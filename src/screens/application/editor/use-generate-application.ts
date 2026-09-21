@@ -1,0 +1,66 @@
+import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import {
+	insertApplication,
+	replaceApplication,
+} from '@/features/applications/api/application.cache'
+import { applicationKeys } from '@/features/applications/api/application.queries'
+import type {
+	ApplicationDto,
+	ApplicationInput,
+} from '@/features/applications/model/application.schema'
+import { refreshUsage } from '@/features/billing/api/billing.cache'
+import {
+	type GenerationResult,
+	useLetterGeneration,
+} from '@/features/generation/hooks/use-letter-generation'
+import { redirectToSignIn } from '@/lib/query/query-client'
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Generation as the editor needs it: stream a letter for these inputs and
+//   leave every cache that could have changed up to date, whatever the
+//   outcome. A stopped or failed run may still have written something — a
+//   letter saved in the moment Stop was pressed, a day's quota spent — so
+//   the applications and the usage overview are revalidated after each
+//   run, not only after a success.
+//
+//   The saved application goes into the cache before the stream hands over,
+//   so the editor never flashes back to the previous letter.
+// ═══════════════════════════════════════════════════════════════════════════
+export function useGenerateApplication(saved: ApplicationDto | undefined) {
+	const queryClient = useQueryClient()
+	const generation = useLetterGeneration()
+	const [lastOutcome, setLastOutcome] = useState<GenerationResult['outcome']>()
+
+	const generate = async (
+		input: ApplicationInput,
+	): Promise<ApplicationDto | undefined> => {
+		let result: ApplicationDto | undefined
+
+		setLastOutcome(undefined)
+
+		const outcome = await generation.generate(
+			{ applicationId: saved?.id, input },
+			{
+				onComplete: (application) => {
+					result = application
+
+					if (saved) replaceApplication(queryClient, application)
+					else insertApplication(queryClient, application)
+				},
+			},
+		)
+
+		setLastOutcome(outcome.outcome)
+		void queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+		void refreshUsage(queryClient)
+
+		if (outcome.outcome === 'failed' && outcome.error.code === 'unauthorized') {
+			redirectToSignIn()
+		}
+
+		return result
+	}
+
+	return { ...generation, generate, lastOutcome }
+}

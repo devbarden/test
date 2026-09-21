@@ -1,34 +1,21 @@
+import type { UserActor } from '@/backend/auth/actor'
 import type { AppConfig } from '@/backend/config.server'
-import type { UserActor } from '@/backend/di/actor'
 import {
 	ConflictError,
 	PlanRequiredError,
 	toAppError,
-} from '@/backend/errors.server'
+} from '@/backend/errors/app-error.server'
 import type { GenerationApiGateway } from '@/backend/gateways/generation-api/generation-api.gateway.server'
 import type { Logger } from '@/backend/observability/logger.server'
-import type {
-	Budget,
-	RateLimiter,
-} from '@/backend/rate-limit/rate-limiter.server'
+import { budgets } from '@/backend/rate-limit/budgets'
+import type { RateLimiter } from '@/backend/rate-limit/rate-limiter.server'
 import type { Lock, LockService } from '@/backend/redis/lock.server'
 import type { ApplicationService } from '@/features/applications/application.service.server'
-import { DEFAULT_LETTER_TONE } from '@/features/applications/application-tone'
-import type { ApiError } from '@/lib/api-error'
+import { DEFAULT_LETTER_TONE } from '@/features/applications/model/application-tone'
+import type { ApiError } from '@/lib/api/api-error'
+import { toPlainText } from '@/lib/plain-text'
 import { buildCoverLetterPrompt } from './cover-letter-prompt'
-import type { GenerateCommand, GenerationEvent } from './protocol'
-
-type GenerationServiceDeps = {
-	applicationService: ApplicationService
-	config: AppConfig
-	generationApiGateway: GenerationApiGateway
-	lockService: LockService
-	logger: Logger
-	rateLimiter: RateLimiter
-	userActor: UserActor
-}
-
-const UPSTREAM_BUDGET_KEY = 'generation-api'
+import type { GenerateCommand, GenerationEvent } from './model/protocol'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Save failures the user can act on keep their own code; anything else
@@ -55,11 +42,21 @@ type RelayOutcome =
 //                 upstream budget — charged together, refunded together
 //   3. relay      fragments pass from the provider to the browser as they
 //                 arrive, and are collected
-//   4. finish     the letter is saved, and only then announced as `done`
+//   4. finish     the save starts, `saving` is announced, and the letter
+//                 is announced as `done` only once it is stored
 //
 //   Phases 1–2 and opening the upstream stream happen before the first
 //   byte, so their refusals become HTTP statuses; phases 3–4 can only
 //   report through an `error` event.
+//
+//   The daily quota buys a SAVED letter. When a run ends without one for a
+//   reason that is not the user's — the provider down or breaking off, an
+//   empty answer, the database refusing the save — its point is given
+//   back, so an outage never eats a free user's day. A Stop is not
+//   refunded: the model was paid for, and a free Stop would let anyone
+//   drain the shared upstream budget at no cost to themselves. The minute
+//   and upstream budgets are never refunded once the provider was called:
+//   they meter calls, not letters.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createGenerationService({
 	applicationService,
@@ -69,8 +66,22 @@ export function createGenerationService({
 	logger,
 	rateLimiter,
 	userActor,
-}: GenerationServiceDeps) {
+}: {
+	applicationService: ApplicationService
+	config: AppConfig
+	generationApiGateway: GenerationApiGateway
+	lockService: LockService
+	logger: Logger
+	rateLimiter: RateLimiter
+	userActor: UserActor
+}) {
 	const { entitlements, userId } = userActor
+	const dailyQuota = budgets.dailyGenerations(
+		userId,
+		entitlements.dailyGenerations,
+	)
+
+	const refundDailyQuota = () => rateLimiter.refund(dailyQuota)
 
 	async function assertAllowed({
 		applicationId,
@@ -80,8 +91,7 @@ export function createGenerationService({
 			throw new PlanRequiredError('Letter tones are not in the user plan')
 		}
 
-		if (applicationId) await applicationService.get(applicationId)
-		else await applicationService.assertCanCreate()
+		await applicationService.assertCanSave(applicationId)
 	}
 
 	async function reserve(): Promise<Lock> {
@@ -92,18 +102,12 @@ export function createGenerationService({
 
 		if (!lock) throw new ConflictError('generation_in_progress')
 
-		const budgets: Budget[] = [
-			{ key: userId, tier: 'generationMinute' },
-			{
-				key: userId,
-				limit: entitlements.dailyGenerations,
-				tier: 'generationDay',
-			},
-			{ key: UPSTREAM_BUDGET_KEY, tier: 'upstream' },
-		]
-
 		try {
-			await rateLimiter.consumeAll(budgets)
+			await rateLimiter.consumeAll([
+				budgets.generationsPerMinute(userId),
+				dailyQuota,
+				budgets.generationApi(),
+			])
 
 			return lock
 		} catch (error) {
@@ -112,16 +116,35 @@ export function createGenerationService({
 		}
 	}
 
+	// ═════════════════════════════════════════════════════════════════════════
+	//   Each fragment is cleaned the way the saved letter is (toPlainText) —
+	//   a control character is dropped before the browser shows it, not only
+	//   before the database stores it — so what streamed onto the screen and
+	//   what `done` carries back are the same text.
+	// ═════════════════════════════════════════════════════════════════════════
 	async function* relay(
 		deltas: AsyncIterable<string>,
 		signal: AbortSignal,
 	): AsyncGenerator<GenerationEvent, RelayOutcome> {
+		const { maxLetterCharacters } = config.generation
 		let letter = ''
 
 		try {
-			for await (const text of deltas) {
+			for await (const fragment of deltas) {
+				const text = toPlainText(fragment)
+
 				letter += text
-				yield { text, type: 'delta' }
+
+				if (letter.length > maxLetterCharacters) {
+					logger.warn(
+						{ characters: letter.length },
+						'Generation API exceeded the letter length bound',
+					)
+
+					return { error: { code: 'interrupted' }, ok: false }
+				}
+
+				if (text) yield { text, type: 'delta' }
 			}
 		} catch (error) {
 			if (signal.aborted) return { error: null, ok: false }
@@ -133,13 +156,15 @@ export function createGenerationService({
 			return { error: appError.toPayload(), ok: false }
 		}
 
-		if (!letter.trim()) {
+		const trimmed = letter.trim()
+
+		if (!trimmed) {
 			logger.warn('Generation API finished without any text')
 
 			return { error: { code: 'interrupted' }, ok: false }
 		}
 
-		return { letter: letter.trim(), ok: true }
+		return { letter: trimmed, ok: true }
 	}
 
 	async function finish(
@@ -168,6 +193,7 @@ export function createGenerationService({
 			const appError = toAppError(error)
 
 			logger.error({ err: appError }, 'Generated letter could not be saved')
+			await refundDailyQuota()
 
 			return {
 				error: SAVE_ERRORS_SHOWN_AS_IS.has(appError.code)
@@ -189,8 +215,24 @@ export function createGenerationService({
 		try {
 			const outcome = yield* relay(deltas, signal)
 
-			if (outcome.ok) yield await finish(command, outcome.letter, startedAt)
-			else if (outcome.error) yield { error: outcome.error, type: 'error' }
+			if (outcome.ok) {
+				// ═══════════════════════════════════════════════════════════════
+				//   The save starts BEFORE `saving` is sent, not after the
+				//   browser reads it. A generator runs only when its consumer
+				//   pulls, and a browser that goes away right after `saving`
+				//   never pulls again: saving after the yield would drop a
+				//   finished, paid-for letter that the UI had already stopped
+				//   offering to cancel. `finish` never rejects, so nothing is
+				//   left unhandled if nobody awaits it.
+				// ═══════════════════════════════════════════════════════════════
+				const saved = finish(command, outcome.letter, startedAt)
+
+				yield { type: 'saving' }
+				yield await saved
+			} else if (outcome.error) {
+				await refundDailyQuota()
+				yield { error: outcome.error, type: 'error' }
+			}
 		} finally {
 			await lock.release()
 		}
@@ -200,8 +242,9 @@ export function createGenerationService({
 		// ═════════════════════════════════════════════════════════════════════
 		//   Resolves once the letter has STARTED; everything refused before
 		//   that throws. The lock is released when the stream ends, and also
-		//   when the request is aborted: a generator that is never iterated
-		//   never reaches its `finally`, and the lock would otherwise sit
+		//   the moment the request is aborted (Stop): a generator suspended
+		//   at a `yield` that nobody reads again never reaches its `finally`,
+		//   and the lock would otherwise refuse the user's next Generate
 		//   until its TTL.
 		// ═════════════════════════════════════════════════════════════════════
 		async start(
@@ -224,7 +267,7 @@ export function createGenerationService({
 
 				return stream(command, deltas, signal, lock)
 			} catch (error) {
-				await lock.release()
+				await Promise.all([lock.release(), refundDailyQuota()])
 				throw error
 			}
 		},

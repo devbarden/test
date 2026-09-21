@@ -1,0 +1,25 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+     A static dot grid under the whole page — texture without colour: on a
+     white page a coloured haze reads as a stain. It never moves, so it
+     costs nothing while scrolling.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.screen {
+	position: relative;
+	min-block-size: 100dvh;
+	overflow-x: clip;
+	isolation: isolate;
+}
+
+.screen::before {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	content: "";
+	background-image: radial-gradient(
+		circle,
+		var(--color-pattern-dot) 1px,
+		transparent 1.5px
+	);
+	background-size: 1.5rem 1.5rem;
+}

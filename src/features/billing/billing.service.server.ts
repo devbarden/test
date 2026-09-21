@@ -1,35 +1,34 @@
-import type { UserActor } from '@/backend/di/actor'
+import type { UserActor } from '@/backend/auth/actor'
+import { budgets } from '@/backend/rate-limit/budgets'
 import type { RateLimiter } from '@/backend/rate-limit/rate-limiter.server'
-import type { ApplicationRepository } from '@/features/applications/application.repository.server'
-import type { BillingOverview } from './billing.schema'
-
-type BillingServiceDeps = {
-	applicationRepository: ApplicationRepository
-	rateLimiter: RateLimiter
-	userActor: UserActor
-}
+import type { ApplicationService } from '@/features/applications/application.service.server'
+import type { BillingOverview } from './model/billing-overview'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   What the signed-in user's plan grants and how much of it is used — the
 //   numbers the UI turns into "7 letters left today" and upgrade prompts.
 //   Usage is read from the same counters that enforce it (the daily quota
-//   in Redis, the application count in Postgres), so the screen can never
-//   promise a letter the server would then refuse.
+//   budget in Redis, the application count behind the cap), so the screen
+//   can never promise a letter the server would then refuse.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createBillingService({
-	applicationRepository,
+	applicationService,
 	rateLimiter,
 	userActor,
-}: BillingServiceDeps) {
+}: {
+	applicationService: ApplicationService
+	rateLimiter: RateLimiter
+	userActor: UserActor
+}) {
 	const { entitlements, plan, userId } = userActor
 
 	return {
 		async overview(): Promise<BillingOverview> {
 			const [applications, generations] = await Promise.all([
-				applicationRepository.countActive(userId),
-				rateLimiter.peek('generationDay', userId, {
-					limit: entitlements.dailyGenerations,
-				}),
+				applicationService.count(),
+				rateLimiter.peek(
+					budgets.dailyGenerations(userId, entitlements.dailyGenerations),
+				),
 			])
 
 			return {

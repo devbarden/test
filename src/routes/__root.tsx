@@ -1,4 +1,3 @@
-import { ClerkProvider } from '@clerk/tanstack-react-start'
 import {
 	createRootRoute,
 	HeadContent,
@@ -6,56 +5,46 @@ import {
 	Scripts,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { clerkAppearance } from '@/lib/clerk-appearance'
-import globalCss from '@/styles/global.css?url'
-
-const FONTS_TO_PRELOAD = [
-	'/fonts/FixelText-Regular.woff2',
-	'/fonts/FixelText-Medium.woff2',
-	'/fonts/FixelDisplay-SemiBold.woff2',
-]
+import { NotFound, RouteError } from '@/components/fallbacks'
+import { StandalonePage } from '@/components/layout/standalone-page'
+import { OgLocaleAlternates } from '@/components/seo/og-locale-alternates'
+import { useLocale } from '@/lib/i18n/use-locale'
+import { rootHead } from '@/lib/seo/root-head'
 
 export const Route = createRootRoute({
 	component: Outlet,
-	head: () => ({
-		links: [
-			...FONTS_TO_PRELOAD.map((href) => ({
-				as: 'font',
-				crossOrigin: 'anonymous' as const,
-				href,
-				rel: 'preload',
-				type: 'font/woff2',
-			})),
-			{ href: globalCss, rel: 'stylesheet' },
-			{ href: '/favicon.svg', rel: 'icon', type: 'image/svg+xml' },
-		],
-		meta: [
-			{ charSet: 'utf-8' },
-			{ content: 'width=device-width, initial-scale=1', name: 'viewport' },
-			{ title: 'Alt+Shift — Cover letters' },
-			{
-				content:
-					'Generate a personalised cover letter for every job you apply to.',
-				name: 'description',
-			},
-			{ content: '#ffffff', name: 'theme-color' },
-		],
-	}),
+	errorComponent: (props) => (
+		<StandalonePage>
+			<RouteError {...props} />
+		</StandalonePage>
+	),
+	head: rootHead,
+	notFoundComponent: () => (
+		<StandalonePage>
+			<NotFound />
+		</StandalonePage>
+	),
 	shellComponent: RootDocument,
 })
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   `lang` comes from the same resolver as every message on the page, on
+//   the server and in the browser alike, so the attribute a screen reader
+//   picks its voice from always matches the language it is reading.
+// ═══════════════════════════════════════════════════════════════════════════
 function RootDocument({ children }: { children: ReactNode }) {
+	const locale = useLocale()
+
 	return (
-		<ClerkProvider afterSignOutUrl="/sign-in" appearance={clerkAppearance}>
-			<html lang="en">
-				<head>
-					<HeadContent />
-				</head>
-				<body>
-					{children}
-					<Scripts />
-				</body>
-			</html>
-		</ClerkProvider>
+		<html lang={locale}>
+			<head>
+				<HeadContent />
+				<OgLocaleAlternates />
+			</head>
+			<body>
+				{children}
+				<Scripts />
+			</body>
+		</html>
 	)
 }

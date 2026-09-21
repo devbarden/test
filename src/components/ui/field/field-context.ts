@@ -12,7 +12,8 @@ export const FieldContext = createContext<FieldContextValue | null>(null)
 //   The wiring a control needs to be announced properly — its id for the
 //   <label>, the description it is described by, its validity — comes from
 //   the surrounding Field, so a form can never pair a label with the wrong
-//   input or forget aria-describedby on one of them.
+//   input or forget aria-describedby on one of them. The control spreads
+//   these AFTER its own props, so a caller cannot break the pairing.
 // ═══════════════════════════════════════════════════════════════════════════
 export function useFieldControlProps() {
 	const field = use(FieldContext)

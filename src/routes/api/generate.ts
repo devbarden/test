@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ndjsonResponse } from '@/backend/http/ndjson.server'
+import { readJsonBody } from '@/backend/http/request-body.server'
 import { userApiScopeMiddleware } from '@/backend/middleware/api-scope.middleware'
-import { ndjsonResponse } from '@/backend/web/ndjson.server'
-import { readJsonBody } from '@/backend/web/request-body.server'
-import { generateCommandSchema } from '@/features/generation/protocol'
+import { generateCommandSchema } from '@/features/generation/model/protocol'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Four short fields: 16 kB is generous for multi-byte text and JSON

@@ -8,15 +8,15 @@ import { createRootLogger } from '../observability/logger.server'
 import { createRateLimiter } from '../rate-limit/rate-limiter.server'
 import { createLockService } from '../redis/lock.server'
 import { createRedisClient } from '../redis/redis.server'
-import { createClerkWebhookHandler } from '../webhooks/clerk-webhook.server'
+import { createClerkWebhookVerifier } from '../webhooks/clerk-webhook-verifier.server'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Infrastructure: process-wide singletons (config, clients, pools,
-//   gateways, the limiter) plus the scoped entry points of the system
-//   callers — the webhook handler and the job runner.
+//   Infrastructure — nothing here knows a feature. Process-wide singletons
+//   (config, clients, pools, gateways, the limiter, the lock) plus the job
+//   runner, which is scoped only because it logs with the request's logger.
 // ═══════════════════════════════════════════════════════════════════════════
 export const coreModule = {
-	clerkWebhookHandler: asFunction(createClerkWebhookHandler).scoped(),
+	clerkWebhookVerifier: asFunction(createClerkWebhookVerifier).singleton(),
 	config: asValue(createAppConfig()),
 	db: asFunction(createPrismaClient).singleton(),
 	generationApiGateway: asFunction(createGenerationApiGateway).singleton(),

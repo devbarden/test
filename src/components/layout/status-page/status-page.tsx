@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Heading } from '@/components/ui/heading'
 import styles from './status-page.module.css'
 
 type StatusPageProps = {
@@ -10,7 +11,9 @@ type StatusPageProps = {
 export function StatusPage({ action, description, title }: StatusPageProps) {
 	return (
 		<section className={styles.status}>
-			<h1 className={styles.title}>{title}</h1>
+			<Heading as="h1" size="sm">
+				{title}
+			</Heading>
 			<p className={styles.description}>{description}</p>
 			{action}
 		</section>

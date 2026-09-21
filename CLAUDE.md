@@ -17,7 +17,7 @@ before changing anything under `src/backend` or a `*.server.ts` file.
 ```bash
 npm run db:up               # Postgres + Redis in Docker (dev and test)
 npm run dev                 # http://localhost:3000
-npm run lint                # Biome + the comment-banner check
+npm run lint                # Biome + comment banners + architecture
 npm run typecheck
 npm test                    # unit tests (no I/O)
 npm run test:integration    # repository/limiter/lock against real Postgres + Redis
@@ -26,8 +26,8 @@ npm run db:migrate:create   # CREATE a migration from schema changes
 npm run db:migrate          # create + apply locally
 ```
 
-Run `npm run lint`, `npm run typecheck` and `npm test` before reporting a
-change as done.
+Run `npm run lint` (Biome, comment banners, architecture), `npm run
+typecheck` and `npm test` before reporting a change as done.
 
 ⚠ Never run `prisma migrate reset` or point any command at a non-local
 database without explicit approval. Production migrations are applied only
@@ -77,21 +77,48 @@ the lint on any violation.
 - Services, repositories and gateways are factories `createXxx({ deps })`
   returning a plain object, typed as `ReturnType<typeof createXxx>`. No
   classes except errors.
-- Barrels use `export *`. A feature `index.ts` never re-exports a
-  `*.server.ts` file.
+- No barrel files in `features/` or `screens/`: import the module itself
+  (`@/features/billing/hooks/use-entitlements`). A barrel there mixes
+  server functions, hooks and styled UI, and importing one name drags in
+  the rest — it once put the whole landing into every page's entry chunk.
+  Each component folder in `components/` has a one-line `index.ts`
+  (`export * from './button'`) and nothing else does.
 - Files and folders are kebab-case; components are one per file.
+- Imports inside one feature, one screen or one `lib/` group are relative
+  (`../model/application.schema`); anything outside it goes through `@/`.
 
 ## Architecture
 
 ```
-src/backend/        infrastructure — config, errors, DI, middleware, clients,
-                    rate limiting, gateways to third parties, health
-src/features/<x>/   one domain each: schema, api (server functions),
-                    service, repository, queries (client), UI
-src/components/     design system (ui/) and layout — know nothing of features
-src/routes/         thin route files that compose features
-src/lib/            shared helpers safe on both sides
+src/backend/        infrastructure — config, auth, errors, DI, middleware,
+                    http, database, Redis, rate limiting, gateways, jobs,
+                    lifecycle. Never imports a feature's services: only the
+                    composition root (di/container.server.ts) knows them
+src/routes/         thin route files: URL, guards and head() → a screen
+src/screens/<x>/    one page each (landing, auth, workspace, dashboard,
+                    application, billing): composes features, owns the
+                    page-only UI
+src/features/<x>/   one domain each (applications, billing, generation,
+                    marketing), in segments:
+                      model/  schemas, types, pure domain logic
+                      api/    server functions, query keys/factories, cache
+                      hooks/  client hooks
+                      ui/     the domain's reusable components
+                    plus its server side at the slice root (*.server.ts)
+src/components/     design system (ui/), layout, brand, locale, seo,
+                    fallbacks, clerk-boundary — know nothing of features
+src/hooks/          generic React hooks
+src/lib/            infrastructure safe on both sides, by concern:
+                    api/ i18n/ query/ seo/ clerk/ and small helpers
 ```
+
+Frontend imports flow one way — `routes → screens → features → components ·
+hooks · lib` — and `npm run lint:architecture` fails on any import that
+goes back up, between two screens, or between two features (the few
+allowed feature dependencies are listed in `scripts/check-architecture.ts`).
+Features are combined in the screen that needs them, never inside each
+other: a feature that must react to another one takes a callback
+(`useDeleteApplication({ onSettled })`, `useSyncPlanChanges(onChange)`).
 
 Request path: route or server function → guard middleware (auth, budget,
 scope) → service (business rules, bound to the request's user) →
@@ -104,8 +131,8 @@ repository (Prisma, every query scoped by owner) → Postgres.
 - **Services get the user from `userActor`**, never from an argument.
   `userActor` exists only on user scopes; system code (webhooks, cron) runs
   on a system scope and cannot resolve user services.
-- **Errors are `AppError`s with a code from `src/lib/api-error.ts`.** Adding
-  a code means adding its sentence in `src/lib/api-error-message.ts`; the
+- **Errors are `AppError`s with a code from `src/lib/api/api-error.ts`.** Adding
+  a code means adding its sentence in `src/lib/api/api-error-message.ts`; the
   compiler enforces it. Nothing from an exception other than the payload may
   reach a client.
 - **Every user-facing server function uses `userScopeMiddleware`; every
@@ -116,16 +143,28 @@ repository (Prisma, every query scoped by owner) → Postgres.
   environment variable is added to its schema and to `.env.example` in the
   same change. Product limits are code in the config, not env.
 - **Anything that costs money or a shared budget is rate limited** with a
-  tier in `rate-limit.server.ts`, not ad hoc.
+  tier in `rate-limit/rate-limit-tiers.ts`, charged through a constructor
+  in `rate-limit/budgets.ts` — never a hand-built key, so the code that
+  charges a budget and the code that reports it hit the same counter.
+- **Server function inputs go through `validateInput(schema)`**
+  (`backend/middleware/validate-input.ts`), never the bare schema: TanStack
+  reports a bare schema's failure as a plain `Error`, which surfaces as
+  `internal` instead of `invalid_request`.
+- **Features own what an event or a job means; the backend only transports
+  it.** A Clerk event is handled in `features/account`
+  (`account-events.service.server.ts`) after `clerkWebhookVerifier` proves
+  it; a scheduled job is a feature's `x.jobs.server.ts`, merged into
+  `scheduledJobs` in the container.
 
 ### Adding a server feature
 
 1. Model in `prisma/schema.prisma`, then `npm run db:migrate:create`.
 2. `x.repository.server.ts` — Prisma only, owner-scoped.
 3. `x.service.server.ts` — rules, errors, logging.
-4. Register both in `src/backend/di/container.server.ts` (`.scoped()`).
-5. `x.api.ts` — `createServerFn` + `userScopeMiddleware` + a zod input
-   validator + one service call.
+4. Register both in the feature's `x.module.server.ts` (`.scoped()`) and add
+   the module to `src/backend/di/container.server.ts`.
+5. `x.api.ts` — `createServerFn` + `userScopeMiddleware` +
+   `.validator(validateInput(schema))` + one service call.
 6. `x.queries.ts` — key and query factories for the client.
 7. Unit tests for the service (fakes in `src/test/fakes`), integration tests
    for the repository.
@@ -136,10 +175,34 @@ repository (Prisma, every query scoped by owner) → Postgres.
   `src/styles/tokens.css` (`--color-text-secondary`), never palette values or
   raw hex.
 - Server state lives in TanStack Query through the factories in
-  `*.queries.ts`; mutations update the cache optimistically and invalidate
-  on settle.
+  `api/*.queries.ts`; mutations update the cache optimistically (helpers in
+  `api/*.cache.ts`) and invalidate on settle.
+- A route file holds only its URL concerns — params, search, guards,
+  `head()`, `ssr` — and renders a screen from `src/screens`.
+- Screens are named `<name>-screen.tsx`, export `<Name>Screen`, and the
+  root class of their CSS module is `.screen`.
 - `components/ui` is the design system. A new variant goes into the
   component, not into a one-off override at the call site.
+
+### Translations and public pages
+
+- Every user-visible string goes through Paraglide: `m['dotted.key']()`,
+  with the key in BOTH `messages/en.json` and `messages/ru.json`. Biome's
+  `noJsxLiterals` fails a raw string in JSX; `npm run i18n:check` (run by
+  `typecheck`) fails a missing key or a dropped `{placeholder}`.
+- Always a full, static key — never one built from a template string: a
+  computed key keeps every message of every locale in the bundle.
+- Nothing message-backed at module scope: a `const` holding `m[...]()`
+  captures the first request's locale forever. Use functions.
+- Two locale zones (see `src/lib/i18n/localized-routes.ts`): public pages carry
+  the locale in the URL (`/ru/`); `/applications`, `/sign-in` and `/api`
+  read the `PARAGLIDE_LOCALE` cookie and never get a prefix.
+- A new public page goes into `LOCALIZED_PATHS` in `src/lib/seo/robots-and-sitemap.ts` (the
+  sitemap) and gets canonical + hreflang via `src/lib/seo/seo-links.ts`;
+  anything private gets `noindex` and a robots `Disallow`. `llms.txt` is
+  built from the same messages (`features/marketing/llms.server.ts`).
+- `VITE_SITE_URL` is the public origin, inlined at build time; without it
+  every page is served noindex.
 
 ## Tests
 

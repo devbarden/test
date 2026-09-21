@@ -1,0 +1,68 @@
+.mesh {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.mesh::after {
+	position: absolute;
+	inset: 0;
+	content: "";
+	background-image: radial-gradient(
+		circle,
+		var(--color-pattern-dot-inverse) 1px,
+		transparent 1.5px
+	);
+	background-size: 1.5rem 1.5rem;
+}
+
+.blob {
+	position: absolute;
+	inline-size: 38rem;
+	block-size: 38rem;
+	border-radius: 50%;
+	opacity: 0.55;
+	filter: blur(80px);
+}
+
+.blob:nth-child(1) {
+	inset-block-start: -12%;
+	inset-inline-start: -10%;
+	background: var(--color-mesh-1);
+	animation: drift-a 22s ease-in-out infinite;
+}
+
+.blob:nth-child(2) {
+	inset-block-end: -18%;
+	inset-inline-end: -12%;
+	background: var(--color-mesh-2);
+	animation: drift-b 28s ease-in-out infinite;
+}
+
+.blob:nth-child(3) {
+	inset-block-start: 28%;
+	inset-inline-end: 22%;
+	inline-size: 26rem;
+	block-size: 26rem;
+	background: var(--color-mesh-3);
+	animation: drift-c 34s ease-in-out infinite;
+}
+
+@keyframes drift-a {
+	50% {
+		transform: translate3d(22rem, 16rem, 0) scale(1.2);
+	}
+}
+
+@keyframes drift-b {
+	50% {
+		transform: translate3d(-20rem, -14rem, 0) scale(1.15);
+	}
+}
+
+@keyframes drift-c {
+	50% {
+		transform: translate3d(-16rem, 12rem, 0) scale(0.9);
+	}
+}

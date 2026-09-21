@@ -1,0 +1,65 @@
+.list {
+	max-inline-size: 48rem;
+	margin: var(--space-12) auto 0;
+	color: var(--color-text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+     `interpolate-size` lets the height animate to `auto`, and
+     `::details-content` is the box a <details> hides its body in. A browser
+     without them opens the panel instantly — the same content, no motion.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.item {
+	interpolate-size: allow-keywords;
+}
+
+.item + .item {
+	border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.item::details-content {
+	block-size: 0;
+	overflow: clip;
+	transition:
+		block-size var(--duration-slow) var(--ease-emphasized),
+		content-visibility var(--duration-slow) allow-discrete;
+}
+
+.item[open]::details-content {
+	block-size: auto;
+}
+
+.question {
+	display: flex;
+	gap: var(--space-4);
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--space-5) var(--space-6);
+	font-size: var(--text-md);
+	font-weight: var(--weight-semibold);
+	cursor: pointer;
+	list-style: none;
+}
+
+.question::-webkit-details-marker {
+	display: none;
+}
+
+.icon {
+	flex-shrink: 0;
+	inline-size: var(--icon-lg);
+	block-size: var(--icon-lg);
+	color: var(--color-text-tertiary);
+	transition: transform var(--duration-slow) var(--ease-emphasized);
+}
+
+.item[open] .icon {
+	transform: rotate(45deg);
+}
+
+.answer {
+	padding: 0 var(--space-6) var(--space-6);
+	font-size: var(--text-sm);
+	line-height: var(--leading-relaxed);
+	color: var(--color-text-secondary);
+}

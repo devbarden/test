@@ -4,28 +4,16 @@ import {
 	RateLimiterRes,
 } from 'rate-limiter-flexible'
 import type { AppConfig } from '../config.server'
-import { RateLimitError } from '../errors.server'
+import { RateLimitError } from '../errors/app-error.server'
 import type { Logger } from '../observability/logger.server'
 import type { Redis } from '../redis/redis.server'
+import type { Budget } from './budgets'
 import {
+	fixedTierPolicies,
+	PLAN_TIER_POLICIES,
 	type RateLimitTier,
-	rateLimitPolicies,
 	type TierPolicy,
 } from './rate-limit-tiers'
-
-export type { RateLimitTier } from './rate-limit-tiers'
-
-// ═══════════════════════════════════════════════════════════════════════════
-//   One charge against one budget. `limit` overrides the tier's default
-//   ceiling for this caller — how a plan raises its daily quota.
-// ═══════════════════════════════════════════════════════════════════════════
-export type Budget = {
-	key: string
-	limit?: number
-	tier: RateLimitTier
-}
-
-type LimitOptions = { limit?: number }
 
 export type RateLimitUsage = {
 	consumed: number
@@ -48,8 +36,18 @@ export function createRateLimiter({
 	redis: Redis
 	rootLogger: Logger
 }) {
-	const policies = rateLimitPolicies(config)
+	const fixedPolicies = fixedTierPolicies(config)
 	const limiters = new Map<string, RateLimiterRedis>()
+
+	function policyOf(tier: RateLimitTier): TierPolicy {
+		return tier === 'generationDay'
+			? PLAN_TIER_POLICIES[tier]
+			: fixedPolicies[tier]
+	}
+
+	function pointsOf(budget: Budget): number {
+		return 'limit' in budget ? budget.limit : fixedPolicies[budget.tier].points
+	}
 
 	// ═════════════════════════════════════════════════════════════════════════
 	//   One limiter per (tier, limit), all writing the SAME Redis counter for
@@ -57,22 +55,18 @@ export function createRateLimiter({
 	//   compared against it. A user who upgrades mid-day therefore keeps what
 	//   they already spent and gets the higher ceiling at once.
 	// ═════════════════════════════════════════════════════════════════════════
-	function limiterFor(tier: RateLimitTier, limit?: number): RateLimiterRedis {
-		const { durationSeconds, points: defaultPoints } = policies[tier]
-		const points = limit ?? defaultPoints
-		const id = `${tier}:${points}`
+	function limiterFor(budget: Budget): RateLimiterRedis {
+		const points = pointsOf(budget)
+		const id = `${budget.tier}:${points}`
 		const cached = limiters.get(id)
 
 		if (cached) return cached
 
-		const keyPrefix = `rl:${tier}`
+		const duration = policyOf(budget.tier).durationSeconds
+		const keyPrefix = `rl:${budget.tier}`
 		const limiter = new RateLimiterRedis({
-			duration: durationSeconds,
-			insuranceLimiter: new RateLimiterMemory({
-				duration: durationSeconds,
-				keyPrefix,
-				points,
-			}),
+			duration,
+			insuranceLimiter: new RateLimiterMemory({ duration, keyPrefix, points }),
 			keyPrefix,
 			points,
 			rejectIfRedisNotReady: true,
@@ -84,32 +78,32 @@ export function createRateLimiter({
 		return limiter
 	}
 
-	function refusal(
-		tier: RateLimitTier,
-		policy: TierPolicy,
-		rejection: RateLimiterRes,
-	): RateLimitError {
-		return new RateLimitError(
-			policy.exceededCode,
-			Math.max(1, Math.ceil(rejection.msBeforeNext / 1000)),
-			`Rate limit "${tier}" exceeded`,
-		)
-	}
+	// ═════════════════════════════════════════════════════════════════════════
+	//   A refused attempt gives its point straight back. The store counts
+	//   every attempt, refused ones included, so without this a user who
+	//   keeps pressing Generate past the daily quota would push the counter
+	//   beyond it — and after upgrading, those refusals would be spent out of
+	//   the new plan's quota. The counter stays equal to the charges that
+	//   were actually allowed.
+	// ═════════════════════════════════════════════════════════════════════════
+	async function consume(budget: Budget): Promise<void> {
+		const limiter = limiterFor(budget)
 
-	async function consume(
-		tier: RateLimitTier,
-		key: string,
-		{ limit }: LimitOptions = {},
-	): Promise<void> {
 		try {
-			await limiterFor(tier, limit).consume(key)
+			await limiter.consume(budget.key)
 		} catch (rejection) {
 			if (rejection instanceof RateLimiterRes) {
-				throw refusal(tier, policies[tier], rejection)
+				await limiter.reward(budget.key, 1).catch(() => {})
+
+				throw new RateLimitError(
+					policyOf(budget.tier).exceededCode,
+					Math.max(1, Math.ceil(rejection.msBeforeNext / 1000)),
+					`Rate limit "${budget.tier}" exceeded`,
+				)
 			}
 
 			rootLogger.error(
-				{ err: rejection, tier },
+				{ err: rejection, tier: budget.tier },
 				'Rate limiter failed; allowing the request',
 			)
 		}
@@ -120,15 +114,14 @@ export function createRateLimiter({
 	//   the work. Best effort: a refund that fails only costs the user one
 	//   point until the window rolls over.
 	// ═════════════════════════════════════════════════════════════════════════
-	async function refund(
-		tier: RateLimitTier,
-		key: string,
-		{ limit }: LimitOptions = {},
-	): Promise<void> {
-		await limiterFor(tier, limit)
-			.reward(key, 1)
+	async function refund(budget: Budget): Promise<void> {
+		await limiterFor(budget)
+			.reward(budget.key, 1)
 			.catch((error: unknown) => {
-				rootLogger.warn({ err: error, tier }, 'Rate limit refund failed')
+				rootLogger.warn(
+					{ err: error, tier: budget.tier },
+					'Rate limit refund failed',
+				)
 			})
 	}
 
@@ -148,24 +141,18 @@ export function createRateLimiter({
 
 			try {
 				for (const budget of budgets) {
-					await consume(budget.tier, budget.key, budget)
+					await consume(budget)
 					charged.push(budget)
 				}
 			} catch (error) {
-				await Promise.all(
-					charged.map((budget) => refund(budget.tier, budget.key, budget)),
-				)
+				await Promise.all(charged.map(refund))
 				throw error
 			}
 		},
 
-		async peek(
-			tier: RateLimitTier,
-			key: string,
-			{ limit }: LimitOptions = {},
-		): Promise<RateLimitUsage> {
-			const limiter = limiterFor(tier, limit)
-			const state = await limiter.get(key).catch(() => null)
+		async peek(budget: Budget): Promise<RateLimitUsage> {
+			const limiter = limiterFor(budget)
+			const state = await limiter.get(budget.key).catch(() => null)
 
 			return {
 				consumed: Math.min(state?.consumedPoints ?? 0, limiter.points),

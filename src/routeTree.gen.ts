@@ -10,24 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
-import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiGenerateRouteImport } from './routes/api/generate'
+import { Route as AuthedApplicationsIndexRouteImport } from './routes/_authed/applications/index'
 import { Route as ApiWebhooksClerkRouteImport } from './routes/api/webhooks/clerk'
 import { Route as ApiHealthReadyRouteImport } from './routes/api/health.ready'
 import { Route as ApiCronJobRouteImport } from './routes/api/cron.$job'
 import { Route as AuthedApplicationsNewRouteImport } from './routes/_authed/applications/new'
+import { Route as AuthedApplicationsBillingRouteImport } from './routes/_authed/applications/billing'
 import { Route as AuthedApplicationsApplicationIdRouteImport } from './routes/_authed/applications/$applicationId'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedIndexRoute = AuthedIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthedRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SignInSplatRoute = SignInSplatRouteImport.update({
   id: '/sign-in/$',
@@ -43,6 +45,11 @@ const ApiGenerateRoute = ApiGenerateRouteImport.update({
   id: '/api/generate',
   path: '/api/generate',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedApplicationsIndexRoute = AuthedApplicationsIndexRouteImport.update({
+  id: '/applications/',
+  path: '/applications/',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const ApiWebhooksClerkRoute = ApiWebhooksClerkRouteImport.update({
   id: '/api/webhooks/clerk',
@@ -64,6 +71,12 @@ const AuthedApplicationsNewRoute = AuthedApplicationsNewRouteImport.update({
   path: '/applications/new',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedApplicationsBillingRoute =
+  AuthedApplicationsBillingRouteImport.update({
+    id: '/applications/billing',
+    path: '/applications/billing',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedApplicationsApplicationIdRoute =
   AuthedApplicationsApplicationIdRouteImport.update({
     id: '/applications/$applicationId',
@@ -72,39 +85,45 @@ const AuthedApplicationsApplicationIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthedIndexRoute
+  '/': typeof IndexRoute
   '/api/generate': typeof ApiGenerateRoute
   '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
   '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
+  '/applications/billing': typeof AuthedApplicationsBillingRoute
   '/applications/new': typeof AuthedApplicationsNewRoute
   '/api/cron/$job': typeof ApiCronJobRoute
   '/api/health/ready': typeof ApiHealthReadyRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
+  '/applications/': typeof AuthedApplicationsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/api/generate': typeof ApiGenerateRoute
   '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
-  '/': typeof AuthedIndexRoute
   '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
+  '/applications/billing': typeof AuthedApplicationsBillingRoute
   '/applications/new': typeof AuthedApplicationsNewRoute
   '/api/cron/$job': typeof ApiCronJobRoute
   '/api/health/ready': typeof ApiHealthReadyRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
+  '/applications': typeof AuthedApplicationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
   '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
-  '/_authed/': typeof AuthedIndexRoute
   '/_authed/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
+  '/_authed/applications/billing': typeof AuthedApplicationsBillingRoute
   '/_authed/applications/new': typeof AuthedApplicationsNewRoute
   '/api/cron/$job': typeof ApiCronJobRoute
   '/api/health/ready': typeof ApiHealthReadyRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
+  '/_authed/applications/': typeof AuthedApplicationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,36 +133,43 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/sign-in/$'
     | '/applications/$applicationId'
+    | '/applications/billing'
     | '/applications/new'
     | '/api/cron/$job'
     | '/api/health/ready'
     | '/api/webhooks/clerk'
+    | '/applications/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/api/generate'
     | '/api/health'
     | '/sign-in/$'
-    | '/'
     | '/applications/$applicationId'
+    | '/applications/billing'
     | '/applications/new'
     | '/api/cron/$job'
     | '/api/health/ready'
     | '/api/webhooks/clerk'
+    | '/applications'
   id:
     | '__root__'
+    | '/'
     | '/_authed'
     | '/api/generate'
     | '/api/health'
     | '/sign-in/$'
-    | '/_authed/'
     | '/_authed/applications/$applicationId'
+    | '/_authed/applications/billing'
     | '/_authed/applications/new'
     | '/api/cron/$job'
     | '/api/health/ready'
     | '/api/webhooks/clerk'
+    | '/_authed/applications/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
   ApiGenerateRoute: typeof ApiGenerateRoute
   ApiHealthRoute: typeof ApiHealthRouteWithChildren
@@ -161,12 +187,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/': {
-      id: '/_authed/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthedIndexRouteImport
-      parentRoute: typeof AuthedRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/sign-in/$': {
       id: '/sign-in/$'
@@ -188,6 +214,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/generate'
       preLoaderRoute: typeof ApiGenerateRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/applications/': {
+      id: '/_authed/applications/'
+      path: '/applications'
+      fullPath: '/applications/'
+      preLoaderRoute: typeof AuthedApplicationsIndexRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/api/webhooks/clerk': {
       id: '/api/webhooks/clerk'
@@ -217,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedApplicationsNewRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/applications/billing': {
+      id: '/_authed/applications/billing'
+      path: '/applications/billing'
+      fullPath: '/applications/billing'
+      preLoaderRoute: typeof AuthedApplicationsBillingRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/applications/$applicationId': {
       id: '/_authed/applications/$applicationId'
       path: '/applications/$applicationId'
@@ -228,15 +268,17 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
-  AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedApplicationsApplicationIdRoute: typeof AuthedApplicationsApplicationIdRoute
+  AuthedApplicationsBillingRoute: typeof AuthedApplicationsBillingRoute
   AuthedApplicationsNewRoute: typeof AuthedApplicationsNewRoute
+  AuthedApplicationsIndexRoute: typeof AuthedApplicationsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedIndexRoute: AuthedIndexRoute,
   AuthedApplicationsApplicationIdRoute: AuthedApplicationsApplicationIdRoute,
+  AuthedApplicationsBillingRoute: AuthedApplicationsBillingRoute,
   AuthedApplicationsNewRoute: AuthedApplicationsNewRoute,
+  AuthedApplicationsIndexRoute: AuthedApplicationsIndexRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -255,6 +297,7 @@ const ApiHealthRouteWithChildren = ApiHealthRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   ApiGenerateRoute: ApiGenerateRoute,
   ApiHealthRoute: ApiHealthRouteWithChildren,

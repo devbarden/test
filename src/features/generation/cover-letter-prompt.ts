@@ -1,5 +1,5 @@
-import type { ApplicationInput } from '@/features/applications/application.schema'
-import type { LetterTone } from '@/features/applications/application-tone'
+import type { ApplicationInput } from '@/features/applications/model/application.schema'
+import type { LetterTone } from '@/features/applications/model/application-tone'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The prompt lives on the server, and the client sends only the four form

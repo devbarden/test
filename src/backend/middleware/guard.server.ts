@@ -1,0 +1,71 @@
+import type { SystemActor } from '../auth/actor'
+import { authenticate } from '../auth/authenticate.server'
+import { type AppContainer, getAppContainer } from '../di/container.server'
+import { createSystemScope, createUserScope } from '../di/request-scope.server'
+import type { AppError } from '../errors/app-error.server'
+import { logAndNormalizeError } from '../errors/log-error.server'
+import { UNKNOWN_CLIENT_IP } from '../http/client-ip.server'
+import { getRequestContext } from '../http/request-context.server'
+import { budgets } from '../rate-limit/budgets'
+
+type Handle<T> = (scope: AppContainer) => T | Promise<T>
+
+type Refuse<R> = (error: AppError) => R
+
+type GuardOptions = { precheck?: () => Promise<void> }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   What every guard does, whatever transport it runs in front of — the
+//   middleware files differ only in how a refusal travels (a thrown RPC
+//   error, or a JSON response):
+//
+//   0. precheck             optional, before anything costs a lookup — the
+//                           same-origin check of cookie-authenticated routes
+//   1. who is calling       a Clerk session (or 401), or a named system
+//                           source, and a request scope bound to it
+//   2. charge the budget    per user, or per source and IP, before any work
+//   3. run the handler      with that scope
+//   4. anything thrown      logged once — with the scope's logger when there
+//                           is one, so a refusal names the user — and handed
+//                           to `refuse` as a normalized AppError
+// ═══════════════════════════════════════════════════════════════════════════
+export async function guardUser<T, R>(
+	handle: Handle<T>,
+	refuse: Refuse<R>,
+	{ precheck }: GuardOptions = {},
+): Promise<T | R> {
+	let scope: AppContainer | undefined
+
+	try {
+		await precheck?.()
+
+		scope = createUserScope(await authenticate())
+
+		const { rateLimiter, userActor } = scope.cradle
+
+		await rateLimiter.consume(budgets.user(userActor.userId))
+
+		return await handle(scope)
+	} catch (error) {
+		const logger = scope?.cradle.logger ?? getAppContainer().cradle.rootLogger
+
+		return refuse(logAndNormalizeError(error, logger))
+	}
+}
+
+export async function guardSystem<T, R>(
+	source: SystemActor['source'],
+	handle: Handle<T>,
+	refuse: Refuse<R>,
+): Promise<T | R> {
+	const scope = createSystemScope(source)
+	const clientIp = getRequestContext()?.clientIp ?? UNKNOWN_CLIENT_IP
+
+	try {
+		await scope.cradle.rateLimiter.consume(budgets.system(source, clientIp))
+
+		return await handle(scope)
+	} catch (error) {
+		return refuse(logAndNormalizeError(error, scope.cradle.logger))
+	}
+}

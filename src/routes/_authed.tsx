@@ -1,20 +1,8 @@
-import { UserButton, useAuth } from '@clerk/tanstack-react-start'
 import { auth } from '@clerk/tanstack-react-start/server'
-import { QueryClientProvider } from '@tanstack/react-query'
-import {
-	createFileRoute,
-	Navigate,
-	Outlet,
-	redirect,
-} from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createIsomorphicFn } from '@tanstack/react-start'
-import type { ReactNode } from 'react'
-import { AppHeader } from '@/components/layout/app-header'
-import { Container } from '@/components/layout/page'
-import { ToastProvider } from '@/components/ui/toast'
-import { GoalIndicator } from '@/features/goal'
-import { useClearCacheOnSignOut } from '@/hooks/use-clear-cache-on-sign-out'
-import { getUserQueryClient } from '@/lib/user-query-client'
+import { AppShell } from '@/components/layout/app-shell'
+import { WorkspaceScreen } from '@/screens/workspace/workspace-screen'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Two guards for two moments:
@@ -22,9 +10,10 @@ import { getUserQueryClient } from '@/lib/user-query-client'
 //   - A document request is checked on the server, before anything renders,
 //     so a signed-out visitor is redirected without ever seeing the app.
 //   - Client-side navigations are NOT re-checked with a round trip: every
-//     page here reads browser storage, and the one thing that talks to the
-//     server — /api/generate — authenticates each request itself. Signing
-//     out while the app is open is caught by `useAuth` in the layout.
+//     server function and /api/generate authenticates each request itself,
+//     and a 401 from any of them sends the user to sign in (see
+//     lib/query/query-client.ts). Signing out while the app is open is
+//     caught by the workspace gate.
 // ═══════════════════════════════════════════════════════════════════════════
 const requireSignedIn = createIsomorphicFn()
 	.server(async () => {
@@ -42,58 +31,8 @@ const requireSignedIn = createIsomorphicFn()
 // ═══════════════════════════════════════════════════════════════════════════
 export const Route = createFileRoute('/_authed')({
 	beforeLoad: () => requireSignedIn(),
-	component: AuthedLayout,
-	pendingComponent: ShellFallback,
+	component: WorkspaceScreen,
+	head: () => ({ meta: [{ content: 'noindex, nofollow', name: 'robots' }] }),
+	pendingComponent: AppShell,
 	ssr: 'data-only',
 })
-
-function AuthedLayout() {
-	const { isLoaded, userId } = useAuth()
-
-	useClearCacheOnSignOut()
-
-	if (!isLoaded) return <ShellFallback />
-
-	if (!userId)
-		return <Navigate params={{ _splat: '' }} replace to="/sign-in/$" />
-
-	return <UserWorkspace key={userId} userId={userId} />
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//   The client arrives with the user's letters already restored from browser
-//   storage, so the first paint is the cached state, not a spinner. See
-//   getUserQueryClient for why it is not created here.
-// ═══════════════════════════════════════════════════════════════════════════
-function UserWorkspace({ userId }: { userId: string }) {
-	const queryClient = getUserQueryClient(userId)
-
-	return (
-		<QueryClientProvider client={queryClient}>
-			<ToastProvider>
-				<Shell account={<UserButton />} status={<GoalIndicator />}>
-					<Outlet />
-				</Shell>
-			</ToastProvider>
-		</QueryClientProvider>
-	)
-}
-
-function ShellFallback() {
-	return <Shell />
-}
-
-type ShellProps = {
-	account?: ReactNode
-	children?: ReactNode
-	status?: ReactNode
-}
-
-function Shell({ account, children, status }: ShellProps) {
-	return (
-		<Container>
-			<AppHeader account={account} status={status} />
-			<main>{children}</main>
-		</Container>
-	)
-}

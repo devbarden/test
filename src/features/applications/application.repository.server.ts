@@ -1,12 +1,13 @@
-import type { PrismaClient } from '@/backend/database/prisma.server'
+import { withAdvisoryLock } from '@/backend/database/advisory-lock.server'
+import type { DbClient, PrismaClient } from '@/backend/database/prisma.server'
 import type { Application, Prisma } from '@/generated/prisma/client'
-import type { ApplicationInput } from './application.schema'
-
-export type DbClient = PrismaClient | Prisma.TransactionClient
+import type { ApplicationInput } from './model/application.schema'
 
 type LetterData = { input: ApplicationInput; letter: string }
 
 type Page = { cursor?: string; take: number }
+
+const PURGE_BATCH_SIZE = 1_000
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Every method takes the owner's `userId` and puts it in the WHERE clause
@@ -15,9 +16,10 @@ type Page = { cursor?: string; take: number }
 //   else is indistinguishable from a row that does not exist. That is what
 //   makes guessing another user's id useless — no IDOR by construction.
 //
-//   Every method also takes an optional client, so a service can compose
-//   several of them inside one transaction (withUserLock) and have all of
-//   them run on that transaction's connection.
+//   Methods that take part in "check, then write" also take an optional
+//   client, so a service can compose them inside one transaction
+//   (withUserLock) and have all of them run on that transaction's
+//   connection.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createApplicationRepository({ db }: { db: PrismaClient }) {
 	const owned = (userId: string) => ({ userId })
@@ -70,12 +72,29 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 			})
 		},
 
+		// ═════════════════════════════════════════════════════════════════════
+		//   In batches, oldest first, each its own short statement: one DELETE
+		//   over a month of rows could outrun the statement timeout and hold
+		//   row locks the live tables are waiting on. The (deleted_at) index
+		//   serves the inner SELECT.
+		// ═════════════════════════════════════════════════════════════════════
 		async purgeDeletedBefore(cutoff: Date): Promise<number> {
-			const { count } = await db.application.deleteMany({
-				where: { deletedAt: { lt: cutoff } },
-			})
+			let purged = 0
 
-			return count
+			for (;;) {
+				const deleted = await db.$executeRaw`
+					DELETE FROM applications
+					WHERE id IN (
+						SELECT id FROM applications
+						WHERE deleted_at < ${cutoff}
+						ORDER BY deleted_at
+						LIMIT ${PURGE_BATCH_SIZE}
+					)`
+
+				purged += deleted
+
+				if (deleted < PURGE_BATCH_SIZE) return purged
+			}
 		},
 
 		async restore(
@@ -115,19 +134,14 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 
 		// ═════════════════════════════════════════════════════════════════════
 		//   Serialises writes that must see a consistent count for one user —
-		//   "check the per-user cap, then insert" — with a transaction-scoped
-		//   advisory lock keyed by the user. Two tabs finishing a letter at the
-		//   same instant would otherwise both read 199 and both insert.
+		//   "check the per-user cap, then insert". Two tabs finishing a letter
+		//   at the same instant would otherwise both read 199 and both insert.
 		// ═════════════════════════════════════════════════════════════════════
 		withUserLock<T>(
 			userId: string,
 			callback: (tx: Prisma.TransactionClient) => Promise<T>,
 		): Promise<T> {
-			return db.$transaction(async (tx) => {
-				await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${userId}, 0))`
-
-				return callback(tx)
-			})
+			return withAdvisoryLock(db, `applications:${userId}`, callback)
 		},
 	}
 }

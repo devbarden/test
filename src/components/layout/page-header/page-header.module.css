@@ -1,0 +1,21 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+     The mockup draws the rule as an inside stroke, inside the padding; a CSS
+     border sits outside it, so the padding gives back its 1px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pageHeader {
+	display: flex;
+	gap: var(--space-4);
+	align-items: center;
+	justify-content: space-between;
+	padding-block-end: calc(var(--space-4) - 1px);
+	border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.md {
+	align-items: flex-end;
+	padding-block-end: calc(var(--space-3) - 1px);
+}
+
+.actions {
+	flex-shrink: 0;
+}

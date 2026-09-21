@@ -8,8 +8,8 @@ export function TextArea({ className, ...props }: ComponentProps<'textarea'>) {
 
 	return (
 		<textarea
-			{...controlProps}
 			{...props}
+			{...controlProps}
 			className={clsx(styles.control, styles.textArea, className)}
 		/>
 	)

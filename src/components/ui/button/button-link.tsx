@@ -13,6 +13,7 @@ function ButtonAnchor({
 	fullWidth,
 	iconEnd,
 	iconStart,
+	shape,
 	size,
 	variant,
 	...props
@@ -20,7 +21,10 @@ function ButtonAnchor({
 	return (
 		<a
 			{...props}
-			className={buttonClassName({ fullWidth, size, variant }, className)}
+			className={buttonClassName(
+				{ fullWidth, shape, size, variant },
+				className,
+			)}
 		>
 			<ButtonContent iconEnd={iconEnd} iconStart={iconStart}>
 				{children}

@@ -1,11 +1,8 @@
 import { createMiddleware, isCsrfRequestAllowed } from '@tanstack/react-start'
-import type { SystemActor } from '../di/actor'
-import { getAppContainer } from '../di/container.server'
-import { createSystemRequestScope } from '../di/scope.server'
-import { errorResponse, ForbiddenError } from '../errors.server'
-import { getRequestContext } from '../web/request-context.server'
-import { logAndNormalizeError } from './error-handling.server'
-import { chargeRequest, openUserScope } from './user-scope.server'
+import type { SystemActor } from '../auth/actor'
+import { ForbiddenError } from '../errors/app-error.server'
+import { errorResponse } from '../errors/error-response.server'
+import { guardSystem, guardUser } from './guard.server'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The /api file-route counterpart of userScopeMiddleware. Two differences
@@ -19,29 +16,14 @@ import { chargeRequest, openUserScope } from './user-scope.server'
 //     thrown: an error thrown out of a file route becomes a generic 500.
 // ═══════════════════════════════════════════════════════════════════════════
 export const userApiScopeMiddleware = createMiddleware().server(
-	async (context) => {
-		let scope: Awaited<ReturnType<typeof openUserScope>>
-
-		try {
-			if (!(await isCsrfRequestAllowed({}, context))) {
-				throw new ForbiddenError('Cross-origin request refused')
-			}
-
-			scope = await openUserScope()
-		} catch (error) {
-			return errorResponse(
-				logAndNormalizeError(error, getAppContainer().cradle.rootLogger),
-			)
-		}
-
-		try {
-			await chargeRequest(scope)
-
-			return await context.next({ context: { scope } })
-		} catch (error) {
-			return errorResponse(logAndNormalizeError(error, scope.cradle.logger))
-		}
-	},
+	async (context) =>
+		guardUser((scope) => context.next({ context: { scope } }), errorResponse, {
+			precheck: async () => {
+				if (!(await isCsrfRequestAllowed({}, context))) {
+					throw new ForbiddenError('Cross-origin request refused')
+				}
+			},
+		}),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -51,15 +33,6 @@ export const userApiScopeMiddleware = createMiddleware().server(
 //   which no user-facing service can be resolved.
 // ═══════════════════════════════════════════════════════════════════════════
 export const systemApiScopeMiddleware = (source: SystemActor['source']) =>
-	createMiddleware().server(async ({ next }) => {
-		const scope = createSystemRequestScope(source)
-		const clientIp = getRequestContext()?.clientIp ?? 'unknown'
-
-		try {
-			await scope.cradle.rateLimiter.consume('webhook', `${source}:${clientIp}`)
-
-			return await next({ context: { scope } })
-		} catch (error) {
-			return errorResponse(logAndNormalizeError(error, scope.cradle.logger))
-		}
-	})
+	createMiddleware().server(async ({ next }) =>
+		guardSystem(source, (scope) => next({ context: { scope } }), errorResponse),
+	)

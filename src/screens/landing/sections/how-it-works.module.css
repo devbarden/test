@@ -1,0 +1,15 @@
+.top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-block-end: var(--space-3);
+}
+
+.number {
+	font-family: var(--font-display);
+	font-size: var(--display-md);
+	font-weight: var(--weight-semibold);
+	line-height: 1;
+	color: var(--color-decoration);
+	letter-spacing: var(--display-tracking);
+}

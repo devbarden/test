@@ -8,8 +8,8 @@ export function Input({ className, ...props }: ComponentProps<'input'>) {
 
 	return (
 		<input
-			{...controlProps}
 			{...props}
+			{...controlProps}
 			className={clsx(styles.control, styles.input, className)}
 		/>
 	)

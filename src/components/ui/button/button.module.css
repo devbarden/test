@@ -1,9 +1,8 @@
 .button {
 	display: inline-flex;
-	gap: var(--space-2);
 	align-items: center;
 	justify-content: center;
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	white-space: nowrap;
 	user-select: none;
 	border: 1px solid transparent;
@@ -13,9 +12,48 @@
 	transition-property: background-color, border-color, color, box-shadow;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+     Label and spinner share one grid cell. While loading the label turns
+     transparent rather than hidden, so it still holds the button's width
+     and still names the button for a screen reader ("Generate Now, busy").
+   ═══════════════════════════════════════════════════════════════════════════ */
+.content {
+	display: inline-grid;
+	place-items: center;
+	min-inline-size: 0;
+}
+
+.content > * {
+	grid-area: 1 / 1;
+}
+
+.row {
+	display: inline-flex;
+	gap: var(--space-2);
+	align-items: center;
+	min-inline-size: 0;
+}
+
+.concealed {
+	opacity: 0;
+}
+
 .label {
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.button svg {
+	flex-shrink: 0;
+	inline-size: var(--icon-md);
+	block-size: var(--icon-md);
+}
+
+.xs {
+	min-block-size: var(--control-height-xs);
+	padding-inline: var(--space-3);
+	font-size: var(--text-sm);
+	line-height: var(--text-sm-leading);
 }
 
 .sm {
@@ -25,21 +63,53 @@
 	line-height: var(--text-md-leading);
 }
 
-.sm svg {
-	inline-size: 1rem;
-	block-size: 1rem;
+.md {
+	min-block-size: var(--control-height-md);
+	padding-inline: 1.125rem;
+	font-size: var(--text-md);
+	line-height: var(--text-md-leading);
 }
 
 .lg {
 	min-block-size: var(--control-height-lg);
-	padding-inline: var(--space-6);
+	padding-inline: 1.75rem;
 	font-size: var(--text-lg);
 	line-height: var(--text-lg-leading);
 }
 
+.lg .row {
+	gap: var(--space-3);
+}
+
 .lg svg {
-	inline-size: 1.25rem;
-	block-size: 1.25rem;
+	inline-size: var(--icon-lg);
+	block-size: var(--icon-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+     The pill is the public pages' shape: bolder, fully rounded, and it
+     lifts under the pointer. Inside the app buttons stay quiet rectangles.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pill {
+	padding-inline: var(--space-8);
+	border-radius: var(--radius-full);
+	transition-property:
+		background-color, border-color, color, box-shadow, transform;
+}
+
+.pill.xs,
+.pill.sm {
+	padding-inline: var(--space-5);
+}
+
+@media (hover: hover) {
+	.pill:hover {
+		transform: translateY(-2px);
+	}
+}
+
+.pill:active {
+	transform: none;
 }
 
 .fullWidth {
@@ -61,7 +131,7 @@
 }
 
 .secondary {
-	color: var(--palette-gray-700);
+	color: var(--color-text-label);
 	background: var(--color-surface-page);
 	border-color: var(--color-border-default);
 	box-shadow: var(--shadow-xs);
@@ -76,14 +146,14 @@
 	margin: calc(var(--space-1) * -1);
 	font-size: var(--text-md);
 	line-height: var(--text-md-leading);
-	color: var(--palette-gray-700);
+	color: var(--color-text-secondary);
 	background: none;
 	border-radius: var(--radius-sm);
 }
 
 .ghost svg {
-	inline-size: 1.25rem;
-	block-size: 1.25rem;
+	inline-size: var(--icon-lg);
+	block-size: var(--icon-lg);
 }
 
 .ghost:hover {
@@ -98,13 +168,29 @@
 	cursor: not-allowed;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+     Only primary and secondary grey out. A disabled ghost keeps its
+     colour, as in the mockup's empty letter panel: "Copy to clipboard" is
+     present but has nothing to copy yet. The cursor and the disabled
+     state still tell it apart.
+   ═══════════════════════════════════════════════════════════════════════════ */
 .primary:disabled {
 	color: var(--color-text-disabled);
 	background: var(--color-control-disabled);
 	box-shadow: none;
 }
 
-.secondary:disabled,
-.ghost:disabled {
+.secondary:disabled {
 	color: var(--color-text-disabled);
+}
+
+.button:disabled,
+.button[aria-busy="true"] {
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pill:hover {
+		transform: none;
+	}
 }

@@ -24,7 +24,8 @@
 			"!**/package-lock.json",
 			"!**/routeTree.gen.ts",
 			"!public/fonts",
-			"!src/generated"
+			"!src/generated",
+			"!src/paraglide"
 		]
 	},
 	"javascript": {
@@ -37,6 +38,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"style": {
+				"noJsxLiterals": "error"
+			},
 			"suspicious": {
 				"noConsole": {
 					"level": "warn",

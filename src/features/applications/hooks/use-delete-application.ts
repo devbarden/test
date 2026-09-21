@@ -1,79 +1,97 @@
-import {
-	type QueryKey,
-	useMutation,
-	useQueryClient,
-} from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRef } from 'react'
 import { useToast } from '@/components/ui/toast'
-import { readApiError } from '@/lib/api-error'
-import { apiErrorMessage } from '@/lib/api-error-message'
-import { deleteApplication, restoreApplication } from '../application.api'
-import {
-	putApplicationInCache,
-	removeApplicationFromCache,
-} from '../application.cache'
-import { applicationKeys } from '../application.queries'
-import type { ApplicationDto } from '../application.schema'
+import { readApiError } from '@/lib/api/api-error'
+import { errorMessage } from '@/lib/api/api-error-message'
+import { m } from '@/paraglide/messages'
+import { deleteApplication, restoreApplication } from '../api/application.api'
+import { insertApplication, removeApplication } from '../api/application.cache'
+import { applicationKeys } from '../api/application.queries'
+import type { ApplicationDto } from '../model/application.schema'
+
+type DeleteOptions = {
+	onRestored?: (application: ApplicationDto) => void
+	onSettled?: () => void
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Delete immediately and offer Undo, rather than asking "Are you sure?".
-//   The card disappears optimistically; if the server refuses, the cache is
-//   rolled back to its snapshot and the user is told. Undo restores the
-//   soft-deleted row on the server — the exact letter, not a copy the
-//   client sends back — and it returns to its place, since order is by id.
+//   The card disappears optimistically; Undo restores the soft-deleted row
+//   on the server — the exact letter, not a copy the client sends back —
+//   and it returns to its own place in the list.
+//
+//   A failure puts back only the letter that failed, never a snapshot of the
+//   whole cache: with two deletes in flight, rolling one back to its
+//   snapshot would resurrect the other. A second click on a card already
+//   on its way out is ignored, and "not found" from a delete counts as
+//   done — the letter is gone either way, and an error toast would replace
+//   the Undo the user may be reaching for.
+//
+//   `onSettled` lets the caller refresh what else counted the letter — the
+//   plan's usage, say — without this feature knowing about billing.
 // ═══════════════════════════════════════════════════════════════════════════
-export function useDeleteApplication() {
+export function useDeleteApplication({
+	onRestored,
+	onSettled,
+}: DeleteOptions = {}) {
 	const queryClient = useQueryClient()
 	const showToast = useToast()
+	const pending = useRef(new Set<string>())
 
-	const settle = () =>
-		queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+	const settle = async () => {
+		await queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+		onSettled?.()
+	}
 
 	const showError = (error: unknown) =>
-		showToast({ message: apiErrorMessage(readApiError(error)) })
+		showToast({ message: errorMessage(error) })
 
 	const restore = useMutation({
 		mutationFn: (id: string) => restoreApplication({ data: { id } }),
 		onError: showError,
+		onMutate: () =>
+			queryClient.cancelQueries({ queryKey: applicationKeys.list() }),
 		onSettled: settle,
-		onSuccess: (application) =>
-			putApplicationInCache(queryClient, application, { isNew: true }),
+		onSuccess: (application) => {
+			insertApplication(queryClient, application)
+			onRestored?.(application)
+		},
 	})
 
-	const remove = useMutation<
-		void,
-		Error,
-		ApplicationDto,
-		[QueryKey, unknown][]
-	>({
-		mutationFn: (application: ApplicationDto) =>
-			deleteApplication({ data: { id: application.id } }),
-		onError: (error, _application, snapshot) => {
-			for (const [queryKey, data] of snapshot ?? []) {
-				queryClient.setQueryData(queryKey, data)
+	const remove = useMutation({
+		mutationFn: async (application: ApplicationDto) => {
+			try {
+				await deleteApplication({ data: { id: application.id } })
+			} catch (error) {
+				if (readApiError(error).code !== 'not_found') throw error
 			}
+		},
+		onError: (error, application) => {
+			insertApplication(queryClient, application)
 			showError(error)
 		},
 		onMutate: async (application) => {
 			await queryClient.cancelQueries({ queryKey: applicationKeys.all })
-
-			const snapshot = queryClient.getQueriesData({
-				queryKey: applicationKeys.all,
-			})
-
-			removeApplicationFromCache(queryClient, application.id)
-
-			return snapshot
+			removeApplication(queryClient, application.id)
 		},
-		onSettled: settle,
+		onSettled: (_result, _error, application) => {
+			pending.current.delete(application.id)
+			return settle()
+		},
 		onSuccess: (_result, application) =>
 			showToast({
 				action: {
-					label: 'Undo',
+					label: m['dashboard.undo'](),
 					onClick: () => restore.mutate(application.id),
 				},
-				message: 'Application deleted',
+				message: m['dashboard.deleted'](),
 			}),
 	})
 
-	return (application: ApplicationDto) => remove.mutate(application)
+	return (application: ApplicationDto) => {
+		if (pending.current.has(application.id)) return
+
+		pending.current.add(application.id)
+		remove.mutate(application)
+	}
 }

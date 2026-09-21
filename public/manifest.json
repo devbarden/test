@@ -1,0 +1,24 @@
+{
+	"background_color": "#ffffff",
+	"categories": ["productivity", "business"],
+	"description": "Generate a personal cover letter for every job you apply to.",
+	"display": "standalone",
+	"icons": [
+		{ "sizes": "any", "src": "/favicon.svg", "type": "image/svg+xml" },
+		{ "sizes": "192x192", "src": "/icon-192.png", "type": "image/png" },
+		{ "sizes": "512x512", "src": "/icon-512.png", "type": "image/png" },
+		{
+			"purpose": "maskable",
+			"sizes": "512x512",
+			"src": "/icon-512.png",
+			"type": "image/png"
+		}
+	],
+	"id": "/",
+	"lang": "en",
+	"name": "Alt+Shift — cover letters",
+	"scope": "/",
+	"short_name": "Alt+Shift",
+	"start_url": "/applications",
+	"theme_color": "#ffffff"
+}

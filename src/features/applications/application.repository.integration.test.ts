@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ConflictError } from '@/backend/errors.server'
+import { ConflictError } from '@/backend/errors/app-error.server'
 import { silentLogger, testUser } from '@/test/fixtures'
 import { setupTestDatabase } from '@/test/integration/clients'
 import { createApplicationRepository } from './application.repository.server'

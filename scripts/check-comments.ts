@@ -21,11 +21,11 @@ const ROOT_FILES = [
 	'playwright.config.ts',
 	'prisma.config.ts',
 ]
-const IGNORED = ['src/generated', 'src/routeTree.gen.ts']
+const IGNORED = ['src/generated', 'src/paraglide', 'src/routeTree.gen.ts']
 const DIRECTIVE = /^\/\/ (biome-ignore|@ts-expect-error|TODO:)/
 const TS_RULE = /^\/\/ ═+$/
 const CSS_OPEN = /^\/\* ═+$/
-const CSS_CLOSE = /^ *═+ \*\/$/
+const CSS_CLOSE = /^[\t ]*═+ \*\/$/
 
 type Violation = { file: string; line: number; reason: string }
 

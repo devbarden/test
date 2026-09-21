@@ -80,4 +80,15 @@ describe('createSseParser', () => {
 
 		expect(events).toEqual([{ data: 'whole', event: 'message' }])
 	})
+
+	it('fails a line or an event too long to be a delta, instead of buffering it', async () => {
+		const line = 'x'.repeat(40 * 1024)
+
+		await expect(parse([`data: ${line}${line}`])).rejects.toThrow(
+			'length limit',
+		)
+		await expect(parse([`data: ${line}\n`, `data: ${line}\n`])).rejects.toThrow(
+			'length limit',
+		)
+	})
 })

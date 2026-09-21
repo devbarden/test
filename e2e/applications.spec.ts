@@ -11,7 +11,7 @@ import {
 test('an empty dashboard invites the user to create the first letter', async ({
 	page,
 }) => {
-	await page.goto('/')
+	await page.goto('/applications')
 
 	await expect(
 		page.getByRole('heading', { name: 'No applications yet' }),
@@ -57,7 +57,7 @@ test('shows the letter in another browser, from the server', async ({
 	const otherPage = await otherBrowser.newPage()
 
 	await signIn(otherPage, testInfo.parallelIndex)
-	await otherPage.goto('/')
+	await otherPage.goto('/applications')
 
 	await expect(otherPage.getByRole('listitem')).toHaveCount(1)
 	await expect(otherPage.getByText('1/5')).toBeVisible()
@@ -69,7 +69,7 @@ test('restores letters from browser storage when the API cannot be reached', asy
 	page,
 }) => {
 	await generateLetter(page)
-	await page.goto('/')
+	await page.goto('/applications')
 	await expect(page.getByRole('listitem')).toHaveCount(1)
 	await page.waitForFunction(() =>
 		Object.entries(localStorage).some(
@@ -113,7 +113,7 @@ test('saves nothing when the letter breaks off mid-stream', async ({
 	await expect(page.getByRole('alert')).toContainText('connection dropped')
 	await expect(page).toHaveURL(/\/applications\/new$/)
 
-	await page.goto('/')
+	await page.goto('/applications')
 	await expect(
 		page.getByRole('heading', { name: 'No applications yet' }),
 	).toBeVisible()
@@ -138,7 +138,7 @@ test('deletes a letter and brings it back with Undo, on the server too', async (
 	page,
 }) => {
 	await generateLetter(page)
-	await page.goto('/')
+	await page.goto('/applications')
 
 	await page.getByRole('button', { name: 'Delete' }).click()
 	await expect(

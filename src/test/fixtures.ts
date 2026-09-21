@@ -1,10 +1,10 @@
 import pino from 'pino'
+import type { UserActor } from '@/backend/auth/actor'
 import { type AppConfig, createAppConfig } from '@/backend/config.server'
-import type { UserActor } from '@/backend/di/actor'
 import {
 	type Entitlements,
 	FREE_ENTITLEMENTS,
-} from '@/features/billing/billing.catalog'
+} from '@/features/billing/model/billing.catalog'
 
 export const silentLogger = pino({ level: 'silent' })
 

@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //   An AbortSignal that fires if nobody re-arms it in time. Used twice for
 //   one request: first as a time-to-first-byte limit, then — re-armed on
-//   every event — as an inactivity limit. A total-duration timeout would be
-//   wrong here: a long letter that keeps streaming is healthy; a stream
-//   that goes silent is not.
+//   every event — as an inactivity limit: a long letter that keeps
+//   streaming is healthy, a stream that goes silent is not. The overall
+//   ceiling is a separate, fixed timeout (see the gateway).
 // ═══════════════════════════════════════════════════════════════════════════
 export function createWatchdog() {
 	const controller = new AbortController()

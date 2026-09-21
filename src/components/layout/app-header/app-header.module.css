@@ -3,11 +3,16 @@
 	gap: var(--space-4);
 	align-items: center;
 	justify-content: space-between;
-	padding-block: var(--space-6);
+	min-block-size: 3rem;
+	margin-block: var(--space-8);
 }
 
-.brand {
-	border-radius: var(--radius-sm);
+/* ═══════════════════════════════════════════════════════════════════════════
+     Named only while the router animates a page change, so the header holds
+     still above the page instead of cross-fading with it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:global(:root:active-view-transition-type(page)) .header {
+	view-transition-name: app-header;
 }
 
 .actions {
@@ -29,7 +34,7 @@
 
 @media (max-width: 639px) {
 	.header {
-		padding-block: var(--space-4);
+		margin-block: var(--space-4) var(--space-6);
 	}
 
 	.actions {

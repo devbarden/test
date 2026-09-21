@@ -28,3 +28,9 @@ playwright-report
 #   prisma/schema.prisma; committing it would only let the two drift.
 # ═══════════════════════════════════════════════════════════════════════════
 src/generated
+
+# ═══════════════════════════════════════════════════════════════════════════
+#   Paraglide compiles messages/*.json into typed functions on dev, build,
+#   typecheck and test; like the Prisma client, it is never committed.
+# ═══════════════════════════════════════════════════════════════════════════
+src/paraglide

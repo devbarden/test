@@ -1,4 +1,3 @@
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig } from 'vitest/config'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -8,7 +7,7 @@ import { defineConfig } from 'vitest/config'
 //   files share one database and truncate it between tests.
 // ═══════════════════════════════════════════════════════════════════════════
 export default defineConfig({
-	plugins: [tsconfigPaths({ projects: ['./tsconfig.json'] })],
+	resolve: { tsconfigPaths: true },
 	test: {
 		projects: [
 			{

@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { FREE_ENTITLEMENTS } from '@/features/billing/billing.catalog'
 
 const emptyAsUndefined = (value: unknown) => (value === '' ? undefined : value)
 
@@ -26,14 +25,21 @@ const envSchema = z.object({
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Parsed once, when the server boots — the container registers the result
-//   as a value — so a deploy with a missing or malformed variable fails its
-//   healthcheck and never takes traffic, instead of failing the first user
-//   who reaches the code path that needs it.
+//   Parsed when the server boots (lifecycle/server-lifecycle.nitro.ts), so
+//   a deploy with a missing or malformed variable crashes before it listens
+//   and never takes traffic, instead of failing the first user who reaches
+//   the code path that needs it. The container then registers one parsed
+//   copy as a value.
 //
 //   Operational limits live here too, as code rather than environment: they
 //   are decisions reviewed in a pull request, not knobs to turn in a
-//   dashboard. Limits that depend on the plan live in the billing catalogue.
+//   dashboard. Limits that depend on the plan live in the billing catalogue
+//   and reach the limiter per request, never through this file.
+//
+//   The generation bounds are chosen together: a letter may take at most
+//   maxDurationMs, which is shorter than lockTtlMs, so the one-generation-
+//   per-user lock can never expire under a generation that is still
+//   running.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 	const parsed = envSchema.safeParse(env)
@@ -60,22 +66,23 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 			firstByteTimeoutMs: 30_000,
 			idleTimeoutMs: 20_000,
 			lockTtlMs: 120_000,
+			maxDurationMs: 90_000,
+			maxLetterCharacters: 20_000,
 			maxTokens: 800,
 		},
+		http: { maxRequestBodyBytes: 1024 * 1024 },
 		isProduction: vars.NODE_ENV === 'production',
-		limits: {
-			defaultGenerationsPerDay: FREE_ENTITLEMENTS.dailyGenerations,
-			deletedRetentionDays: 30,
-			generationsPerMinute: 4,
-			requestBodyBytes: 1024 * 1024,
-			requestsPerMinutePerIp: 600,
-			requestsPerMinutePerUser: 300,
-			upstreamRequestsPerMinute: 6,
-			webhooksPerMinutePerIp: 60,
-		},
 		logLevel: vars.LOG_LEVEL,
 		nodeEnv: vars.NODE_ENV,
+		rateLimits: {
+			generationsPerMinute: 4,
+			requestsPerMinutePerIp: 600,
+			requestsPerMinutePerUser: 300,
+			systemRequestsPerMinute: 300,
+			upstreamRequestsPerMinute: 6,
+		},
 		redis: { url: vars.REDIS_URL },
+		retention: { deletedApplicationsDays: 30 },
 	}
 }
 

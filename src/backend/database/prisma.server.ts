@@ -1,9 +1,16 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@/generated/prisma/client'
+import { type Prisma, PrismaClient } from '@/generated/prisma/client'
 import type { AppConfig } from '../config.server'
 import type { Logger } from '../observability/logger.server'
 
 export type { PrismaClient }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   What a repository method runs its query on: the shared client, or the
+//   transaction a caller opened — so several methods can be composed inside
+//   one transaction and all run on its connection.
+// ═══════════════════════════════════════════════════════════════════════════
+export type DbClient = PrismaClient | Prisma.TransactionClient
 
 const globalCache = globalThis as { __altShiftPrisma?: PrismaClient }
 

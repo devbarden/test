@@ -1,22 +1,25 @@
 .iconButton {
 	display: inline-flex;
+	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
 	inline-size: var(--control-height-sm);
 	block-size: var(--control-height-sm);
-	color: var(--palette-gray-700);
+	color: var(--color-text-label);
 	background: var(--color-surface-page);
 	border: 1px solid var(--color-border-default);
 	border-radius: var(--radius-md);
 	box-shadow: var(--shadow-xs);
-	transition: background-color var(--duration-fast) var(--ease-out);
+	transition:
+		background-color var(--duration-fast) var(--ease-out),
+		color var(--duration-fast) var(--ease-out);
+}
+
+.iconButton svg {
+	inline-size: var(--icon-lg);
+	block-size: var(--icon-lg);
 }
 
 .iconButton:hover {
 	background: var(--color-control-hover);
-}
-
-.iconButton svg {
-	inline-size: 1.25rem;
-	block-size: 1.25rem;
 }

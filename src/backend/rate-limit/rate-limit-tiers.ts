@@ -5,59 +5,67 @@ const DAY = 24 * 60 * MINUTE
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Every budget in the system and what it protects — the policy, kept
-//   apart from the mechanism that enforces it (rate-limiter.server.ts):
+//   apart from the mechanism that enforces it (rate-limiter.server.ts) and
+//   from the keys it is charged under (budgets.ts):
 //
 //   ip                  any dynamic request, per client IP — floods and
 //                       scrapers, before auth costs anything
 //   user                every authenticated call, per user
+//   system              the Clerk webhook and the scheduler, per source
+//                       and IP — they authenticate by signature or secret
 //   generationMinute    letters per user per minute — "Try Again" mashing
-//   generationDay       letters per user per day — the plan's quota,
-//                       reported as `quota_exceeded` so the UI can say
-//                       "come back tomorrow" (or "upgrade") rather than
-//                       "wait a few seconds"
 //   upstream            the Generation API's own budget (6/min per TOKEN),
 //                       one bucket for the whole deployment: every user of
 //                       this service shares it, so it is spent here, where
 //                       it can be refused politely, not at the provider
-//   webhook             signature-checked webhooks and the scheduler, per
-//                       source and IP
+//   generationDay       letters per user per day — the PLAN's quota. Its
+//                       size is not policy but the caller's entitlement,
+//                       so it has no default here: a charge against it must
+//                       carry its limit (see budgets.ts), and forgetting it
+//                       is a type error rather than a silent free-tier
+//                       ceiling.
 // ═══════════════════════════════════════════════════════════════════════════
-export const RATE_LIMIT_TIERS = [
+export const FIXED_TIERS = [
 	'ip',
 	'user',
+	'system',
 	'generationMinute',
-	'generationDay',
 	'upstream',
-	'webhook',
 ] as const
 
-export type RateLimitTier = (typeof RATE_LIMIT_TIERS)[number]
+export type FixedTier = (typeof FIXED_TIERS)[number]
+
+export type PlanTier = 'generationDay'
+
+export type RateLimitTier = FixedTier | PlanTier
+
+type ExceededCode = 'rate_limited' | 'quota_exceeded'
 
 export type TierPolicy = {
 	durationSeconds: number
-	exceededCode: 'rate_limited' | 'quota_exceeded'
-	points: number
+	exceededCode: ExceededCode
 }
 
-export function rateLimitPolicies({
-	limits,
-}: AppConfig): Record<RateLimitTier, TierPolicy> {
-	const perMinute = (points: number): TierPolicy => ({
+export type FixedTierPolicy = TierPolicy & { points: number }
+
+export function fixedTierPolicies({
+	rateLimits,
+}: AppConfig): Record<FixedTier, FixedTierPolicy> {
+	const perMinute = (points: number): FixedTierPolicy => ({
 		durationSeconds: MINUTE,
 		exceededCode: 'rate_limited',
 		points,
 	})
 
 	return {
-		generationDay: {
-			durationSeconds: DAY,
-			exceededCode: 'quota_exceeded',
-			points: limits.defaultGenerationsPerDay,
-		},
-		generationMinute: perMinute(limits.generationsPerMinute),
-		ip: perMinute(limits.requestsPerMinutePerIp),
-		upstream: perMinute(limits.upstreamRequestsPerMinute),
-		user: perMinute(limits.requestsPerMinutePerUser),
-		webhook: perMinute(limits.webhooksPerMinutePerIp),
+		generationMinute: perMinute(rateLimits.generationsPerMinute),
+		ip: perMinute(rateLimits.requestsPerMinutePerIp),
+		system: perMinute(rateLimits.systemRequestsPerMinute),
+		upstream: perMinute(rateLimits.upstreamRequestsPerMinute),
+		user: perMinute(rateLimits.requestsPerMinutePerUser),
 	}
+}
+
+export const PLAN_TIER_POLICIES: Record<PlanTier, TierPolicy> = {
+	generationDay: { durationSeconds: DAY, exceededCode: 'quota_exceeded' },
 }

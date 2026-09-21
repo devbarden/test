@@ -4,6 +4,14 @@ export type SseEvent = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//   A line — or an event, which is its `data` lines together — longer than
+//   this is not a delta but a broken or hostile stream. The parser fails it
+//   rather than buffering forever while waiting for a line break, or a
+//   blank line, that never comes.
+// ═══════════════════════════════════════════════════════════════════════════
+const MAX_LENGTH = 64 * 1024
+
+// ═══════════════════════════════════════════════════════════════════════════
 //   A Server-Sent Events parser as a TransformStream<string, SseEvent>,
 //   following the WHATWG "event stream interpretation" rules:
 //
@@ -26,6 +34,7 @@ export function createSseParser(): TransformStream<string, SseEvent> {
 	let buffer = ''
 	let eventName = ''
 	let dataLines: string[] = []
+	let dataLength = 0
 
 	const dispatch = (controller: TransformStreamDefaultController<SseEvent>) => {
 		if (dataLines.length > 0) {
@@ -37,6 +46,7 @@ export function createSseParser(): TransformStream<string, SseEvent> {
 
 		eventName = ''
 		dataLines = []
+		dataLength = 0
 	}
 
 	const processLine = (
@@ -56,7 +66,10 @@ export function createSseParser(): TransformStream<string, SseEvent> {
 		const value = rawValue.startsWith(' ') ? rawValue.slice(1) : rawValue
 
 		if (field === 'event') eventName = value
-		if (field === 'data') dataLines.push(value)
+		if (field === 'data') {
+			dataLines.push(value)
+			dataLength += value.length
+		}
 	}
 
 	return new TransformStream({
@@ -73,6 +86,10 @@ export function createSseParser(): TransformStream<string, SseEvent> {
 			buffer = (lines.pop() ?? '') + (endsWithCr ? '\r' : '')
 
 			for (const line of lines) processLine(line, controller)
+
+			if (buffer.length > MAX_LENGTH || dataLength > MAX_LENGTH) {
+				controller.error(new Error('SSE event exceeds the length limit'))
+			}
 		},
 	})
 }

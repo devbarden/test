@@ -1,11 +1,9 @@
-import type { UserActor } from '@/backend/di/actor'
-import { ConflictError, NotFoundError } from '@/backend/errors.server'
+import type { UserActor } from '@/backend/auth/actor'
+import type { DbClient } from '@/backend/database/prisma.server'
+import { ConflictError, NotFoundError } from '@/backend/errors/app-error.server'
 import type { Logger } from '@/backend/observability/logger.server'
 import { toApplicationDto } from './application.mapper'
-import type {
-	ApplicationRepository,
-	DbClient,
-} from './application.repository.server'
+import type { ApplicationRepository } from './application.repository.server'
 import {
 	APPLICATION_GOAL,
 	APPLICATIONS_PAGE_SIZE,
@@ -13,13 +11,7 @@ import {
 	type ApplicationInput,
 	type ApplicationPage,
 	type ApplicationStats,
-} from './application.schema'
-
-type ApplicationServiceDeps = {
-	applicationRepository: ApplicationRepository
-	logger: Logger
-	userActor: UserActor
-}
+} from './model/application.schema'
 
 type SaveLetterCommand = {
 	applicationId?: string
@@ -37,10 +29,14 @@ export function createApplicationService({
 	applicationRepository,
 	logger,
 	userActor,
-}: ApplicationServiceDeps) {
+}: {
+	applicationRepository: ApplicationRepository
+	logger: Logger
+	userActor: UserActor
+}) {
 	const { entitlements, userId } = userActor
 
-	async function getOwned(id: string) {
+	async function findOwned(id: string) {
 		const application = await applicationRepository.findActive(userId, id)
 
 		if (!application) throw new NotFoundError(`Application ${id} not found`)
@@ -98,14 +94,30 @@ export function createApplicationService({
 			throw new NotFoundError(`Application ${applicationId} not found`)
 		}
 
+		logger.info({ applicationId }, 'Application regenerated')
+
 		return toApplicationDto(updated)
 	}
 
+	const count = () => applicationRepository.countActive(userId)
+
 	return {
-		assertCanCreate: () => assertRoom(),
+		// ═════════════════════════════════════════════════════════════════════
+		//   Would `saveLetter` accept this letter? Asked by the generation
+		//   service BEFORE it spends anything on the model: the same rule, so
+		//   a letter is never generated only to be refused at save time. It
+		//   is re-checked at save, under the lock — this answer can go stale
+		//   while the letter streams.
+		// ═════════════════════════════════════════════════════════════════════
+		async assertCanSave(applicationId?: string): Promise<void> {
+			if (applicationId) await findOwned(applicationId)
+			else await assertRoom()
+		},
+
+		count,
 
 		async get(id: string): Promise<ApplicationDto> {
-			return toApplicationDto(await getOwned(id))
+			return toApplicationDto(await findOwned(id))
 		},
 
 		async list({ cursor }: { cursor?: string }): Promise<ApplicationPage> {
@@ -139,6 +151,8 @@ export function createApplicationService({
 				throw new NotFoundError(`Deleted application ${id} not found`)
 			}
 
+			logger.info({ applicationId: id }, 'Application restored')
+
 			return toApplicationDto(restored)
 		},
 
@@ -161,7 +175,7 @@ export function createApplicationService({
 			return {
 				goal: APPLICATION_GOAL,
 				limit: entitlements.maxApplications,
-				total: await applicationRepository.countActive(userId),
+				total: await count(),
 			}
 		},
 	}

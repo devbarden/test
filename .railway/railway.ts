@@ -52,15 +52,24 @@ export default defineRailway(() => {
 	//   Migrations run in pre-deploy, before the new version takes traffic,
 	//   and traffic switches only once readiness (database reachable)
 	//   passes — a release that cannot migrate or connect never goes live.
+	//
+	//   The old version is given time to finish what it started: a letter
+	//   may stream for up to 90 s (config.generation.maxDurationMs) and is
+	//   saved after that. The server drains for SERVER_SHUTDOWN_TIMEOUT
+	//   seconds (srvx's default is 5) and Railway waits drainingSeconds
+	//   (default 0) before SIGKILL — both are set past that bound, or every
+	//   deploy would cut off the letters being written at that moment.
 	// ═════════════════════════════════════════════════════════════════════════
 	const app = service('test', {
 		build: 'npm run build',
 		deploy: {
+			drainingSeconds: 100,
 			limitOverride: { containers: { cpu: 4, memoryBytes: 4_000_000_000 } },
 			restartPolicyMaxRetries: 3,
 		},
 		env: {
 			CLERK_SECRET_KEY: preserve(),
+			CLERK_WEBHOOK_SIGNING_SECRET: preserve(),
 			CRON_SECRET: preserve(),
 			DATABASE_URL: Postgres.env.DATABASE_URL,
 			GENERATION_API_TOKEN: preserve(),
@@ -68,6 +77,7 @@ export default defineRailway(() => {
 			LOG_LEVEL: 'info',
 			NODE_ENV: 'production',
 			REDIS_URL: Redis.env.REDIS_URL,
+			SERVER_SHUTDOWN_TIMEOUT: '95',
 			VITE_CLERK_PUBLISHABLE_KEY: preserve(),
 			VITE_SITE_URL: preserve(),
 		},

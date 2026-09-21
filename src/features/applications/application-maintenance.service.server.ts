@@ -32,7 +32,7 @@ export function createApplicationMaintenanceService({
 
 		async purgeDeleted(now = new Date()): Promise<number> {
 			const cutoff = new Date(
-				now.getTime() - config.limits.deletedRetentionDays * DAY_MS,
+				now.getTime() - config.retention.deletedApplicationsDays * DAY_MS,
 			)
 			const count = await applicationRepository.purgeDeletedBefore(cutoff)
 

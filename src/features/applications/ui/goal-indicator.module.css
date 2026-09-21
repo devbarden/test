@@ -1,0 +1,46 @@
+.indicator {
+	display: flex;
+	gap: var(--space-4);
+	align-items: center;
+}
+
+.label {
+	font-size: var(--text-lg);
+	line-height: var(--text-lg-leading);
+	color: var(--color-text-tertiary);
+	white-space: nowrap;
+}
+
+.suffix {
+	margin-inline-start: 0.3em;
+}
+
+.check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 1.75rem;
+	block-size: 1.75rem;
+	color: var(--color-success-graphic);
+	background: var(--color-success-subtle);
+	border-radius: var(--radius-full);
+}
+
+.check svg {
+	inline-size: var(--icon-md);
+	block-size: var(--icon-md);
+}
+
+@media (max-width: 639px) {
+	.indicator {
+		gap: var(--space-2);
+	}
+
+	.label {
+		font-size: var(--text-md);
+	}
+
+	.suffix {
+		display: none;
+	}
+}

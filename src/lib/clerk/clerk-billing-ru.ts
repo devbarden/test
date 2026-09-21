@@ -1,0 +1,161 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//   Clerk's own Russian dictionary leaves almost all of billing untranslated
+//   (120 of 125 strings in @clerk/localizations 4.17), so a Russian page
+//   would open an English pricing table and an English checkout. This fills
+//   the gap; it is merged under Clerk's ruRU, so a string Clerk translates
+//   itself in a later release still wins. {{placeholders}} are Clerk's and
+//   must survive unchanged.
+// ═══════════════════════════════════════════════════════════════════════════
+export const CLERK_BILLING_RU = {
+	accountCredit: 'Баланс аккаунта',
+	addPaymentMethod__label: 'Добавить способ оплаты',
+	alwaysFree: 'Всегда бесплатно',
+	annually: 'Ежегодно',
+	availableFeatures: 'Возможности',
+	billedAnnually: 'Оплата за год',
+	billedAnnuallyOnly: 'Только оплата за год',
+	billedMonthly: 'Оплата помесячно',
+	billedMonthlyOnly: 'Только помесячная оплата',
+	cancelSubscription: 'Отменить подписку',
+	cancelSubscriptionAccessUntil:
+		"Возможности тарифа «{{plan}}» останутся доступны до {{ date | longDate('ru-RU') }}, после этого доступ закроется.",
+	cancelSubscriptionNoCharge: 'Списаний по этой подписке не будет.',
+	cancelSubscriptionPastDue:
+		'Подписка закончится сразу, и все возможности тарифа станут недоступны. Задолженность нужно будет оплатить при следующей подписке.',
+	cancelSubscriptionTitle: 'Отменить подписку {{plan}}?',
+	cannotSubscribeMonthly:
+		'На этот тариф нельзя подписаться с помесячной оплатой — только с оплатой за год.',
+	cannotSubscribeUnrecoverable:
+		'На этот тариф нельзя подписаться: текущая подписка дороже.',
+	checkout: {
+		addPromoCode: 'Добавить промокод',
+		applyPromoCode: 'Применить',
+		description__paymentSuccessful: 'Оплата прошла успешно.',
+		description__subscriptionSuccessful: 'Новая подписка оформлена.',
+		discount: 'Скидка',
+		downgradeNotice:
+			'Текущая подписка и её возможности сохранятся до конца оплаченного периода, затем вы перейдёте на эту подписку.',
+		emailForm: {
+			subtitle:
+				'Чтобы завершить покупку, добавьте адрес почты — на него придут чеки.',
+			title: 'Добавьте адрес почты',
+		},
+		lineItems: {
+			title__freeTrialEndsAt: 'Пробный период до',
+			title__paymentMethod: 'Способ оплаты',
+			title__statementId: 'Номер выписки',
+			title__subscriptionBegins: 'Подписка начинается',
+			title__totalPaid: 'Оплачено всего',
+		},
+		pastDueNotice: 'Предыдущая подписка не была оплачена.',
+		perMonth: 'в месяц',
+		promoCodePlaceholder: 'Введите промокод',
+		removePromoCode: 'Убрать промокод',
+		title: 'Оформление',
+		title__paymentSuccessful: 'Оплата прошла!',
+		title__subscriptionSuccessful: 'Готово!',
+		title__trialSuccess: 'Пробный период начался!',
+		totalDueAfterTrial: 'К оплате после пробного периода через {{days}} дн.',
+		totalDuePerPeriod: 'К оплате за период',
+	},
+	credit: 'Зачёт',
+	creditRemainder: 'Зачёт за оставшийся срок текущей подписки.',
+	defaultFreePlanActive: 'Сейчас у вас бесплатный тариф',
+	discountAmount: 'Скидка {{amount}}',
+	discountCyclesRemaining: 'Осталось: {{cycles}} {{period}}',
+	discountDuration: 'Скидка {{amount}} на первые {{cycles}} {{period}}',
+	free: 'Бесплатно',
+	getStarted: 'Начать',
+	highlightedPlanBadge: 'Популярный',
+	keepFreeTrial: 'Оставить пробный период',
+	keepSubscription: 'Оставить подписку',
+	manage: 'Управлять',
+	manageSubscription: 'Управлять подпиской',
+	month: 'Месяц',
+	monthAbbreviation: 'мес.',
+	monthly: 'Помесячно',
+	monthPerUnit: 'Месяц за {{unitName}}',
+	months: 'Месяцы',
+	pastDue: 'Просрочено',
+	pay: 'Оплатить {{amount}}',
+	payerCreditRemainder: 'Зачёт с баланса аккаунта.',
+	paymentMethod: {
+		applePayDescription: {
+			annual: 'Оплата за год',
+			monthly: 'Помесячная оплата',
+		},
+		dev: {
+			anyNumbers: 'Любые цифры',
+			cardNumber: 'Номер карты',
+			cvcZip: 'CVC, индекс',
+			developmentMode: 'Режим разработки',
+			expirationDate: 'Срок действия',
+			testCardInfo: 'Данные тестовой карты',
+		},
+	},
+	paymentMethods__label: 'Способы оплаты',
+	pricingTable: {
+		billingCycle: 'Период оплаты',
+		included: 'Включено',
+		seatCost: {
+			additionalSeats:
+				'({{additionalTierFeePerBlockAmount}}/{{periodAbbreviation}} за дополнительные)',
+			freeUpToSeats: 'Бесплатно до {{endsAfterBlock}} мест',
+			includedSeats: 'Мест включено: {{includedSeats}}',
+			perSeat: '{{feePerBlockAmount}}/{{periodAbbreviation}} за место',
+			tooltip: {
+				additionalSeatsEach:
+					'Каждое дополнительное место — {{feePerBlockAmount}}/{{period}}.',
+				firstSeatsIncludedInPlan:
+					'Первые {{endsAfterBlock}} мест входят в тариф.',
+				freeForUpToSeats: 'Бесплатно до {{endsAfterBlock}} мест.',
+			},
+			unlimitedSeats: 'Без ограничения мест',
+			upToSeats: 'До {{endsAfterBlock}} мест',
+		},
+	},
+	proratedDiscount: 'Пропорциональная скидка',
+	prorationCredit: 'Пропорциональный зачёт',
+	reSubscribe: 'Подписаться снова',
+	seatBreakdownIncludedPlural:
+		'{{chargeable}} мест по {{rate}}/мес. (всего {{totalSeats}}, включено {{included}})',
+	seatBreakdownIncludedSingular:
+		'1 место по {{rate}}/мес. (всего {{totalSeats}}, включено {{included}})',
+	seatBreakdownPlural: '{{chargeable}} мест по {{rate}}/мес.',
+	seatBreakdownSingular: '1 место по {{rate}}/мес.',
+	seats: 'Места',
+	seatsWithLimit: 'Места (до {{limit}})',
+	seeAllFeatures: 'Все возможности',
+	startFreeTrial: 'Начать пробный период',
+	startFreeTrial__days: 'Попробовать {{days}} дней бесплатно',
+	subscribe: 'Подписаться',
+	subscriptionDetails: {
+		beginsOn: 'Начало',
+		currentBillingCycle: 'Текущий период',
+		endsOn: 'Окончание',
+		firstPaymentAmount: 'Сумма первого платежа',
+		firstPaymentOn: 'Первый платёж',
+		nextPaymentAmount: 'Сумма следующего платежа',
+		nextPaymentOn: 'Следующий платёж',
+		pastDueAt: 'Просрочено с',
+		renewsAt: 'Продление',
+		subscribedOn: 'Подписка с',
+		title: 'Подписка',
+	},
+	subtotal: 'Промежуточный итог',
+	subtotalRenewal: 'Промежуточный итог за период',
+	switchPlan: 'Перейти на этот тариф',
+	switchToAnnual: 'Перейти на оплату за год',
+	switchToAnnualWithAnnualPrice: 'Перейти на оплату за год: {{price}} в год',
+	switchToMonthly: 'Перейти на помесячную оплату',
+	switchToMonthlyWithPrice: 'Перейти на помесячную оплату: {{price}} в месяц',
+	totalDue: 'К оплате',
+	totalDuePerPeriod: 'Итого за период',
+	totalDueToday: 'К оплате сегодня',
+	viewFeatures: 'Посмотреть возможности',
+	viewPayment: 'Посмотреть платёж',
+	year: 'Год',
+	yearAbbreviation: 'г.',
+	yearPerUnit: 'Год за {{unitName}}',
+	years: 'Годы',
+}

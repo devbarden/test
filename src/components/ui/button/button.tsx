@@ -20,6 +20,7 @@ export function Button({
 	iconStart,
 	loading = false,
 	onClick,
+	shape,
 	size,
 	type = 'button',
 	variant,
@@ -39,7 +40,10 @@ export function Button({
 			{...props}
 			aria-busy={loading || undefined}
 			aria-disabled={loading || undefined}
-			className={buttonClassName({ fullWidth, size, variant }, className)}
+			className={buttonClassName(
+				{ fullWidth, shape, size, variant },
+				className,
+			)}
 			onClick={handleClick}
 			type={type}
 		>

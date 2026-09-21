@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { ConflictError, NotFoundError } from '@/backend/errors.server'
+import { ConflictError, NotFoundError } from '@/backend/errors/app-error.server'
 import { createFakeApplicationRepository } from '@/test/fakes/application-repository.fake'
 import { silentLogger, testUser } from '@/test/fixtures'
-import { APPLICATIONS_PAGE_SIZE } from './application.schema'
 import { createApplicationService } from './application.service.server'
+import { APPLICATIONS_PAGE_SIZE } from './model/application.schema'
 
 const input = {
 	company: 'Apple',
@@ -105,12 +105,22 @@ describe('applicationService', () => {
 		await service().remove(id)
 		await service().saveLetter({ input, letter: 'Two' })
 
-		await expect(service().assertCanCreate()).rejects.toBeInstanceOf(
+		await expect(service().assertCanSave()).rejects.toBeInstanceOf(
 			ConflictError,
 		)
 		await expect(
 			service().saveLetter({ input, letter: 'Three' }),
 		).rejects.toBeInstanceOf(ConflictError)
 		await expect(service().restore(id)).rejects.toBeInstanceOf(ConflictError)
+	})
+
+	it('allows regenerating an owned letter even at the cap, never a foreign one', async () => {
+		const { service } = setup({ cap: 1 })
+		const { id } = await service('alice').saveLetter({ input, letter: 'One' })
+
+		await expect(service('alice').assertCanSave(id)).resolves.toBeUndefined()
+		await expect(service('mallory').assertCanSave(id)).rejects.toBeInstanceOf(
+			NotFoundError,
+		)
 	})
 })

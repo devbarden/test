@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { UpstreamError } from '@/backend/errors.server'
+import { UpstreamError } from '@/backend/errors/app-error.server'
 import { readableStreamFrom } from '@/lib/readable-stream-from'
 import { silentLogger, testConfig } from '@/test/fixtures'
 import { createGenerationApiGateway } from './generation-api.gateway.server'
@@ -121,6 +121,36 @@ describe('openGenerationStream', () => {
 			sseResponse([
 				'event: delta\ndata: {"text":"Dear"}\n\n',
 				'event: delta\ndata: not-json\n\n',
+			]),
+		)
+
+		const stream = await openGenerationStream(request)
+		const failure = await failureOf(collect(stream))
+
+		expect(failure.toPayload()).toEqual({ code: 'interrupted' })
+	})
+
+	it('refuses to follow a redirect', async () => {
+		fetchMock.mockResolvedValue(sseResponse(['data: [DONE]\n\n']))
+
+		await collect(await openGenerationStream(request))
+
+		expect(fetchMock.mock.calls[0]?.[1]?.redirect).toBe('error')
+	})
+
+	it('fails as unavailable when a 200 is not an event stream', async () => {
+		fetchMock.mockResolvedValue(Response.json({ error: 'overloaded' }))
+
+		const failure = await failureOf(openGenerationStream(request))
+
+		expect(failure.toPayload()).toEqual({ code: 'unavailable' })
+	})
+
+	it('fails as interrupted when the provider sends an error event', async () => {
+		fetchMock.mockResolvedValue(
+			sseResponse([
+				'event: delta\ndata: {"text":"Dear"}\n\n',
+				'event: error\ndata: {"message":"overloaded"}\n\n',
 			]),
 		)
 
