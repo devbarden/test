@@ -1,6 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@/generated/prisma/client'
 import type { AppConfig } from '../config.server'
+import type { Logger } from '../observability/logger.server'
 
 export type { PrismaClient }
 
@@ -15,22 +16,39 @@ const globalCache = globalThis as { __altShiftPrisma?: PrismaClient }
 //   The pool is sized per instance (DATABASE_POOL_MAX); the total a
 //   deployment can open is that times the replica count, which must stay
 //   under the database's max_connections.
+//
+//   Every connection carries server-side timeouts: a statement that runs
+//   away, or a transaction left idle by a crashed request, is ended by
+//   Postgres instead of holding a pooled connection (and an advisory lock)
+//   until the process restarts.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createPrismaClient({
 	config,
+	rootLogger,
 }: {
 	config: AppConfig
+	rootLogger: Logger
 }): PrismaClient {
 	if (globalCache.__altShiftPrisma) return globalCache.__altShiftPrisma
 
+	const { poolMax, statementTimeoutMs, url } = config.database
 	const client = new PrismaClient({
 		adapter: new PrismaPg({
-			connectionString: config.database.url,
+			connectionString: url,
 			connectionTimeoutMillis: 5_000,
+			idle_in_transaction_session_timeout: statementTimeoutMs,
 			idleTimeoutMillis: 30_000,
-			max: config.database.poolMax,
+			max: poolMax,
+			statement_timeout: statementTimeoutMs,
 		}),
+		log: [
+			{ emit: 'event', level: 'warn' },
+			{ emit: 'event', level: 'error' },
+		],
 	})
+
+	client.$on('warn', (event) => rootLogger.warn({ prisma: event }, 'Prisma'))
+	client.$on('error', (event) => rootLogger.error({ prisma: event }, 'Prisma'))
 
 	if (!config.isProduction) globalCache.__altShiftPrisma = client
 

@@ -22,6 +22,11 @@ const CACHE_BUSTER = 'applications-v1'
 //   first render. The dashboard therefore paints the letters immediately —
 //   and still shows them when the API cannot be reached — then revalidates.
 //
+//   Restored queries are marked stale at once. What was persisted may be
+//   seconds old and still inside staleTime, and it may predate the last
+//   change (the throttled write missed an Undo right before a reload): the
+//   cached letters are painted, and every query revalidates as it mounts.
+//
 //   Restoring is synchronous on purpose. localStorage is synchronous, so the
 //   cache can be filled before any component mounts; the asynchronous
 //   restore of PersistQueryClientProvider left a window in which queries
@@ -40,8 +45,13 @@ export function restoreCache(queryClient: QueryClient, userId: string): void {
 			persisted.buster === CACHE_BUSTER &&
 			Date.now() - persisted.timestamp <= CACHE_MAX_AGE_MS
 
-		if (isCurrent) hydrate(queryClient, persisted.clientState)
-		else storage.removeItem(key)
+		if (!isCurrent) {
+			storage.removeItem(key)
+			return
+		}
+
+		hydrate(queryClient, persisted.clientState)
+		void queryClient.invalidateQueries({ refetchType: 'none' })
 	} catch {
 		storage.removeItem(key)
 	}

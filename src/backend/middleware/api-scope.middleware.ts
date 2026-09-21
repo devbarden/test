@@ -1,18 +1,11 @@
-import { auth } from '@clerk/tanstack-react-start/server'
 import { createMiddleware, isCsrfRequestAllowed } from '@tanstack/react-start'
 import type { SystemActor } from '../di/actor'
 import { getAppContainer } from '../di/container.server'
-import {
-	createSystemRequestScope,
-	createUserRequestScope,
-} from '../di/scope.server'
-import {
-	errorResponse,
-	ForbiddenError,
-	UnauthorizedError,
-} from '../errors.server'
+import { createSystemRequestScope } from '../di/scope.server'
+import { errorResponse, ForbiddenError } from '../errors.server'
 import { getRequestContext } from '../web/request-context.server'
 import { logAndNormalizeError } from './error-handling.server'
+import { chargeRequest, openUserScope } from './user-scope.server'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The /api file-route counterpart of userScopeMiddleware. Two differences
@@ -27,36 +20,34 @@ import { logAndNormalizeError } from './error-handling.server'
 // ═══════════════════════════════════════════════════════════════════════════
 export const userApiScopeMiddleware = createMiddleware().server(
 	async (context) => {
-		const { rootLogger } = getAppContainer().cradle
+		let scope: Awaited<ReturnType<typeof openUserScope>>
 
 		try {
 			if (!(await isCsrfRequestAllowed({}, context))) {
 				throw new ForbiddenError('Cross-origin request refused')
 			}
 
-			const { isAuthenticated, userId } = await auth()
-
-			if (!isAuthenticated || !userId) throw new UnauthorizedError()
-
-			const scope = createUserRequestScope(userId)
-
-			try {
-				await scope.cradle.rateLimiter.consume('user', userId)
-
-				return await context.next({ context: { scope } })
-			} catch (error) {
-				return errorResponse(logAndNormalizeError(error, scope.cradle.logger))
-			}
+			scope = await openUserScope()
 		} catch (error) {
-			return errorResponse(logAndNormalizeError(error, rootLogger))
+			return errorResponse(
+				logAndNormalizeError(error, getAppContainer().cradle.rootLogger),
+			)
+		}
+
+		try {
+			await chargeRequest(scope)
+
+			return await context.next({ context: { scope } })
+		} catch (error) {
+			return errorResponse(logAndNormalizeError(error, scope.cradle.logger))
 		}
 	},
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   For callers that are not users — the Clerk webhook, the scheduler. They
-//   authenticate by signature or shared secret inside the handler; this
-//   applies the per-IP webhook budget and gives them a system scope, from
+//   authenticate by signature or shared secret in their handler; this
+//   applies the per-source-and-IP budget and gives them a system scope, from
 //   which no user-facing service can be resolved.
 // ═══════════════════════════════════════════════════════════════════════════
 export const systemApiScopeMiddleware = (source: SystemActor['source']) =>

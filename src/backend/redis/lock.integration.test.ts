@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { silentLogger } from '@/test/fixtures'
-import { useTestRedis } from '@/test/integration/clients'
+import { setupTestRedis } from '@/test/integration/clients'
 import { createLockService } from './lock.server'
 
-const redis = useTestRedis()
+const redis = setupTestRedis()
 const locks = createLockService({ redis, rootLogger: silentLogger })
 
 describe('lockService (Redis)', () => {

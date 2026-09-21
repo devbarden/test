@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto'
 import type { Logger } from '../observability/logger.server'
 import type { Redis } from './redis.server'
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   `release` is idempotent: a holder may reach it from several exits (the
+//   stream ending, the request being aborted) without coordinating which
+//   one runs first.
+// ═══════════════════════════════════════════════════════════════════════════
 export type Lock = { release: () => Promise<void> }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -46,8 +51,13 @@ export function createLockService({
 				return NOOP_LOCK
 			}
 
+			let released = false
+
 			return {
 				release: async () => {
+					if (released) return
+
+					released = true
 					await redis
 						.eval(RELEASE_SCRIPT, 1, key, token)
 						.catch((error: unknown) => {

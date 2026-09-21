@@ -20,6 +20,7 @@ export const apiErrorCodeSchema = z.enum([
 	'quota_exceeded',
 	'generation_in_progress',
 	'application_limit_reached',
+	'plan_required',
 	'unavailable',
 	'interrupted',
 	'save_failed',

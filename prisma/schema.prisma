@@ -29,6 +29,10 @@ model Application {
   company   String    @db.VarChar(100)
   skills    String    @db.VarChar(300)
   details   String    @db.VarChar(1200)
+  /// The voice the letter was written in (see LETTER_TONES). Stored so that
+  /// "Try Again" keeps it. Plain text, not an enum: a tone can be retired
+  /// in code without a migration, and old rows then read as the default.
+  tone      String    @default("professional") @db.VarChar(20)
   letter    String
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)

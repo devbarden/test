@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { FREE_ENTITLEMENTS } from '@/features/billing/billing.catalog'
 
 const emptyAsUndefined = (value: unknown) => (value === '' ? undefined : value)
 
@@ -30,8 +31,9 @@ const envSchema = z.object({
 //   healthcheck and never takes traffic, instead of failing the first user
 //   who reaches the code path that needs it.
 //
-//   Product limits live here too, as code rather than environment: they are
-//   decisions reviewed in a pull request, not knobs to turn in a dashboard.
+//   Operational limits live here too, as code rather than environment: they
+//   are decisions reviewed in a pull request, not knobs to turn in a
+//   dashboard. Limits that depend on the plan live in the billing catalogue.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 	const parsed = envSchema.safeParse(env)
@@ -47,7 +49,11 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 	return {
 		clerk: { webhookSigningSecret: vars.CLERK_WEBHOOK_SIGNING_SECRET },
 		cron: { secret: vars.CRON_SECRET },
-		database: { poolMax: vars.DATABASE_POOL_MAX, url: vars.DATABASE_URL },
+		database: {
+			poolMax: vars.DATABASE_POOL_MAX,
+			statementTimeoutMs: 10_000,
+			url: vars.DATABASE_URL,
+		},
 		generation: {
 			apiToken: vars.GENERATION_API_TOKEN,
 			apiUrl: vars.GENERATION_API_URL,
@@ -58,9 +64,8 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 		},
 		isProduction: vars.NODE_ENV === 'production',
 		limits: {
-			applicationsPerUser: 200,
+			defaultGenerationsPerDay: FREE_ENTITLEMENTS.dailyGenerations,
 			deletedRetentionDays: 30,
-			generationsPerDay: 50,
 			generationsPerMinute: 4,
 			requestBodyBytes: 1024 * 1024,
 			requestsPerMinutePerIp: 600,

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DEFAULT_LETTER_TONE, LETTER_TONES } from './application-tone'
 
 export const INPUT_LIMITS = {
 	company: 100,
@@ -19,6 +20,7 @@ export const applicationInputSchema = z.object({
 	details: z.string().max(INPUT_LIMITS.details).trim(),
 	jobTitle: z.string().max(INPUT_LIMITS.jobTitle).trim().min(1),
 	skills: z.string().max(INPUT_LIMITS.skills).trim().min(1),
+	tone: z.enum(LETTER_TONES).default(DEFAULT_LETTER_TONE),
 })
 
 export type ApplicationInput = z.infer<typeof applicationInputSchema>
@@ -28,6 +30,7 @@ export const EMPTY_APPLICATION_INPUT: ApplicationInput = {
 	details: '',
 	jobTitle: '',
 	skills: '',
+	tone: DEFAULT_LETTER_TONE,
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -43,6 +46,7 @@ export const applicationDtoSchema = z.object({
 		details: z.string(),
 		jobTitle: z.string(),
 		skills: z.string(),
+		tone: z.enum(LETTER_TONES),
 	}),
 	letter: z.string(),
 	updatedAt: z.iso.datetime(),
@@ -63,6 +67,7 @@ export type ApplicationPage = {
 
 export type ApplicationStats = {
 	goal: number
+	limit: number
 	total: number
 }
 

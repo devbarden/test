@@ -7,6 +7,7 @@ const command = {
 		details: '',
 		jobTitle: 'Product manager',
 		skills: 'HTML',
+		tone: 'professional' as const,
 	},
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	ConflictError,
 	NotFoundError,
+	PlanRequiredError,
 	RateLimitError,
 	UpstreamError,
 } from '@/backend/errors.server'
@@ -22,9 +23,11 @@ const input = {
 	details: '',
 	jobTitle: 'Product manager',
 	skills: 'HTML',
+	tone: 'professional' as const,
 }
 
 type SetupOptions = {
+	entitlements?: Parameters<typeof testUser>[1]
 	held?: boolean
 	refused?: Parameters<typeof createFakeRateLimiter>[0]
 	repository?: ApplicationRepository
@@ -33,6 +36,7 @@ type SetupOptions = {
 }
 
 function setup({
+	entitlements,
 	held,
 	refused,
 	repository = createFakeApplicationRepository().repository,
@@ -44,9 +48,8 @@ function setup({
 	const limits = createFakeRateLimiter(refused)
 	const applicationService = createApplicationService({
 		applicationRepository: repository,
-		config,
 		logger: silentLogger,
-		userActor: testUser(userId),
+		userActor: testUser(userId, entitlements),
 	})
 	const service = createGenerationService({
 		applicationService,
@@ -55,7 +58,7 @@ function setup({
 		lockService: lock.lockService,
 		logger: silentLogger,
 		rateLimiter: limits.limiter,
-		userActor: testUser(userId),
+		userActor: testUser(userId, entitlements),
 	})
 
 	return { applicationService, limits, lock, service }
@@ -87,7 +90,11 @@ describe('generationService', () => {
 		expect(done?.type === 'done' && done.application.letter).toBe(
 			'Dear Apple Team,',
 		)
-		expect(await applicationService.stats()).toEqual({ goal: 5, total: 1 })
+		expect(await applicationService.stats()).toEqual({
+			goal: 5,
+			limit: 20,
+			total: 1,
+		})
 		expect(limits.consumed).toEqual([
 			'generationMinute',
 			'generationDay',
@@ -138,7 +145,11 @@ describe('generationService', () => {
 			error: { code: 'interrupted' },
 			type: 'error',
 		})
-		expect(await applicationService.stats()).toEqual({ goal: 5, total: 0 })
+		expect(await applicationService.stats()).toEqual({
+			goal: 5,
+			limit: 20,
+			total: 0,
+		})
 		expect(lock.state.released).toBe(1)
 	})
 
@@ -183,5 +194,36 @@ describe('generationService', () => {
 		controller.abort()
 
 		expect(lock.state.released).toBeGreaterThanOrEqual(1)
+	})
+
+	it('charges the daily quota of the user plan', async () => {
+		const free = setup()
+		const pro = setup({ entitlements: { dailyGenerations: 100 } })
+
+		await drain(await free.service.start({ input }, signal()))
+		await drain(await pro.service.start({ input }, signal()))
+
+		expect(free.limits.limits.generationDay).toBe(10)
+		expect(pro.limits.limits.generationDay).toBe(100)
+	})
+
+	it('refuses a letter tone outside the plan before spending anything', async () => {
+		const { limits, lock, service } = setup()
+
+		await expect(
+			service.start({ input: { ...input, tone: 'confident' } }, signal()),
+		).rejects.toBeInstanceOf(PlanRequiredError)
+		expect(limits.consumed).toEqual([])
+		expect(lock.state.acquired).toBe(0)
+	})
+
+	it('writes in the chosen tone when the plan includes tones', async () => {
+		const { service } = setup({ entitlements: { letterTones: true } })
+		const events = await drain(
+			await service.start({ input: { ...input, tone: 'warm' } }, signal()),
+		)
+		const done = events.at(-1)
+
+		expect(done?.type === 'done' && done.application.input.tone).toBe('warm')
 	})
 })

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { asValue } from 'awilix'
 import { getRequestContext } from '../web/request-context.server'
-import type { Actor, SystemActor } from './actor'
+import type { Actor, SystemActor, UserActor } from './actor'
 import { type AppContainer, getAppContainer } from './container.server'
 
 function buildScope(actor: Actor): AppContainer {
@@ -25,8 +25,8 @@ function buildScope(actor: Actor): AppContainer {
 	return scope
 }
 
-export function createUserRequestScope(userId: string): AppContainer {
-	return buildScope({ type: 'user', userId })
+export function createUserRequestScope(user: UserActor): AppContainer {
+	return buildScope(user)
 }
 
 export function createSystemRequestScope(

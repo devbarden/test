@@ -1,15 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import { ConflictError } from '@/backend/errors.server'
-import { silentLogger, testConfig, testUser } from '@/test/fixtures'
-import { useTestDatabase } from '@/test/integration/clients'
+import { silentLogger, testUser } from '@/test/fixtures'
+import { setupTestDatabase } from '@/test/integration/clients'
 import { createApplicationRepository } from './application.repository.server'
 import { createApplicationService } from './application.service.server'
 
-const db = useTestDatabase()
+const db = setupTestDatabase()
 const repository = createApplicationRepository({ db })
 
 const letter = {
-	input: { company: 'Apple', details: '', jobTitle: 'PM', skills: 'HTML' },
+	input: {
+		company: 'Apple',
+		details: '',
+		jobTitle: 'PM',
+		skills: 'HTML',
+		tone: 'professional' as const,
+	},
 	letter: 'Dear Apple Team,',
 }
 
@@ -59,26 +65,17 @@ describe('applicationRepository (Postgres)', () => {
 
 		expect(
 			await repository.purgeDeletedBefore(new Date(Date.now() - 60_000)),
-		).toEqual({
-			count: 0,
-		})
+		).toBe(0)
 		expect(
 			await repository.purgeDeletedBefore(new Date(Date.now() + 60_000)),
-		).toEqual({
-			count: 1,
-		})
+		).toBe(1)
 	})
 
 	it('holds the per-user cap under concurrent inserts', async () => {
-		const config = testConfig()
-
-		config.limits.applicationsPerUser = 1
-
 		const service = createApplicationService({
 			applicationRepository: repository,
-			config,
 			logger: silentLogger,
-			userActor: testUser('alice'),
+			userActor: testUser('alice', { maxApplications: 1 }),
 		})
 
 		const results = await Promise.allSettled(

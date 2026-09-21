@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { RateLimitError } from '@/backend/errors.server'
 import { silentLogger, testConfig } from '@/test/fixtures'
-import { useTestRedis } from '@/test/integration/clients'
-import { createRateLimiter } from './rate-limit.server'
+import { setupTestRedis } from '@/test/integration/clients'
+import { createRateLimiter } from './rate-limiter.server'
 
-const redis = useTestRedis()
+const redis = setupTestRedis()
 
 function limiter() {
 	const config = testConfig()

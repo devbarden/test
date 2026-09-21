@@ -1,14 +1,19 @@
-import type { Lock, LockService } from '@/backend/cache/lock.server'
 import type { AppConfig } from '@/backend/config.server'
 import type { UserActor } from '@/backend/di/actor'
-import { ConflictError, toAppError } from '@/backend/errors.server'
+import {
+	ConflictError,
+	PlanRequiredError,
+	toAppError,
+} from '@/backend/errors.server'
 import type { GenerationApiGateway } from '@/backend/gateways/generation-api/generation-api.gateway.server'
 import type { Logger } from '@/backend/observability/logger.server'
 import type {
+	Budget,
 	RateLimiter,
-	RateLimitTier,
-} from '@/backend/web/rate-limit.server'
+} from '@/backend/rate-limit/rate-limiter.server'
+import type { Lock, LockService } from '@/backend/redis/lock.server'
 import type { ApplicationService } from '@/features/applications/application.service.server'
+import { DEFAULT_LETTER_TONE } from '@/features/applications/application-tone'
 import type { ApiError } from '@/lib/api-error'
 import { buildCoverLetterPrompt } from './cover-letter-prompt'
 import type { GenerateCommand, GenerationEvent } from './protocol'
@@ -35,6 +40,27 @@ const SAVE_ERRORS_SHOWN_AS_IS = new Set<ApiError['code']>([
 	'application_limit_reached',
 ])
 
+type RelayOutcome =
+	| { letter: string; ok: true }
+	| { error: ApiError | null; ok: false }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   A letter goes through four phases, each refusing as early and as
+//   cheaply as it can:
+//
+//   1. allowed?   the plan covers the tone; the application is the user's
+//                 own (Try Again) or the cap leaves room (a new one)
+//   2. reserve    one generation per user at a time (Redis lock), then the
+//                 minute budget, the plan's daily quota and the shared
+//                 upstream budget — charged together, refunded together
+//   3. relay      fragments pass from the provider to the browser as they
+//                 arrive, and are collected
+//   4. finish     the letter is saved, and only then announced as `done`
+//
+//   Phases 1–2 and opening the upstream stream happen before the first
+//   byte, so their refusals become HTTP statuses; phases 3–4 can only
+//   report through an `error` event.
+// ═══════════════════════════════════════════════════════════════════════════
 export function createGenerationService({
 	applicationService,
 	config,
@@ -44,16 +70,21 @@ export function createGenerationService({
 	rateLimiter,
 	userActor,
 }: GenerationServiceDeps) {
-	const { userId } = userActor
+	const { entitlements, userId } = userActor
 
-	// ═════════════════════════════════════════════════════════════════════════
-	//   Admission, cheapest refusal first: the lock (is another letter for
-	//   this user already being written?), then the user's minute and day
-	//   budgets, then the deployment-wide upstream budget. Points already
-	//   taken are refunded if a later check refuses, so a user is never
-	//   charged for a letter that was never attempted.
-	// ═════════════════════════════════════════════════════════════════════════
-	async function admit(): Promise<Lock> {
+	async function assertAllowed({
+		applicationId,
+		input,
+	}: GenerateCommand): Promise<void> {
+		if (input.tone !== DEFAULT_LETTER_TONE && !entitlements.letterTones) {
+			throw new PlanRequiredError('Letter tones are not in the user plan')
+		}
+
+		if (applicationId) await applicationService.get(applicationId)
+		else await applicationService.assertCanCreate()
+	}
+
+	async function reserve(): Promise<Lock> {
 		const lock = await lockService.acquire(
 			`lock:generation:${userId}`,
 			config.generation.lockTtlMs,
@@ -61,35 +92,30 @@ export function createGenerationService({
 
 		if (!lock) throw new ConflictError('generation_in_progress')
 
-		const steps: [RateLimitTier, string][] = [
-			['generationMinute', userId],
-			['generationDay', userId],
-			['upstream', UPSTREAM_BUDGET_KEY],
+		const budgets: Budget[] = [
+			{ key: userId, tier: 'generationMinute' },
+			{
+				key: userId,
+				limit: entitlements.dailyGenerations,
+				tier: 'generationDay',
+			},
+			{ key: UPSTREAM_BUDGET_KEY, tier: 'upstream' },
 		]
-		const consumed: [RateLimitTier, string][] = []
 
 		try {
-			for (const [tier, key] of steps) {
-				await rateLimiter.consume(tier, key)
-				consumed.push([tier, key])
-			}
+			await rateLimiter.consumeAll(budgets)
 
 			return lock
 		} catch (error) {
-			await Promise.all(
-				consumed.map(([tier, key]) => rateLimiter.refund(tier, key)),
-			)
 			await lock.release()
 			throw error
 		}
 	}
 
-	async function* run(
-		command: GenerateCommand,
+	async function* relay(
 		deltas: AsyncIterable<string>,
 		signal: AbortSignal,
-	): AsyncGenerator<GenerationEvent> {
-		const startedAt = performance.now()
+	): AsyncGenerator<GenerationEvent, RelayOutcome> {
 		let letter = ''
 
 		try {
@@ -98,26 +124,34 @@ export function createGenerationService({
 				yield { text, type: 'delta' }
 			}
 		} catch (error) {
-			if (signal.aborted) return
+			if (signal.aborted) return { error: null, ok: false }
 
 			const appError = toAppError(error)
 
 			logger.warn({ err: appError }, 'Generation failed mid-stream')
-			yield { error: appError.toPayload(), type: 'error' }
-			return
+
+			return { error: appError.toPayload(), ok: false }
 		}
 
 		if (!letter.trim()) {
 			logger.warn('Generation API finished without any text')
-			yield { error: { code: 'interrupted' }, type: 'error' }
-			return
+
+			return { error: { code: 'interrupted' }, ok: false }
 		}
 
+		return { letter: letter.trim(), ok: true }
+	}
+
+	async function finish(
+		command: GenerateCommand,
+		letter: string,
+		startedAt: number,
+	): Promise<GenerationEvent> {
 		try {
 			const application = await applicationService.saveLetter({
 				applicationId: command.applicationId,
 				input: command.input,
-				letter: letter.trim(),
+				letter,
 			})
 
 			logger.info(
@@ -129,12 +163,13 @@ export function createGenerationService({
 				'Letter generated',
 			)
 
-			yield { application, type: 'done' }
+			return { application, type: 'done' }
 		} catch (error) {
 			const appError = toAppError(error)
 
 			logger.error({ err: appError }, 'Generated letter could not be saved')
-			yield {
+
+			return {
 				error: SAVE_ERRORS_SHOWN_AS_IS.has(appError.code)
 					? appError.toPayload()
 					: { code: 'save_failed' },
@@ -143,25 +178,39 @@ export function createGenerationService({
 		}
 	}
 
+	async function* stream(
+		command: GenerateCommand,
+		deltas: AsyncIterable<string>,
+		signal: AbortSignal,
+		lock: Lock,
+	): AsyncGenerator<GenerationEvent> {
+		const startedAt = performance.now()
+
+		try {
+			const outcome = yield* relay(deltas, signal)
+
+			if (outcome.ok) yield await finish(command, outcome.letter, startedAt)
+			else if (outcome.error) yield { error: outcome.error, type: 'error' }
+		} finally {
+			await lock.release()
+		}
+	}
+
 	return {
 		// ═════════════════════════════════════════════════════════════════════
-		//   Resolves once the letter has STARTED — everything refused before
-		//   that throws, so the route can answer with a status code. The lock
-		//   is released when the stream ends, and also when the request is
-		//   aborted: a generator that is never iterated never reaches its
-		//   `finally`, and the lock would otherwise sit until its TTL.
+		//   Resolves once the letter has STARTED; everything refused before
+		//   that throws. The lock is released when the stream ends, and also
+		//   when the request is aborted: a generator that is never iterated
+		//   never reaches its `finally`, and the lock would otherwise sit
+		//   until its TTL.
 		// ═════════════════════════════════════════════════════════════════════
 		async start(
 			command: GenerateCommand,
 			signal: AbortSignal,
 		): Promise<AsyncGenerator<GenerationEvent>> {
-			if (command.applicationId) {
-				await applicationService.get(command.applicationId)
-			} else {
-				await applicationService.assertCanCreate()
-			}
+			await assertAllowed(command)
 
-			const lock = await admit()
+			const lock = await reserve()
 
 			signal.addEventListener('abort', () => void lock.release(), {
 				once: true,
@@ -173,13 +222,7 @@ export function createGenerationService({
 					signal,
 				})
 
-				return (async function* () {
-					try {
-						yield* run(command, deltas, signal)
-					} finally {
-						await lock.release()
-					}
-				})()
+				return stream(command, deltas, signal, lock)
 			} catch (error) {
 				await lock.release()
 				throw error

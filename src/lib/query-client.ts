@@ -27,15 +27,20 @@ function onError(error: unknown) {
 //   instance. A 404, a validation error or a rate limit is an answer, and
 //   asking again only delays showing it (or, for 429, makes it worse).
 //
-//   `gcTime` matches the persisted cache's lifetime: a query collected from
-//   memory is also dropped from what is written to storage.
+//   `gcTime` is Infinity: a query restored from storage must not be
+//   collected before a component subscribes to it, or it is also dropped
+//   from what is written back. The persisted cache's own lifetime is still
+//   bounded by CACHE_MAX_AGE_MS when it is read (restoreCache). A finite
+//   30-day gcTime looked equivalent and was not — it exceeds setTimeout's
+//   2^31-1 ms ceiling, browsers fire such a timer almost immediately, and
+//   every restored query was garbage-collected on arrival.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createQueryClient(): QueryClient {
 	return new QueryClient({
 		defaultOptions: {
 			mutations: { retry: false },
 			queries: {
-				gcTime: CACHE_MAX_AGE_MS,
+				gcTime: Number.POSITIVE_INFINITY,
 				retry: (failureCount, error) =>
 					failureCount < MAX_RETRIES && RETRYABLE.has(readApiError(error).code),
 				staleTime: 30_000,

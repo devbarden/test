@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ConflictError, NotFoundError } from '@/backend/errors.server'
 import { createFakeApplicationRepository } from '@/test/fakes/application-repository.fake'
-import { silentLogger, testConfig, testUser } from '@/test/fixtures'
+import { silentLogger, testUser } from '@/test/fixtures'
 import { APPLICATIONS_PAGE_SIZE } from './application.schema'
 import { createApplicationService } from './application.service.server'
 
@@ -10,20 +10,19 @@ const input = {
 	details: '',
 	jobTitle: 'Product manager',
 	skills: 'HTML',
+	tone: 'professional' as const,
 }
 
 function setup({ cap }: { cap?: number } = {}) {
-	const config = testConfig()
-
-	if (cap !== undefined) config.limits.applicationsPerUser = cap
-
 	const { repository, rows } = createFakeApplicationRepository()
 	const service = (userId = 'alice') =>
 		createApplicationService({
 			applicationRepository: repository,
-			config,
 			logger: silentLogger,
-			userActor: testUser(userId),
+			userActor: testUser(
+				userId,
+				cap === undefined ? {} : { maxApplications: cap },
+			),
 		})
 
 	return { rows, service }
@@ -42,7 +41,7 @@ describe('applicationService', () => {
 		expect(updated.id).toBe(created.id)
 		expect(updated.letter).toBe('Second')
 		expect(updated.input.company).toBe('Stripe')
-		expect(await service().stats()).toEqual({ goal: 5, total: 1 })
+		expect(await service().stats()).toEqual({ goal: 5, limit: 20, total: 1 })
 	})
 
 	it("never exposes or modifies another user's letter", async () => {
@@ -66,7 +65,7 @@ describe('applicationService', () => {
 	})
 
 	it('pages newest first with a cursor', async () => {
-		const { service } = setup()
+		const { service } = setup({ cap: 100 })
 
 		for (let index = 0; index < APPLICATIONS_PAGE_SIZE + 2; index += 1) {
 			await service().saveLetter({ input, letter: `Letter ${index}` })
@@ -91,7 +90,7 @@ describe('applicationService', () => {
 		const { id } = await service().saveLetter({ input, letter: 'Keep me' })
 
 		await service().remove(id)
-		expect(await service().stats()).toEqual({ goal: 5, total: 0 })
+		expect(await service().stats()).toEqual({ goal: 5, limit: 20, total: 0 })
 
 		const restored = await service().restore(id)
 

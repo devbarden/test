@@ -1,49 +1,16 @@
-import {
-	type AwilixContainer,
-	asFunction,
-	asValue,
-	createContainer,
-	InjectionMode,
-} from 'awilix'
-import {
-	type ApplicationRepository,
-	createApplicationRepository,
-} from '@/features/applications/application.repository.server'
-import {
-	type ApplicationService,
-	createApplicationService,
-} from '@/features/applications/application.service.server'
-import {
-	type ApplicationMaintenanceService,
-	createApplicationMaintenanceService,
-} from '@/features/applications/application-maintenance.service.server'
-import {
-	createGenerationService,
-	type GenerationService,
-} from '@/features/generation/generation.service.server'
-import { createLockService, type LockService } from '../cache/lock.server'
-import { createRedisClient, type Redis } from '../cache/redis.server'
-import { type AppConfig, createAppConfig } from '../config.server'
-import {
-	createPrismaClient,
-	type PrismaClient,
-} from '../database/prisma.server'
-import {
-	createGenerationApiGateway,
-	type GenerationApiGateway,
-} from '../gateways/generation-api/generation-api.gateway.server'
-import {
-	createHealthService,
-	type HealthService,
-} from '../lifecycle/health.server'
-import { createRootLogger, type Logger } from '../observability/logger.server'
-import { createRateLimiter, type RateLimiter } from '../web/rate-limit.server'
+import { type AwilixContainer, createContainer, InjectionMode } from 'awilix'
+import { applicationsModule } from '@/features/applications/applications.module.server'
+import { billingModule } from '@/features/billing/billing.module.server'
+import { generationModule } from '@/features/generation/generation.module.server'
+import type { Logger } from '../observability/logger.server'
 import type { Actor, UserActor } from './actor'
+import { coreModule } from './core.module.server'
+import type { CradleOf } from './module'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The composition root: every service, repository and gateway is a plain
-//   factory `createX({ deps })`, and this is the only file that knows how
-//   they are wired.
+//   The composition root. Each module (infrastructure and one per feature)
+//   lists its own registrations next to the code it wires, and this file
+//   only merges them — a new feature adds one line here.
 //
 //   Lifetimes:
 //   - singleton  config, clients, pools, gateways, rate limiter — process-wide
@@ -56,57 +23,34 @@ import type { Actor, UserActor } from './actor'
 //   so resolving a user-facing service from a system scope fails loudly
 //   instead of running without an owner.
 // ═══════════════════════════════════════════════════════════════════════════
-export type AppCradle = {
+const modules = {
+	...coreModule,
+	...applicationsModule,
+	...billingModule,
+	...generationModule,
+}
+
+type RequestCradle = {
 	actor: Actor
-	applicationMaintenanceService: ApplicationMaintenanceService
-	applicationRepository: ApplicationRepository
-	applicationService: ApplicationService
-	config: AppConfig
-	db: PrismaClient
-	generationApiGateway: GenerationApiGateway
-	generationService: GenerationService
-	healthService: HealthService
-	lockService: LockService
 	logger: Logger
-	rateLimiter: RateLimiter
-	redis: Redis
 	requestId: string
-	rootLogger: Logger
 	userActor: UserActor
 }
 
+export type AppCradle = CradleOf<typeof modules> & RequestCradle
+
 export type AppContainer = AwilixContainer<AppCradle>
-
-function buildContainer(): AppContainer {
-	const container = createContainer<AppCradle>({
-		injectionMode: InjectionMode.PROXY,
-		strict: true,
-	})
-
-	container.register({
-		applicationMaintenanceService: asFunction(
-			createApplicationMaintenanceService,
-		).scoped(),
-		applicationRepository: asFunction(createApplicationRepository).scoped(),
-		applicationService: asFunction(createApplicationService).scoped(),
-		config: asValue(createAppConfig()),
-		db: asFunction(createPrismaClient).singleton(),
-		generationApiGateway: asFunction(createGenerationApiGateway).singleton(),
-		generationService: asFunction(createGenerationService).scoped(),
-		healthService: asFunction(createHealthService).singleton(),
-		lockService: asFunction(createLockService).singleton(),
-		rateLimiter: asFunction(createRateLimiter).singleton(),
-		redis: asFunction(createRedisClient).singleton(),
-		rootLogger: asFunction(createRootLogger).singleton(),
-	})
-
-	return container
-}
 
 let container: AppContainer | undefined
 
 export function getAppContainer(): AppContainer {
-	container ??= buildContainer()
+	if (!container) {
+		container = createContainer<AppCradle>({
+			injectionMode: InjectionMode.PROXY,
+			strict: true,
+		})
+		container.register(modules)
+	}
 
 	return container
 }

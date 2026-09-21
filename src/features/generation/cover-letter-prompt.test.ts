@@ -6,6 +6,7 @@ const input = {
 	details: '',
 	jobTitle: 'Product manager',
 	skills: 'HTML, CSS and doing things in time',
+	tone: 'professional' as const,
 }
 
 describe('buildCoverLetterPrompt', () => {
@@ -30,5 +31,11 @@ describe('buildCoverLetterPrompt', () => {
 
 		expect(prompt.match(/<\/application>/g)).toHaveLength(1)
 		expect(prompt).toContain('‹/additional_details›')
+	})
+
+	it('asks for the chosen tone', () => {
+		const { prompt } = buildCoverLetterPrompt({ ...input, tone: 'confident' })
+
+		expect(prompt).toContain('Tone: Confident and direct')
 	})
 })

@@ -8,7 +8,7 @@ import {
 	TEST_REDIS_URL,
 } from './environment'
 
-export function useTestDatabase(): PrismaClient {
+export function setupTestDatabase(): PrismaClient {
 	assertDisposable(TEST_DATABASE_URL)
 
 	const db = new PrismaClient({
@@ -24,7 +24,7 @@ export function useTestDatabase(): PrismaClient {
 	return db
 }
 
-export function useTestRedis(): Redis {
+export function setupTestRedis(): Redis {
 	assertDisposable(TEST_REDIS_URL)
 
 	const redis = new Redis(TEST_REDIS_URL, { maxRetriesPerRequest: 1 })

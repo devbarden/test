@@ -46,6 +46,12 @@ export class ForbiddenError extends AppError {
 	}
 }
 
+export class PlanRequiredError extends AppError {
+	constructor(message = 'plan_required') {
+		super('plan_required', 403, message)
+	}
+}
+
 export class NotFoundError extends AppError {
 	constructor(message = 'not_found') {
 		super('not_found', 404, message)

@@ -1,5 +1,5 @@
-import type { Redis } from '../cache/redis.server'
 import type { PrismaClient } from '../database/prisma.server'
+import type { Redis } from '../redis/redis.server'
 
 const CHECK_TIMEOUT_MS = 2_000
 
@@ -43,17 +43,24 @@ export function createHealthService({
 
 export type HealthService = ReturnType<typeof createHealthService>
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   A dependency that hangs is reported as down after the timeout instead
+//   of holding the healthcheck open; the timer is cleared either way, so a
+//   check that answers quickly leaves nothing scheduled behind it.
+// ═══════════════════════════════════════════════════════════════════════════
 async function probe(check: () => Promise<unknown>): Promise<CheckStatus> {
+	let timer: ReturnType<typeof setTimeout> | undefined
+	const timeout = new Promise<never>((_, reject) => {
+		timer = setTimeout(() => reject(new Error('timeout')), CHECK_TIMEOUT_MS)
+	})
+
 	try {
-		await Promise.race([
-			check(),
-			new Promise((_, reject) =>
-				setTimeout(() => reject(new Error('timeout')), CHECK_TIMEOUT_MS),
-			),
-		])
+		await Promise.race([check(), timeout])
 
 		return 'ok'
 	} catch {
 		return 'down'
+	} finally {
+		clearTimeout(timer)
 	}
 }

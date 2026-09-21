@@ -20,7 +20,7 @@ export function createApplicationMaintenanceService({
 }) {
 	return {
 		async eraseUser(userId: string): Promise<number> {
-			const { count } = await applicationRepository.deleteAllForUser(userId)
+			const count = await applicationRepository.deleteAllForUser(userId)
 
 			logger.info(
 				{ count, userId },
@@ -34,7 +34,7 @@ export function createApplicationMaintenanceService({
 			const cutoff = new Date(
 				now.getTime() - config.limits.deletedRetentionDays * DAY_MS,
 			)
-			const { count } = await applicationRepository.purgeDeletedBefore(cutoff)
+			const count = await applicationRepository.purgeDeletedBefore(cutoff)
 
 			logger.info({ count, cutoff }, 'Purged soft-deleted applications')
 

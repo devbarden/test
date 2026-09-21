@@ -43,7 +43,7 @@ export function createFakeApplicationRepository(seed: Application[] = []) {
 
 			for (const row of owned) rows.delete(row.id)
 
-			return { count: owned.length }
+			return owned.length
 		},
 		findActive: async (userId, id) =>
 			active(userId).find((row) => row.id === id) ?? null,
@@ -58,7 +58,7 @@ export function createFakeApplicationRepository(seed: Application[] = []) {
 
 			for (const row of expired) rows.delete(row.id)
 
-			return { count: expired.length }
+			return expired.length
 		},
 		restore: async (userId, id) => {
 			const row = rows.get(id)
