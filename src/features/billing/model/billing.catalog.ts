@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //   The product catalogue, in code. Clerk Billing holds the same plans and
-//   features (clerk/billing.json is what gets pushed there) and is the
-//   source of truth for WHO has what; this file is the source of truth for
-//   what a feature MEANS — the limits and options it unlocks.
+//   features and is the source of truth for WHO has what; this file is the
+//   source of truth for what a feature MEANS — the limits and options it
+//   unlocks.
 //
 //   Access is decided by FEATURE, never by plan name: a limit reads
 //   "does this user have extended_history", not "is this user on Pro". Plans

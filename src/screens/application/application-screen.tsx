@@ -47,7 +47,7 @@ export function ApplicationScreen({
 		return error.code === 'not_found' || error.code === 'invalid_request' ? (
 			<StatusPage
 				action={
-					<ButtonLink to="/applications" variant="secondary">
+					<ButtonLink to="/app/applications" variant="secondary">
 						{m['application.backToList']()}
 					</ButtonLink>
 				}

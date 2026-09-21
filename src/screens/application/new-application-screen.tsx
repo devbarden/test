@@ -24,7 +24,7 @@ export function NewApplicationScreen() {
 					replace: true,
 					resetScroll: false,
 					state: { letterJustSaved: true },
-					to: '/applications/$applicationId',
+					to: '/app/applications/$applicationId',
 					viewTransition: false,
 				})
 			}

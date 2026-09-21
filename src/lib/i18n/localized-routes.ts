@@ -16,7 +16,7 @@
 export const UNLOCALIZED_PREFIXES = [
 	'_serverFn',
 	'api',
-	'applications',
+	'app',
 	'sign-in',
 	'sign-up',
 ] as const

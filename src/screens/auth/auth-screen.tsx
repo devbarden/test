@@ -29,10 +29,10 @@ export function AuthScreen() {
 					</div>
 					<div className={styles.form}>
 						<SignIn
-							fallbackRedirectUrl="/applications"
+							fallbackRedirectUrl="/app/applications"
 							path="/sign-in"
 							routing="path"
-							signUpFallbackRedirectUrl="/applications"
+							signUpFallbackRedirectUrl="/app/applications"
 							withSignUp
 						/>
 					</div>

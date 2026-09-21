@@ -5,7 +5,7 @@ export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type ButtonShape = 'rounded' | 'pill'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
 
 const SIZE_CLASS = {
 	lg: styles.lg,
@@ -15,6 +15,7 @@ const SIZE_CLASS = {
 } satisfies Record<ButtonSize, string | undefined>
 
 const VARIANT_CLASS = {
+	danger: styles.danger,
 	ghost: styles.ghost,
 	primary: styles.primary,
 	secondary: styles.secondary,
@@ -29,7 +30,7 @@ export type ButtonStyleProps = { fullWidth?: boolean } & (
 	| {
 			shape?: ButtonShape
 			size?: ButtonSize
-			variant?: 'primary' | 'secondary'
+			variant?: 'primary' | 'secondary' | 'danger'
 	  }
 	| { shape?: never; size?: never; variant: 'ghost' }
 )

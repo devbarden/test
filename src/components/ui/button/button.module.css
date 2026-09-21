@@ -168,6 +168,22 @@
 		}
 	}
 
+	.danger {
+		color: var(--color-text-on-accent);
+		background: var(--color-danger);
+		box-shadow: var(--shadow-xs);
+
+		&:hover {
+			background: var(--color-danger-hover);
+		}
+
+		&:disabled {
+			color: var(--color-text-disabled);
+			background: var(--color-control-disabled);
+			box-shadow: none;
+		}
+	}
+
 	/* ═══════════════════════════════════════════════════════════════════════
 	     A ghost has no size: it is a line of text that happens to be a
 	     button, padded just enough for a focus ring and pulled back by as

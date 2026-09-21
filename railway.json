@@ -1,0 +1,14 @@
+{
+	"$schema": "https://railway.com/railway.schema.json",
+	"build": {
+		"buildCommand": "npm run build",
+		"builder": "RAILPACK"
+	},
+	"deploy": {
+		"drainingSeconds": 100,
+		"preDeployCommand": "npx prisma migrate deploy",
+		"restartPolicyMaxRetries": 3,
+		"restartPolicyType": "ON_FAILURE",
+		"startCommand": "npm run start"
+	}
+}

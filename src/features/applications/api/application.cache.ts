@@ -5,6 +5,7 @@ import type {
 	ApplicationPage,
 	ApplicationStats,
 } from '../model/application.schema'
+import { matchesSearch } from '../model/application-search'
 import { applicationKeys } from './application.queries'
 
 type ApplicationList = InfiniteData<ApplicationPage, string | undefined>
@@ -16,7 +17,7 @@ type ApplicationList = InfiniteData<ApplicationPage, string | undefined>
 // ═══════════════════════════════════════════════════════════════════════════
 export const PERSISTED_APPLICATIONS: PersistedQueries = {
 	roots: applicationKeys.all,
-	version: 'applications-v2',
+	version: 'applications-v3',
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -29,18 +30,23 @@ export const PERSISTED_APPLICATIONS: PersistedQueries = {
 //   A letter that was not in the list: a new one, or one brought back by
 //   Undo. The list is ordered by id, newest first — ids are UUIDv7, so
 //   their text order is their creation order — and the letter goes to its
-//   own place, not to the top: an undone delete returns where it was.
+//   own place, not to the top: an undone delete returns where it was. A
+//   search's list only takes it if it matches that search.
 //
 //   Any copy already there is dropped first, so a refetch that raced the
 //   insert can never show the same card twice. A letter older than every
-//   loaded one, while more pages exist, is left for "Show more" to bring.
+//   loaded one, while more pages exist, is left for the next page to bring.
 // ═══════════════════════════════════════════════════════════════════════════
 export function insertApplication(
 	queryClient: QueryClient,
 	application: ApplicationDto,
 ): void {
 	queryClient.setQueryData(applicationKeys.detail(application.id), application)
-	updateList(queryClient, (pages) => insertInOrder(pages, application))
+	updateLists(queryClient, (pages, search) =>
+		matchesSearch(application.input, search)
+			? insertInOrder(pages, application)
+			: pages,
+	)
 	adjustTotal(queryClient, 1)
 }
 
@@ -74,28 +80,46 @@ export function replaceApplication(
 	application: ApplicationDto,
 ): void {
 	queryClient.setQueryData(applicationKeys.detail(application.id), application)
-	updateList(queryClient, (pages) =>
+	updateLists(queryClient, (pages, search) =>
 		mapItems(pages, (items) =>
-			items.map((item) => (item.id === application.id ? application : item)),
+			items.flatMap((item) => {
+				if (item.id !== application.id) return [item]
+				return matchesSearch(application.input, search) ? [application] : []
+			}),
 		),
 	)
 }
 
 export function removeApplication(queryClient: QueryClient, id: string): void {
-	updateList(queryClient, (pages) =>
+	updateLists(queryClient, (pages) =>
 		mapItems(pages, (items) => items.filter((item) => item.id !== id)),
 	)
 	queryClient.removeQueries({ queryKey: applicationKeys.detail(id) })
 	adjustTotal(queryClient, -1)
 }
 
-function updateList(
+// ═══════════════════════════════════════════════════════════════════════════
+//   Every cached list — the full one and one per search — with the search
+//   it was fetched for, which is the last part of its key.
+// ═══════════════════════════════════════════════════════════════════════════
+function updateLists(
 	queryClient: QueryClient,
-	update: (pages: ApplicationPage[]) => ApplicationPage[],
+	update: (pages: ApplicationPage[], search: string) => ApplicationPage[],
 ): void {
-	queryClient.setQueryData<ApplicationList>(applicationKeys.list(), (list) =>
-		list ? { ...list, pages: update(list.pages) } : list,
-	)
+	const lists = queryClient.getQueriesData<ApplicationList>({
+		queryKey: applicationKeys.lists(),
+	})
+
+	for (const [queryKey, list] of lists) {
+		if (!list) continue
+
+		const search = String(queryKey[2] ?? '')
+
+		queryClient.setQueryData<ApplicationList>(queryKey, {
+			...list,
+			pages: update(list.pages, search),
+		})
+	}
 }
 
 function mapItems(
@@ -123,16 +147,22 @@ export function applicationFromList(
 	queryClient: QueryClient,
 	id: string,
 ): { data: ApplicationDto; updatedAt: number | undefined } | undefined {
-	const data = queryClient
-		.getQueryData<ApplicationList>(applicationKeys.list())
-		?.pages.flatMap((page) => page.items)
-		.find((item) => item.id === id)
+	const lists = queryClient.getQueriesData<ApplicationList>({
+		queryKey: applicationKeys.lists(),
+	})
 
-	return data
-		? {
+	for (const [queryKey, list] of lists) {
+		const data = list?.pages
+			.flatMap((page) => page.items)
+			.find((item) => item.id === id)
+
+		if (data) {
+			return {
 				data,
-				updatedAt: queryClient.getQueryState(applicationKeys.list())
-					?.dataUpdatedAt,
+				updatedAt: queryClient.getQueryState(queryKey)?.dataUpdatedAt,
 			}
-		: undefined
+		}
+	}
+
+	return undefined
 }

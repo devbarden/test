@@ -71,4 +71,14 @@ describe('letterNotice', () => {
 		})
 		expect(letterNotice({ status: 'idle' }, saved)).toBeUndefined()
 	})
+	it('leaves a plan limit to its dialog', () => {
+		for (const code of [
+			'quota_exceeded',
+			'application_limit_reached',
+		] as const) {
+			expect(
+				letterNotice({ error: { code }, status: 'failed', text: '' }, saved),
+			).toBeUndefined()
+		}
+	})
 })

@@ -14,6 +14,7 @@ import {
 	type GenerationResult,
 	useLetterGeneration,
 } from '@/features/generation/hooks/use-letter-generation'
+import type { ApiError } from '@/lib/api/api-error'
 import { redirectToSignIn } from '@/lib/query/query-client'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -34,7 +35,7 @@ export function useGenerateApplication(saved: ApplicationDto | undefined) {
 
 	const generate = async (
 		input: ApplicationInput,
-	): Promise<ApplicationDto | undefined> => {
+	): Promise<{ application?: ApplicationDto; error?: ApiError }> => {
 		let result: ApplicationDto | undefined
 
 		setLastOutcome(undefined)
@@ -59,7 +60,10 @@ export function useGenerateApplication(saved: ApplicationDto | undefined) {
 			redirectToSignIn()
 		}
 
-		return result
+		return {
+			application: result,
+			error: outcome.outcome === 'failed' ? outcome.error : undefined,
+		}
 	}
 
 	return { ...generation, generate, lastOutcome }

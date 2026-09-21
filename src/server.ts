@@ -3,6 +3,7 @@ import { getAppContainer } from '@/backend/di/container.server'
 import { errorResponse } from '@/backend/errors/error-response.server'
 import { logAndNormalizeError } from '@/backend/errors/log-error.server'
 import { getClientIp } from '@/backend/http/client-ip.server'
+import { legacyAppRedirect } from '@/backend/http/legacy-app-paths.server'
 import { asPermanentIfSpelling } from '@/backend/http/permanent-redirect.server'
 import { withBodyLimit } from '@/backend/http/request-body.server'
 import { runWithRequestContext } from '@/backend/http/request-context.server'
@@ -95,6 +96,10 @@ async function handle(incoming: Request, clientIp: string): Promise<Response> {
 			},
 		})
 	}
+
+	const legacy = legacyAppRedirect(request)
+
+	if (legacy) return legacy
 
 	const response = await paraglideMiddleware(request, () =>
 		handler.fetch(request),

@@ -14,19 +14,13 @@ const LOCALIZED_PATHS = [{ changefreq: 'weekly', path: '/', priority: '1.0' }]
 const ALTERNATE_PRIORITY = '0.8'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Robots rules are PREFIX matches, so `/applications` is spelled as its
-//   three exact shapes rather than a bare prefix that would also swallow any
-//   future `/applications-guide`. Sign-in is deliberately absent: it carries
+//   Robots rules are PREFIX matches, so `/app` is spelled as its three
+//   exact shapes rather than a bare prefix that would also swallow any
+//   future `/apply` or `/app-guide`. Sign-in is deliberately absent: it carries
 //   noindex in its own head, and a disallow would stop a crawler from ever
 //   reading that — leaving it "indexed, though blocked".
 // ═══════════════════════════════════════════════════════════════════════════
-const DISALLOWED = [
-	'/applications$',
-	'/applications?',
-	'/applications/',
-	'/api/',
-	'/_serverFn/',
-]
+const DISALLOWED = ['/app$', '/app?', '/app/', '/api/', '/_serverFn/']
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   AI crawlers are welcome — being quoted by an assistant is how a tool

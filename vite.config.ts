@@ -25,8 +25,8 @@ import { UNLOCALIZED_PREFIXES } from './src/lib/i18n/localized-routes.ts'
 // ═══════════════════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════════════════
 //   Icons, the social card and the manifest keep stable names while their
-//   content can change (`npm run assets:build`), so they get a day, never
-//   `immutable` — a year-long cache would pin a stale favicon on every
+//   content can change, so they get a day, never `immutable` — a
+//   year-long cache would pin a stale favicon on every
 //   visitor who ever loaded one. Nitro serves public/ before the server
 //   entry runs, so a route rule is the only place that reaches them.
 // ═══════════════════════════════════════════════════════════════════════════

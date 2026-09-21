@@ -1,5 +1,6 @@
 import { useBlocker } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { ConfirmDialog } from '@/components/dialogs/confirm-dialog'
 import { PageHeader } from '@/components/layout/page-header'
 import {
 	type ApplicationDto,
@@ -8,6 +9,7 @@ import {
 } from '@/features/applications/model/application.schema'
 import { applicationTitle } from '@/features/applications/model/application-title'
 import { GoalBanner } from '@/features/applications/ui/goal-banner'
+import { usePlanLimits } from '@/features/billing/hooks/use-plan-limits'
 import { m } from '@/paraglide/messages'
 import { LetterPanel } from '../letter/letter-panel'
 import { letterContent, letterNotice } from '../letter/letter-view'
@@ -45,6 +47,7 @@ export function ApplicationEditor({
 		() => saved?.input ?? EMPTY_APPLICATION_INPUT,
 	)
 	const generation = useGenerateApplication(saved)
+	const planLimits = usePlanLimits()
 	const panelRef = useRef<HTMLElement>(null)
 
 	useEffect(() => {
@@ -54,13 +57,33 @@ export function ApplicationEditor({
 	useBlocker({
 		disabled: !generation.isGenerating,
 		enableBeforeUnload: () => generation.isGenerating,
-		shouldBlockFn: () => !window.confirm(m['editor.leaveConfirm']()),
+		shouldBlockFn: async () =>
+			!(await ConfirmDialog.call({
+				cancelLabel: m['editor.leaveDialog.stay'](),
+				confirmLabel: m['editor.leaveDialog.leave'](),
+				message: m['editor.leaveDialog.description'](),
+				title: m['editor.leaveDialog.title'](),
+				tone: 'danger',
+			})),
 	})
 
 	const handleSubmit = async (validInput: ApplicationInput) => {
+		const limit = planLimits.reached({ creates: !saved })
+
+		if (limit) {
+			planLimits.explain(limit)
+			return
+		}
+
 		scrollIntoViewIfStacked(panelRef.current)
 
-		const application = await generation.generate(validInput)
+		const { application, error } = await generation.generate(validInput)
+
+		if (error?.code === 'quota_exceeded') {
+			planLimits.explain('daily', error.retryAfterSeconds)
+		} else if (error?.code === 'application_limit_reached') {
+			planLimits.explain('saved')
+		}
 
 		if (application) onSaved?.(application)
 	}

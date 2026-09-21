@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { toPlainText } from '@/lib/plain-text'
+import { SEARCH_MAX_LENGTH } from './application-search'
 import { DEFAULT_LETTER_TONE, LETTER_TONES } from './application-tone'
 
 export const INPUT_LIMITS = {
@@ -66,6 +67,7 @@ export const applicationIdSchema = z.object({ id: z.uuid() })
 
 export const listApplicationsSchema = z.object({
 	cursor: z.uuid().optional(),
+	search: z.string().max(SEARCH_MAX_LENGTH).optional(),
 })
 
 export type ApplicationPage = {
@@ -81,4 +83,4 @@ export type ApplicationStats = {
 
 export const APPLICATION_GOAL = 5
 
-export const APPLICATIONS_PAGE_SIZE = 24
+export const APPLICATIONS_PAGE_SIZE = 10

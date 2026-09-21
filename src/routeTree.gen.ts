@@ -9,18 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
+import { Route as AppBillingRouteImport } from './routes/app/billing'
 import { Route as ApiGenerateRouteImport } from './routes/api/generate'
-import { Route as AuthedApplicationsIndexRouteImport } from './routes/_authed/applications/index'
+import { Route as AppApplicationsIndexRouteImport } from './routes/app/applications/index'
+import { Route as AppApplicationsCreateRouteImport } from './routes/app/applications/create'
+import { Route as AppApplicationsApplicationIdRouteImport } from './routes/app/applications/$applicationId'
 import { Route as ApiWebhooksClerkRouteImport } from './routes/api/webhooks/clerk'
-import { Route as AuthedApplicationsNewRouteImport } from './routes/_authed/applications/new'
-import { Route as AuthedApplicationsBillingRouteImport } from './routes/_authed/applications/billing'
-import { Route as AuthedApplicationsApplicationIdRouteImport } from './routes/_authed/applications/$applicationId'
 
-const AuthedRoute = AuthedRouteImport.update({
-  id: '/_authed',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -28,113 +30,125 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const SignInSplatRoute = SignInSplatRouteImport.update({
   id: '/sign-in/$',
   path: '/sign-in/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const ApiGenerateRoute = ApiGenerateRouteImport.update({
   id: '/api/generate',
   path: '/api/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedApplicationsIndexRoute = AuthedApplicationsIndexRouteImport.update({
+const AppApplicationsIndexRoute = AppApplicationsIndexRouteImport.update({
   id: '/applications/',
   path: '/applications/',
-  getParentRoute: () => AuthedRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
+const AppApplicationsCreateRoute = AppApplicationsCreateRouteImport.update({
+  id: '/applications/create',
+  path: '/applications/create',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppApplicationsApplicationIdRoute =
+  AppApplicationsApplicationIdRouteImport.update({
+    id: '/applications/$applicationId',
+    path: '/applications/$applicationId',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const ApiWebhooksClerkRoute = ApiWebhooksClerkRouteImport.update({
   id: '/api/webhooks/clerk',
   path: '/api/webhooks/clerk',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedApplicationsNewRoute = AuthedApplicationsNewRouteImport.update({
-  id: '/applications/new',
-  path: '/applications/new',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedApplicationsBillingRoute =
-  AuthedApplicationsBillingRouteImport.update({
-    id: '/applications/billing',
-    path: '/applications/billing',
-    getParentRoute: () => AuthedRoute,
-  } as any)
-const AuthedApplicationsApplicationIdRoute =
-  AuthedApplicationsApplicationIdRouteImport.update({
-    id: '/applications/$applicationId',
-    path: '/applications/$applicationId',
-    getParentRoute: () => AuthedRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
+  '/app/billing': typeof AppBillingRoute
   '/sign-in/$': typeof SignInSplatRoute
-  '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
-  '/applications/billing': typeof AuthedApplicationsBillingRoute
-  '/applications/new': typeof AuthedApplicationsNewRoute
+  '/app/': typeof AppIndexRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
-  '/applications/': typeof AuthedApplicationsIndexRoute
+  '/app/applications/$applicationId': typeof AppApplicationsApplicationIdRoute
+  '/app/applications/create': typeof AppApplicationsCreateRoute
+  '/app/applications/': typeof AppApplicationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/generate': typeof ApiGenerateRoute
+  '/app/billing': typeof AppBillingRoute
   '/sign-in/$': typeof SignInSplatRoute
-  '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
-  '/applications/billing': typeof AuthedApplicationsBillingRoute
-  '/applications/new': typeof AuthedApplicationsNewRoute
+  '/app': typeof AppIndexRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
-  '/applications': typeof AuthedApplicationsIndexRoute
+  '/app/applications/$applicationId': typeof AppApplicationsApplicationIdRoute
+  '/app/applications/create': typeof AppApplicationsCreateRoute
+  '/app/applications': typeof AppApplicationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authed': typeof AuthedRouteWithChildren
+  '/app': typeof AppRouteRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
+  '/app/billing': typeof AppBillingRoute
   '/sign-in/$': typeof SignInSplatRoute
-  '/_authed/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
-  '/_authed/applications/billing': typeof AuthedApplicationsBillingRoute
-  '/_authed/applications/new': typeof AuthedApplicationsNewRoute
+  '/app/': typeof AppIndexRoute
   '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
-  '/_authed/applications/': typeof AuthedApplicationsIndexRoute
+  '/app/applications/$applicationId': typeof AppApplicationsApplicationIdRoute
+  '/app/applications/create': typeof AppApplicationsCreateRoute
+  '/app/applications/': typeof AppApplicationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/api/generate'
+    | '/app/billing'
     | '/sign-in/$'
-    | '/applications/$applicationId'
-    | '/applications/billing'
-    | '/applications/new'
+    | '/app/'
     | '/api/webhooks/clerk'
-    | '/applications/'
+    | '/app/applications/$applicationId'
+    | '/app/applications/create'
+    | '/app/applications/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/api/generate'
+    | '/app/billing'
     | '/sign-in/$'
-    | '/applications/$applicationId'
-    | '/applications/billing'
-    | '/applications/new'
+    | '/app'
     | '/api/webhooks/clerk'
-    | '/applications'
+    | '/app/applications/$applicationId'
+    | '/app/applications/create'
+    | '/app/applications'
   id:
     | '__root__'
     | '/'
-    | '/_authed'
+    | '/app'
     | '/api/generate'
+    | '/app/billing'
     | '/sign-in/$'
-    | '/_authed/applications/$applicationId'
-    | '/_authed/applications/billing'
-    | '/_authed/applications/new'
+    | '/app/'
     | '/api/webhooks/clerk'
-    | '/_authed/applications/'
+    | '/app/applications/$applicationId'
+    | '/app/applications/create'
+    | '/app/applications/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRouteWithChildren
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   ApiGenerateRoute: typeof ApiGenerateRoute
   SignInSplatRoute: typeof SignInSplatRoute
   ApiWebhooksClerkRoute: typeof ApiWebhooksClerkRoute
@@ -142,11 +156,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_authed': {
-      id: '/_authed'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthedRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -156,12 +170,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/sign-in/$': {
       id: '/sign-in/$'
       path: '/sign-in/$'
       fullPath: '/sign-in/$'
       preLoaderRoute: typeof SignInSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/billing': {
+      id: '/app/billing'
+      path: '/billing'
+      fullPath: '/app/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/api/generate': {
       id: '/api/generate'
@@ -170,12 +198,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/applications/': {
-      id: '/_authed/applications/'
+    '/app/applications/': {
+      id: '/app/applications/'
       path: '/applications'
-      fullPath: '/applications/'
-      preLoaderRoute: typeof AuthedApplicationsIndexRouteImport
-      parentRoute: typeof AuthedRoute
+      fullPath: '/app/applications/'
+      preLoaderRoute: typeof AppApplicationsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/applications/create': {
+      id: '/app/applications/create'
+      path: '/applications/create'
+      fullPath: '/app/applications/create'
+      preLoaderRoute: typeof AppApplicationsCreateRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/applications/$applicationId': {
+      id: '/app/applications/$applicationId'
+      path: '/applications/$applicationId'
+      fullPath: '/app/applications/$applicationId'
+      preLoaderRoute: typeof AppApplicationsApplicationIdRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/api/webhooks/clerk': {
       id: '/api/webhooks/clerk'
@@ -184,50 +226,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksClerkRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/applications/new': {
-      id: '/_authed/applications/new'
-      path: '/applications/new'
-      fullPath: '/applications/new'
-      preLoaderRoute: typeof AuthedApplicationsNewRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/applications/billing': {
-      id: '/_authed/applications/billing'
-      path: '/applications/billing'
-      fullPath: '/applications/billing'
-      preLoaderRoute: typeof AuthedApplicationsBillingRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/applications/$applicationId': {
-      id: '/_authed/applications/$applicationId'
-      path: '/applications/$applicationId'
-      fullPath: '/applications/$applicationId'
-      preLoaderRoute: typeof AuthedApplicationsApplicationIdRouteImport
-      parentRoute: typeof AuthedRoute
-    }
   }
 }
 
-interface AuthedRouteChildren {
-  AuthedApplicationsApplicationIdRoute: typeof AuthedApplicationsApplicationIdRoute
-  AuthedApplicationsBillingRoute: typeof AuthedApplicationsBillingRoute
-  AuthedApplicationsNewRoute: typeof AuthedApplicationsNewRoute
-  AuthedApplicationsIndexRoute: typeof AuthedApplicationsIndexRoute
+interface AppRouteRouteChildren {
+  AppBillingRoute: typeof AppBillingRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppApplicationsApplicationIdRoute: typeof AppApplicationsApplicationIdRoute
+  AppApplicationsCreateRoute: typeof AppApplicationsCreateRoute
+  AppApplicationsIndexRoute: typeof AppApplicationsIndexRoute
 }
 
-const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedApplicationsApplicationIdRoute: AuthedApplicationsApplicationIdRoute,
-  AuthedApplicationsBillingRoute: AuthedApplicationsBillingRoute,
-  AuthedApplicationsNewRoute: AuthedApplicationsNewRoute,
-  AuthedApplicationsIndexRoute: AuthedApplicationsIndexRoute,
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppBillingRoute: AppBillingRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppApplicationsApplicationIdRoute: AppApplicationsApplicationIdRoute,
+  AppApplicationsCreateRoute: AppApplicationsCreateRoute,
+  AppApplicationsIndexRoute: AppApplicationsIndexRoute,
 }
 
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthedRoute: AuthedRouteWithChildren,
+  AppRouteRoute: AppRouteRouteWithChildren,
   ApiGenerateRoute: ApiGenerateRoute,
   SignInSplatRoute: SignInSplatRoute,
   ApiWebhooksClerkRoute: ApiWebhooksClerkRoute,

@@ -1,4 +1,8 @@
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import {
+	infiniteQueryOptions,
+	keepPreviousData,
+	queryOptions,
+} from '@tanstack/react-query'
 import type { ApplicationPage } from '../model/application.schema'
 import {
 	getApplication,
@@ -9,7 +13,8 @@ import {
 export const applicationKeys = {
 	all: ['applications'] as const,
 	detail: (id: string) => [...applicationKeys.all, 'detail', id] as const,
-	list: () => [...applicationKeys.all, 'list'] as const,
+	list: (search = '') => [...applicationKeys.lists(), search] as const,
+	lists: () => [...applicationKeys.all, 'list'] as const,
 	stats: () => [...applicationKeys.all, 'stats'] as const,
 }
 
@@ -20,14 +25,22 @@ export const applicationQueries = {
 			queryKey: applicationKeys.detail(id),
 		}),
 
-	list: () =>
+	// ═════════════════════════════════════════════════════════════════════
+	//   One cached list per search (normalised, so "Apple " and "apple"
+	//   share it). While a new search loads, the previous results stay on
+	//   screen instead of collapsing to skeletons on every keystroke.
+	// ═════════════════════════════════════════════════════════════════════
+	list: (search = '') =>
 		infiniteQueryOptions({
 			getNextPageParam: (lastPage: ApplicationPage) =>
 				lastPage.nextCursor ?? undefined,
 			initialPageParam: undefined as string | undefined,
+			placeholderData: keepPreviousData,
 			queryFn: ({ pageParam }) =>
-				listApplications({ data: { cursor: pageParam } }),
-			queryKey: applicationKeys.list(),
+				listApplications({
+					data: { cursor: pageParam, search: search || undefined },
+				}),
+			queryKey: applicationKeys.list(search),
 		}),
 
 	stats: () =>

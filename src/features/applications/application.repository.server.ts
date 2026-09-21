@@ -5,7 +5,7 @@ import type { ApplicationInput } from './model/application.schema'
 
 type LetterData = { input: ApplicationInput; letter: string }
 
-type Page = { cursor?: string; take: number }
+type Page = { cursor?: string; take: number; terms?: readonly string[] }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Every method takes the owner's `userId` and puts it in the WHERE clause
@@ -61,12 +61,29 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 		//   id you saw". Unlike OFFSET it costs the same on page 50 as on page
 		//   1, and a letter created or deleted between two page loads cannot
 		//   shift a row into both pages or out of both.
+		//
+		//   Search terms each have to appear in the job title or the company
+		//   (ILIKE, case-insensitive). No trigram index: the owner filter
+		//   comes first on the existing index and a user holds at most a few
+		//   hundred letters, so the pattern only ever runs over those.
 		// ═════════════════════════════════════════════════════════════════════
-		listActive(userId: string, { cursor, take }: Page): Promise<Application[]> {
+		listActive(
+			userId: string,
+			{ cursor, take, terms = [] }: Page,
+		): Promise<Application[]> {
 			return db.application.findMany({
 				orderBy: { id: 'desc' },
 				take,
-				where: { ...active(userId), ...(cursor ? { id: { lt: cursor } } : {}) },
+				where: {
+					...active(userId),
+					...(cursor ? { id: { lt: cursor } } : {}),
+					AND: terms.map(literalPattern).map((pattern) => ({
+						OR: [
+							{ jobTitle: { contains: pattern, mode: 'insensitive' as const } },
+							{ company: { contains: pattern, mode: 'insensitive' as const } },
+						],
+					})),
+				},
 			})
 		},
 
@@ -117,6 +134,15 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 			return withAdvisoryLock(db, `applications:${userId}`, callback)
 		},
 	}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Prisma's `contains` becomes ILIKE '%term%' without escaping the term, so
+//   a user's `%` or `_` would act as a wildcard — `%` alone matched every
+//   letter. Backslash is Postgres's default LIKE escape.
+// ═══════════════════════════════════════════════════════════════════════════
+function literalPattern(term: string): string {
+	return term.replace(/[\\%_]/g, (character) => `\\${character}`)
 }
 
 export type ApplicationRepository = ReturnType<

@@ -29,7 +29,11 @@ export function GoalBanner() {
 				{m['goal.title']()}
 			</Heading>
 			<p className={styles.description}>{m['goal.description']()}</p>
-			<ButtonLink iconStart={<PlusIcon />} size="lg" to="/applications/new">
+			<ButtonLink
+				iconStart={<PlusIcon />}
+				size="lg"
+				to="/app/applications/create"
+			>
 				{m['goal.createNew']()}
 			</ButtonLink>
 			<div className={styles.progress}>

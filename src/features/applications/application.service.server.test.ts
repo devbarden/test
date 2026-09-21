@@ -85,6 +85,21 @@ describe('applicationService', () => {
 		expect(second.nextCursor).toBeNull()
 	})
 
+	it('lists only the letters that match a search', async () => {
+		const { service } = setup()
+
+		await service().saveLetter({ input, letter: 'First' })
+		await service().saveLetter({
+			input: { ...input, company: 'Google', jobTitle: 'Designer' },
+			letter: 'Second',
+		})
+
+		const found = await service().list({ search: '  google DESIGN ' })
+
+		expect(found.items.map(({ letter }) => letter)).toEqual(['Second'])
+		expect(found.nextCursor).toBeNull()
+	})
+
 	it('soft-deletes and restores the exact letter', async () => {
 		const { service } = setup()
 		const { id } = await service().saveLetter({ input, letter: 'Keep me' })

@@ -14,10 +14,4 @@
 			grid-template-columns: minmax(0, 1fr);
 		}
 	}
-
-	.submit {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-4);
-	}
 }

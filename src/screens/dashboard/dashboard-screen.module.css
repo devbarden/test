@@ -28,6 +28,26 @@
 		}
 	}
 
+	.search {
+		display: block;
+		flex: 0 1 20rem;
+		min-inline-size: 10rem;
+	}
+
+	.stale {
+		opacity: 0.6;
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     A line with no height is enough for the observer; it sits in the
+	     grid's bottom margin, so it adds no space of its own.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.sentinel {
+		block-size: 1px;
+		margin-block-start: calc(var(--space-6) * -1 - 1px);
+	}
+
 	.more {
 		display: flex;
 		flex-direction: column;

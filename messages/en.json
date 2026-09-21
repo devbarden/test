@@ -13,7 +13,21 @@
 	},
 	"billing": {
 		"currentPlan": "You are on the {plan} plan",
+		"daily": {
+			"suffix": "letters today"
+		},
 		"lettersToday": "Letters today",
+		"limitDialog": {
+			"dailyTitle": "Today’s letters are used up",
+			"dailyUpgrade": "The Free plan includes {limit} letters a day. New ones arrive in {hours} h — or move to Pro for {upgradeLimit} a day.",
+			"dailyWait": "Your plan includes {limit} letters a day. New ones arrive in {hours} h.",
+			"gotIt": "Got it",
+			"notNow": "Not now",
+			"savedTitle": "No room for another application",
+			"savedUpgrade": "The Free plan keeps up to {limit} applications. Delete one you no longer need, or move to Pro to keep up to {upgradeLimit}.",
+			"savedWait": "Your plan keeps up to {limit} applications. Delete one you no longer need to make room.",
+			"seePlans": "See plans"
+		},
 		"loadFailed": "Could not load your usage.",
 		"manage": "Manage subscription",
 		"plan": {
@@ -47,6 +61,7 @@
 		"usageValue": "{used} of {limit}"
 	},
 	"common": {
+		"cancel": "Cancel",
 		"home": "Alt+Shift, home page",
 		"languageSwitcher": {
 			"label": "Language"
@@ -67,22 +82,31 @@
 			"untitled": "Untitled application"
 		},
 		"createNew": "Create New",
+		"deleteDialog": {
+			"confirm": "Delete",
+			"description": "“{title}” and its cover letter will be deleted.",
+			"title": "Delete this application?"
+		},
 		"deleted": "Application deleted",
 		"empty": {
 			"description": "Tell us about the role and what you are good at — the first draft of your cover letter will be ready in seconds.",
 			"title": "No applications yet"
 		},
 		"loading": "Loading applications",
-		"showMore": "Show more",
+		"search": {
+			"clear": "Clear search",
+			"empty": {
+				"description": "No application matches “{query}”. Try another job title or company.",
+				"title": "Nothing found"
+			},
+			"label": "Search applications",
+			"placeholder": "Job title or company",
+			"placeholderShort": "Search"
+		},
 		"title": "Applications",
 		"undo": "Undo"
 	},
 	"editor": {
-		"allowance": {
-			"none": "No letters left today",
-			"remaining": "{remaining} of {limit} letters left today",
-			"upgrade": "Pro: {limit} a day"
-		},
 		"form": {
 			"company": "Company",
 			"companyPlaceholder": "Apple",
@@ -95,7 +119,12 @@
 			"skillsPlaceholder": "HTML, CSS and doing things in time",
 			"tryAgain": "Try Again"
 		},
-		"leaveConfirm": "Your letter is still being written. Leave and discard it?",
+		"leaveDialog": {
+			"description": "Your letter is still being written. If you leave now, it will be discarded.",
+			"leave": "Leave",
+			"stay": "Stay",
+			"title": "Leave while the letter is written?"
+		},
 		"newApplication": "New application",
 		"panel": {
 			"label": "Cover letter",

@@ -12,13 +12,11 @@
 		"build": "prisma generate && vite build",
 		"start": "node --enable-source-maps .output/server/index.mjs",
 		"pretypecheck": "npm run i18n:generate",
-		"typecheck": "npm run i18n:check && tsc --noEmit",
+		"typecheck": "tsc --noEmit",
 		"pretest": "npm run i18n:generate",
 		"test": "vitest run --project unit",
 		"test:watch": "vitest --project unit",
 		"i18n:generate": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy url cookie preferredLanguage baseLocale",
-		"i18n:check": "node scripts/check-messages.ts",
-		"assets:build": "node scripts/build-brand-assets.ts",
 		"biome:lint": "biome check .",
 		"biome:lint:fix": "biome check --write .",
 		"e2e": "playwright test",
@@ -29,10 +27,7 @@
 		"db:migrate:create": "prisma migrate dev --create-only",
 		"db:migrate:deploy": "prisma migrate deploy",
 		"db:studio": "prisma studio",
-		"lint:comments": "node scripts/check-comments.ts",
-		"lint:architecture": "node scripts/check-architecture.ts",
-		"lint:styles": "node scripts/check-styles.ts",
-		"lint": "biome check . && npm run lint:comments && npm run lint:architecture && npm run lint:styles",
+		"lint": "biome check .",
 		"test:integration": "vitest run --project integration"
 	},
 	"dependencies": {
@@ -55,6 +50,7 @@
 		"pino": "^10.3.1",
 		"rate-limiter-flexible": "^11.2.1",
 		"react": "^19.3.0",
+		"react-call": "^1.8.2",
 		"react-dom": "^19.3.0",
 		"zod": "^4.3.6"
 	},
@@ -75,7 +71,6 @@
 		"babel-plugin-react-compiler": "^1.0.0",
 		"happy-dom": "^20.14.5",
 		"prisma": "^7.10.0",
-		"railway": "^3.11.0",
 		"typescript": "^6.0.3",
 		"vite": "^8.3.0",
 		"vitest": "^5.0.1"

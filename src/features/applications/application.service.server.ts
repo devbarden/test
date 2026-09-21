@@ -12,6 +12,7 @@ import {
 	type ApplicationPage,
 	type ApplicationStats,
 } from './model/application.schema'
+import { searchTerms } from './model/application-search'
 
 type SaveLetterCommand = {
 	applicationId?: string
@@ -120,10 +121,17 @@ export function createApplicationService({
 			return toApplicationDto(await findOwned(id))
 		},
 
-		async list({ cursor }: { cursor?: string }): Promise<ApplicationPage> {
+		async list({
+			cursor,
+			search = '',
+		}: {
+			cursor?: string
+			search?: string
+		}): Promise<ApplicationPage> {
 			const rows = await applicationRepository.listActive(userId, {
 				cursor,
 				take: APPLICATIONS_PAGE_SIZE + 1,
+				terms: searchTerms(search),
 			})
 			const items = rows.slice(0, APPLICATIONS_PAGE_SIZE)
 			const hasMore = rows.length > APPLICATIONS_PAGE_SIZE

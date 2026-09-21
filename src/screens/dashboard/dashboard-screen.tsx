@@ -1,6 +1,12 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import {
+	useInfiniteQuery,
+	useQuery,
+	useQueryClient,
+} from '@tanstack/react-query'
+import clsx from 'clsx'
 import { PlusIcon } from 'lucide-react'
 import { useDeferredValue, ViewTransition } from 'react'
+import { ConfirmDialog } from '@/components/dialogs/confirm-dialog'
 import { PageHeader } from '@/components/layout/page-header'
 import { Alert } from '@/components/ui/alert'
 import { Button, ButtonLink } from '@/components/ui/button'
@@ -8,17 +14,27 @@ import { LoadError } from '@/components/ui/load-error'
 import { applicationQueries } from '@/features/applications/api/application.queries'
 import { useDeleteApplication } from '@/features/applications/hooks/use-delete-application'
 import type { ApplicationDto } from '@/features/applications/model/application.schema'
+import {
+	normalizeSearch,
+	searchTerms,
+} from '@/features/applications/model/application-search'
+import { applicationTitle } from '@/features/applications/model/application-title'
 import { GoalBanner } from '@/features/applications/ui/goal-banner'
 import { refreshUsage } from '@/features/billing/api/billing.cache'
+import { useOnVisible } from '@/hooks/use-on-visible'
 import { errorMessage } from '@/lib/api/api-error-message'
 import { m } from '@/paraglide/messages'
 import { ApplicationCard } from './application-card'
 import { ApplicationCardSkeleton } from './application-card-skeleton'
 import styles from './dashboard-screen.module.css'
+import { DashboardSearch } from './dashboard-search'
 import { EmptyState } from './empty-state'
+import { NoMatches } from './no-matches'
 import { useListFocus } from './use-list-focus'
 
 const SKELETON_KEYS = ['first', 'second'] as const
+
+const LOAD_AHEAD_MARGIN = '0px 0px 480px 0px'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The cache updates through useSyncExternalStore, which React always
@@ -26,19 +42,56 @@ const SKELETON_KEYS = ['first', 'second'] as const
 //   grid therefore renders a deferred copy of the list: the change commits
 //   a moment later as a Transition, and <ViewTransition> animates it. A
 //   deleted card fades out while its neighbours slide into the gap, and a
-//   card brought back by Undo or loaded by "Show more" fades in.
+//   card brought back by Undo or loaded by scrolling fades in.
 //
-//   The grid and the empty state both read that one deferred copy, so they
-//   never disagree for a frame; the error and "Show more" follow the live
-//   query, where a frame's delay would only make them late. The <ul> stays
+//   The grid, its loading row and the empty state all read deferred
+//   copies from the same render, so they never disagree for a frame: the
+//   skeleton row leaves in the very commit that brings the cards replacing
+//   it. The error follows the live query, where a frame's delay would only
+//   make it late. The <ul> stays
 //   mounted while it is empty: a card only animates its exit when it is
 //   removed on its own, not together with the list around it.
+//
+//   The search lives in the URL (`?q=`), owned by the route; the field
+//   appears once there is anything to search. While a new search loads,
+//   the previous results stay, marked busy, and "nothing found" waits for
+//   the real answer.
+//
+//   The list pages in as it scrolls: a sentinel under the grid asks for the
+//   next page a little before it comes into view, and the row of skeleton
+//   cards shown meanwhile has the exact shape of real ones, so the cards
+//   that replace them do not move anything. A failed page stops the
+//   scrolling and offers a retry instead.
 // ═══════════════════════════════════════════════════════════════════════════
-export function DashboardScreen() {
-	const applications = useInfiniteQuery(applicationQueries.list())
+type DashboardScreenProps = {
+	onSearchChange: (search: string) => void
+	search: string
+}
+
+export function DashboardScreen({
+	onSearchChange,
+	search,
+}: DashboardScreenProps) {
+	const query = normalizeSearch(search)
+	const applications = useInfiniteQuery(applicationQueries.list(query))
+	const stats = useQuery(applicationQueries.stats())
 	const items = useDeferredValue(
 		applications.data?.pages.flatMap((page) => page.items),
 	)
+	const isLoadingMore = useDeferredValue(applications.isFetchingNextPage)
+	const canLoadMore =
+		applications.hasNextPage &&
+		!applications.isFetchingNextPage &&
+		!applications.isFetchNextPageError
+	const loadMoreSentinel = useOnVisible(() => {
+		void applications.fetchNextPage()
+	}, LOAD_AHEAD_MARGIN)
+	const terms = searchTerms(query)
+	const canSearch = query !== '' || (stats.data?.total ?? 0) > 0
+	const isSettledEmpty =
+		items?.length === 0 &&
+		!applications.hasNextPage &&
+		!applications.isPlaceholderData
 	const focus = useListFocus(items)
 	const queryClient = useQueryClient()
 	const deleteApplication = useDeleteApplication({
@@ -46,7 +99,18 @@ export function DashboardScreen() {
 		onSettled: () => refreshUsage(queryClient),
 	})
 
-	const handleDelete = (application: ApplicationDto) => {
+	const handleDelete = async (application: ApplicationDto) => {
+		const title =
+			applicationTitle(application.input) ?? m['dashboard.card.untitled']()
+		const confirmed = await ConfirmDialog.call({
+			confirmLabel: m['dashboard.deleteDialog.confirm'](),
+			message: m['dashboard.deleteDialog.description']({ title }),
+			title: m['dashboard.deleteDialog.title'](),
+			tone: 'danger',
+		})
+
+		if (!confirmed) return
+
 		focus.afterRemoving(application)
 		deleteApplication(application)
 	}
@@ -55,9 +119,21 @@ export function DashboardScreen() {
 		<div className={styles.root}>
 			<PageHeader
 				actions={
-					<ButtonLink iconStart={<PlusIcon />} size="md" to="/applications/new">
-						{m['dashboard.createNew']()}
-					</ButtonLink>
+					<>
+						{canSearch && (
+							<DashboardSearch
+								onSearchChange={onSearchChange}
+								search={search}
+							/>
+						)}
+						<ButtonLink
+							iconStart={<PlusIcon />}
+							size="md"
+							to="/app/applications/create"
+						>
+							{m['dashboard.createNew']()}
+						</ButtonLink>
+					</>
 				}
 				title={m['dashboard.title']()}
 			/>
@@ -80,31 +156,55 @@ export function DashboardScreen() {
 				</ul>
 			)}
 			{items && (
-				<ul className={styles.grid}>
+				<ul
+					aria-busy={
+						applications.isPlaceholderData || isLoadingMore || undefined
+					}
+					className={clsx(
+						styles.grid,
+						applications.isPlaceholderData && styles.stale,
+					)}
+				>
 					{items.map((application) => (
 						<ViewTransition enter="pop-in" exit="pop-out" key={application.id}>
 							<li>
 								<ApplicationCard
 									application={application}
+									highlight={terms}
 									onDelete={handleDelete}
 								/>
 							</li>
 						</ViewTransition>
 					))}
+					{isLoadingMore &&
+						SKELETON_KEYS.map((key) => (
+							<li aria-hidden="true" key={key}>
+								<ApplicationCardSkeleton />
+							</li>
+						))}
 				</ul>
 			)}
-			{items?.length === 0 && !applications.hasNextPage && <EmptyState />}
-			{applications.hasNextPage && (
+			{isSettledEmpty &&
+				(query ? (
+					<NoMatches onClear={() => onSearchChange('')} search={search} />
+				) : (
+					<EmptyState />
+				))}
+			{canLoadMore && (
+				<div
+					aria-hidden="true"
+					className={styles.sentinel}
+					ref={loadMoreSentinel}
+				/>
+			)}
+			{applications.isFetchNextPageError && (
 				<div className={styles.more}>
-					{applications.isFetchNextPageError && (
-						<Alert tone="danger">{errorMessage(applications.error)}</Alert>
-					)}
+					<Alert tone="danger">{errorMessage(applications.error)}</Alert>
 					<Button
-						loading={applications.isFetchingNextPage}
 						onClick={() => applications.fetchNextPage()}
 						variant="secondary"
 					>
-						{m['dashboard.showMore']()}
+						{m['common.tryAgain']()}
 					</Button>
 				</div>
 			)}

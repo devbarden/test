@@ -1,4 +1,5 @@
 import type { ApplicationRepository } from '@/features/applications/application.repository.server'
+import { matchesSearch } from '@/features/applications/model/application-search'
 import type { Application } from '@/generated/prisma/client'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -47,9 +48,10 @@ export function createFakeApplicationRepository(seed: Application[] = []) {
 		},
 		findActive: async (userId, id) =>
 			active(userId).find((row) => row.id === id) ?? null,
-		listActive: async (userId, { cursor, take }) =>
+		listActive: async (userId, { cursor, take, terms = [] }) =>
 			active(userId)
 				.filter((row) => !cursor || row.id < cursor)
+				.filter((row) => matchesSearch(row, terms.join(' ')))
 				.slice(0, take),
 		restore: async (userId, id) => {
 			const row = rows.get(id)

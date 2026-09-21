@@ -1,6 +1,6 @@
 import type { ApplicationDto } from '@/features/applications/model/application.schema'
 import type { GenerationState } from '@/features/generation/model/generation-state'
-import type { ApiError } from '@/lib/api/api-error'
+import type { ApiError, ApiErrorCode } from '@/lib/api/api-error'
 
 export type LetterContent =
 	| { kind: 'placeholder' }
@@ -48,11 +48,24 @@ export function letterContent(
 	}
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   A refusal over a plan limit is explained in a dialog when it happens
+//   (usePlanLimits), not left standing in the panel over the letter.
+// ═══════════════════════════════════════════════════════════════════════════
+const PLAN_LIMIT_CODES: readonly ApiErrorCode[] = [
+	'application_limit_reached',
+	'quota_exceeded',
+]
+
 export function letterNotice(
 	state: GenerationState,
 	saved: ApplicationDto | undefined,
 ): LetterNotice | undefined {
-	if (state.status === 'failed') return { error: state.error, kind: 'failed' }
+	if (state.status === 'failed') {
+		return PLAN_LIMIT_CODES.includes(state.error.code)
+			? undefined
+			: { error: state.error, kind: 'failed' }
+	}
 
 	if (state.status === 'stopped') {
 		return { kind: 'stopped', savedLetterKept: Boolean(saved) }

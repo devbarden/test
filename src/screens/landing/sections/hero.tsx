@@ -18,7 +18,7 @@ export function Hero() {
 					</Heading>
 					<p className={styles.lead}>{m['landing.hero.lead']()}</p>
 					<div className={styles.actions}>
-						<ButtonLink shape="pill" size="lg" to="/applications">
+						<ButtonLink shape="pill" size="lg" to="/app/applications">
 							{m['landing.cta.primary']()}
 						</ButtonLink>
 					</div>

@@ -67,19 +67,55 @@
 		padding-block-start: var(--space-4);
 	}
 
-	.skeleton {
+	.skeletonPreview {
+		--_bar: 0.75rem;
+
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-4);
-		min-block-size: 11.5rem;
-		padding-block: var(--space-1);
+		gap: calc(var(--text-lg-leading) - var(--_bar));
+		padding-block: calc((var(--text-lg-leading) - var(--_bar)) / 2);
 	}
 
-	.shortLine {
-		inline-size: 40%;
+	.skeletonLine {
+		block-size: var(--_bar);
+
+		&:first-child {
+			inline-size: 38%;
+		}
+
+		&:nth-child(3) {
+			inline-size: 94%;
+		}
+
+		&:nth-child(4) {
+			inline-size: 97%;
+		}
+
+		&:nth-child(5) {
+			inline-size: 88%;
+		}
 	}
 
-	.lastLine {
-		inline-size: 70%;
+	.skeletonAction {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+		block-size: var(--text-md-leading);
+	}
+
+	.skeletonIcon {
+		inline-size: var(--icon-lg);
+		block-size: var(--icon-lg);
+		border-radius: var(--radius-sm);
+	}
+
+	.skeletonDelete {
+		inline-size: 3.25rem;
+		block-size: 0.75rem;
+	}
+
+	.skeletonCopy {
+		inline-size: 8.25rem;
+		block-size: 0.75rem;
 	}
 }

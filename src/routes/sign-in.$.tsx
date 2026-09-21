@@ -9,7 +9,7 @@ const redirectIfSignedIn = createIsomorphicFn()
 	.server(async () => {
 		const { userId } = await auth()
 
-		if (userId) throw redirect({ to: '/applications' })
+		if (userId) throw redirect({ to: '/app/applications' })
 	})
 	.client(() => {})
 

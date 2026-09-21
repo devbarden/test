@@ -14,6 +14,17 @@
 		@media (width < 60rem) {
 			min-block-size: 16rem;
 		}
+
+		/* ═══════════════════════════════════════════════════════════════════
+		     Beside the form the panel is exactly as tall as the form column:
+		     size containment stops the letter from adding to the grid row,
+		     so the row takes the form's height and the panel stretches to
+		     it. A longer letter scrolls inside (see letter-text). Stacked
+		     under the form, it simply grows with the letter.
+		   ═══════════════════════════════════════════════════════════════════ */
+		@media (width >= 60rem) {
+			contain: size;
+		}
 	}
 
 	.placeholder {

@@ -16,7 +16,7 @@ import {
 export const test = base.extend<{ page: Page }>({
 	page: async ({ page }, use, testInfo) => {
 		await signIn(page, testInfo.parallelIndex)
-		await resetUser(await currentUserId(page))
+		await resetUser(await currentUser(page))
 		await use(page)
 	},
 })
@@ -34,7 +34,7 @@ export async function signIn(page: Page, workerIndex: number) {
 	})
 }
 
-async function currentUserId(page: Page): Promise<string> {
+export async function currentUser(page: Page): Promise<string> {
 	await page.waitForFunction(() => Boolean(window.Clerk?.user?.id))
 
 	return page.evaluate(() => window.Clerk?.user?.id ?? '')
@@ -74,8 +74,40 @@ export async function fillApplication(
 }
 
 export async function generateLetter(page: Page) {
-	await page.goto('/applications/new')
+	await page.goto('/app/applications/create')
 	await fillApplication(page)
 	await page.getByRole('button', { name: 'Generate Now' }).click()
-	await page.waitForURL(/\/applications\/[0-9a-f-]{36}$/)
+	await page.waitForURL(/\/app\/applications\/[0-9a-f-]{36}$/)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Shortcuts to states that would take a minute of clicking: letters
+//   written straight into the e2e database, and the daily generation
+//   counter set to the Free plan's ceiling in the limiter's own key.
+// ═══════════════════════════════════════════════════════════════════════════
+export async function addLetters(userId: string, count: number) {
+	const db = new pg.Client({ connectionString: E2E_DATABASE_URL })
+
+	try {
+		await db.connect()
+		for (let index = 0; index < count; index += 1) {
+			await db.query(
+				`INSERT INTO applications (id, user_id, job_title, company, skills, details, letter, updated_at)
+				 VALUES (gen_random_uuid(), $1, 'Engineer', $2, 'HTML', '', $3, now())`,
+				[userId, `Company ${index}`, `Dear Company ${index} team,`],
+			)
+		}
+	} finally {
+		await db.end()
+	}
+}
+
+export async function spendDailyLetters(userId: string) {
+	const redis = new Redis(E2E_REDIS_URL)
+
+	try {
+		await redis.set(`rl:generationDay:${userId}`, 10, 'EX', 3600)
+	} finally {
+		redis.disconnect()
+	}
 }

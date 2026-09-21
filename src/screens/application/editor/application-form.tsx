@@ -7,7 +7,6 @@ import {
 } from '@/features/applications/model/application.schema'
 import { effectiveTone } from '@/features/applications/model/application-tone'
 import { useEntitlements } from '@/features/billing/hooks/use-entitlements'
-import { GenerationAllowance } from '@/features/billing/ui/generation-allowance'
 import { m } from '@/paraglide/messages'
 import styles from './application-form.module.css'
 import { SubmitButton } from './submit-button'
@@ -108,14 +107,11 @@ export function ApplicationForm({
 					value={value.details}
 				/>
 			</Field>
-			<div className={styles.submit}>
-				<SubmitButton
-					disabled={!parsed.success}
-					hasLetter={hasLetter}
-					isGenerating={isGenerating}
-				/>
-				<GenerationAllowance />
-			</div>
+			<SubmitButton
+				disabled={!parsed.success}
+				hasLetter={hasLetter}
+				isGenerating={isGenerating}
+			/>
 		</form>
 	)
 }

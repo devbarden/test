@@ -55,6 +55,35 @@ describe('applicationRepository (Postgres)', () => {
 		expect(secondPage.map((row) => row.letter)).toEqual(['#1', '#0'])
 	})
 
+	it('finds letters whose job title or company holds every search term', async () => {
+		const pick = (jobTitle: string, company: string) =>
+			repository.create('alice', {
+				...letter,
+				input: { ...letter.input, company, jobTitle },
+			})
+
+		await pick('Product Manager', 'Apple')
+		await pick('Designer', 'Apple Retail')
+		await pick('Product Owner', 'Google')
+		await repository.create('mallory', letter)
+
+		const titles = async (terms: string[]) =>
+			(await repository.listActive('alice', { take: 10, terms })).map(
+				(row) => `${row.jobTitle}, ${row.company}`,
+			)
+
+		expect(await titles(['apple'])).toEqual([
+			'Designer, Apple Retail',
+			'Product Manager, Apple',
+		])
+		expect(await titles(['PRODUCT', 'apple'])).toEqual([
+			'Product Manager, Apple',
+		])
+		expect(await titles(['%'])).toEqual([])
+		expect(await titles(['_'])).toEqual([])
+		expect(await titles(['\\'])).toEqual([])
+	})
+
 	it('soft-deletes and restores the same row', async () => {
 		const row = await repository.create('alice', letter)
 

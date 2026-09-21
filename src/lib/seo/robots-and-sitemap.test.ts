@@ -15,7 +15,7 @@ describe('robots.txt', () => {
 		const disallowed = (lines: string[] = []) =>
 			lines.filter((line) => line.startsWith('Disallow:'))
 
-		expect(disallowed(everyone)).toContain('Disallow: /applications/')
+		expect(disallowed(everyone)).toContain('Disallow: /app/')
 		expect(disallowed(aiCrawlers)).toEqual(disallowed(everyone))
 		expect(aiCrawlers).toContain('User-agent: ClaudeBot')
 	})
@@ -44,15 +44,15 @@ describe('sitemap.xml', () => {
 	})
 
 	it('never lists the private app', () => {
-		expect(generateSitemap()).not.toMatch(/applications|sign-in/)
+		expect(generateSitemap()).not.toMatch(/\/app\b|sign-in/)
 	})
 })
 
 describe('localized routes', () => {
 	it('localizes the public pages only', () => {
 		expect(isLocalizablePath('/')).toBe(true)
-		expect(isLocalizablePath('/applications')).toBe(false)
-		expect(isLocalizablePath('/applications/new')).toBe(false)
+		expect(isLocalizablePath('/app/applications')).toBe(false)
+		expect(isLocalizablePath('/app/billing')).toBe(false)
 		expect(isLocalizablePath('/sign-in/factor-one')).toBe(false)
 		expect(isLocalizablePath('/api/generate')).toBe(false)
 	})

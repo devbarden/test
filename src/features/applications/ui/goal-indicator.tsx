@@ -1,33 +1,26 @@
-import { CheckIcon } from 'lucide-react'
+import { HeaderStatus } from '@/components/layout/header-status'
 import { StepProgress } from '@/components/ui/step-progress'
 import { m } from '@/paraglide/messages'
 import { useGoalProgress } from '../hooks/use-goal-progress'
-import styles from './goal-indicator.module.css'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The visible count is decoration for the eye — the progress bar (or the
-//   check) carries the whole sentence for assistive tech, so it is read
-//   once. A phone shows the bare numbers.
+//   Progress towards the goal, shown only until it is reached; after that
+//   the workspace header shows the daily allowance instead.
 // ═══════════════════════════════════════════════════════════════════════════
 export function GoalIndicator() {
-	const { count, goal, isKnown, isReached } = useGoalProgress()
+	const { count, goal, isKnown } = useGoalProgress()
+
+	if (!isKnown) return <HeaderStatus />
+
 	const label = m['goal.indicator']({ count, goal })
 
-	if (!isKnown) return <div aria-hidden="true" className={styles.root} />
-
 	return (
-		<div className={styles.root}>
-			<span aria-hidden="true" className={styles.label}>
-				{`${count}/${goal}`}
-				<span className={styles.suffix}>{m['goal.indicatorSuffix']()}</span>
-			</span>
-			{isReached ? (
-				<span aria-label={label} className={styles.check} role="img">
-					<CheckIcon strokeWidth={2.5} />
-				</span>
-			) : (
+		<HeaderStatus
+			indicator={
 				<StepProgress label={label} max={goal} value={count} variant="dots" />
-			)}
-		</div>
+			}
+			suffix={m['goal.indicatorSuffix']()}
+			value={`${count}/${goal}`}
+		/>
 	)
 }

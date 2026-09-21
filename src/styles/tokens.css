@@ -3,8 +3,8 @@
      except the semantic roles below it; components only ever name a ROLE
      (--color-text-secondary, --color-surface-muted). Re-skinning the product
      or adding a dark theme is then a matter of remapping roles in one place,
-     not hunting hex values through thirty stylesheets. `npm run lint:styles`
-     fails a colour literal or a palette name anywhere else.
+     not hunting hex values through thirty stylesheets, so a colour literal
+     or a palette name never appears anywhere else.
 
      Breakpoints cannot be custom properties — media queries do not resolve
      var(). They are a fixed set instead, written in range syntax and in rem
@@ -44,6 +44,8 @@
 		--palette-red-100: #fee4e2;
 		--palette-red-300: #fda29b;
 		--palette-red-500: #f04438;
+		--palette-red-600: #d92d20;
+		--palette-red-700: #b42318;
 
 		--color-text-primary: var(--palette-gray-900);
 		--color-text-secondary: var(--palette-gray-600);
@@ -71,6 +73,10 @@
 		--color-accent-active: var(--palette-green-900);
 		--color-accent-subtle: var(--palette-green-100);
 
+		--color-danger: var(--palette-red-600);
+		--color-danger-hover: var(--palette-red-700);
+		--color-backdrop: rgb(16 24 40 / 0.45);
+
 		--color-control-disabled: var(--palette-gray-300);
 		--color-control-hover: var(--palette-gray-50);
 		--color-progress-done: var(--palette-gray-900);
@@ -82,6 +88,7 @@
 
 		--color-decoration: var(--palette-gray-200);
 		--color-illustration-accent: var(--palette-green-200);
+		--color-highlight: var(--palette-green-100);
 		--color-pattern-dot: rgb(16 24 40 / 0.14);
 		--color-brand: var(--palette-green-600);
 		--color-brand-text: var(--palette-gray-900);

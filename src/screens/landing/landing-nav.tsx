@@ -25,7 +25,7 @@ export function LandingNav() {
 				</nav>
 				<div className={styles.actions}>
 					<LanguageSwitcher variant="ghost" />
-					<ButtonLink shape="pill" size="md" to="/applications">
+					<ButtonLink shape="pill" size="md" to="/app/applications">
 						{m['landing.nav.start']()}
 					</ButtonLink>
 				</div>

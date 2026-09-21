@@ -29,11 +29,11 @@ export function AppHeader({ account, status }: AppHeaderProps) {
 					<IconButtonLink
 						icon={<HouseIcon />}
 						label={m['header.allApplications']()}
-						to="/applications"
+						to="/app/applications"
 					/>
 					<LanguageSwitcher variant="icon" />
+					{account && <div className={styles.account}>{account}</div>}
 				</div>
-				{account && <div className={styles.account}>{account}</div>}
 			</div>
 		</header>
 	)

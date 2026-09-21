@@ -12,10 +12,11 @@ type LocationChange = {
 //   letter slides forward, going back up to the list slides back.
 //
 //   A move between pages of the same depth has no direction and only
-//   cross-fades. A search-only change is the same page and does not
-//   animate; nor does the editor swapping /applications/new for the saved
-//   letter's own URL, which opts out at its call site (see screens/application/
-//   new-application-screen.tsx).
+//   cross-fades — the letters and billing are siblings under /app. A
+//   search-only change is the same page and does not animate; nor does the
+//   editor swapping /app/applications/create for the saved letter's own
+//   URL, which opts out at its call site (see
+//   screens/application/new-application-screen.tsx).
 // ═══════════════════════════════════════════════════════════════════════════
 export function pageTransitionTypes({
 	fromLocation,

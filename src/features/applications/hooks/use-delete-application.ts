@@ -50,7 +50,7 @@ export function useDeleteApplication({
 		mutationFn: (id: string) => restoreApplication({ data: { id } }),
 		onError: showError,
 		onMutate: () =>
-			queryClient.cancelQueries({ queryKey: applicationKeys.list() }),
+			queryClient.cancelQueries({ queryKey: applicationKeys.lists() }),
 		onSettled: settle,
 		onSuccess: (application) => {
 			insertApplication(queryClient, application)

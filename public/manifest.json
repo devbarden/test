@@ -19,6 +19,6 @@
 	"name": "Alt+Shift — cover letters",
 	"scope": "/",
 	"short_name": "Alt+Shift",
-	"start_url": "/applications",
+	"start_url": "/app/applications",
 	"theme_color": "#ffffff"
 }

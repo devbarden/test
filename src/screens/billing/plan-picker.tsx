@@ -107,7 +107,7 @@ function planAction(
 
 	return (
 		<CheckoutButton
-			newSubscriptionRedirectUrl="/applications/billing"
+			newSubscriptionRedirectUrl="/app/billing"
 			planId={offer.clerkPlanId}
 			planPeriod={offer.annualMonthlyFee ? period : 'month'}
 		>

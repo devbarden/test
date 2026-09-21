@@ -5,6 +5,7 @@
 	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		display: flex;
+		flex-wrap: wrap;
 		gap: var(--space-4);
 		align-items: center;
 		justify-content: space-between;
@@ -17,7 +18,18 @@
 		padding-block-end: calc(var(--space-3) - 1px);
 	}
 
+	/* ═══════════════════════════════════════════════════════════════════════
+	     The actions take the rest of the title's row, aligned to its end.
+	     When they no longer fit beside the title — a search field and a
+	     button on a phone — the whole group wraps under it and gets the
+	     full width.
+	   ═══════════════════════════════════════════════════════════════════════ */
 	.actions {
-		flex-shrink: 0;
+		display: flex;
+		flex: 1 1 auto;
+		gap: var(--space-3);
+		align-items: center;
+		justify-content: flex-end;
+		min-inline-size: 0;
 	}
 }

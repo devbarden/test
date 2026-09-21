@@ -1,0 +1,42 @@
+@layer ui {
+	.root {
+		display: inline-grid;
+		flex-shrink: 0;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+	}
+
+	/* ═══
+	     Both circles have a path length of 100, so the fill's dash offset
+	     is simply the part not yet used. The ring starts at twelve o'clock
+	     and fills clockwise.
+	   ═══ */
+	.ring {
+		inline-size: 100%;
+		block-size: 100%;
+		transform: rotate(-90deg);
+	}
+
+	.track,
+	.fill {
+		fill: none;
+		stroke-width: 4;
+	}
+
+	.track {
+		stroke: var(--color-accent-subtle);
+	}
+
+	.fill {
+		stroke: var(--color-meter-fill);
+		stroke-linecap: round;
+		stroke-dasharray: 100;
+		transition:
+			stroke-dashoffset var(--duration-slow) var(--ease-out),
+			stroke var(--duration-slow) var(--ease-out);
+
+		&.full {
+			stroke: var(--color-meter-spent);
+		}
+	}
+}

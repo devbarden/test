@@ -1,0 +1,77 @@
+@layer ui {
+	.root {
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-inline-size: 0;
+	}
+
+	.icon {
+		--icon-size: var(--icon-lg);
+
+		position: absolute;
+		inset-inline-start: var(--space-3);
+		color: var(--color-text-tertiary);
+		pointer-events: none;
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     The height of a medium button, so it lines up with the action beside
+	     it. The browser's own clear button is hidden: it looks different in
+	     every engine, and the component draws one that matches the product.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.input {
+		inline-size: 100%;
+		block-size: var(--control-height-md);
+		padding-inline: calc(var(--space-3) + var(--icon-lg) + var(--space-2))
+			var(--control-height-sm);
+		font: var(--type-body-md);
+		color: var(--color-text-primary);
+		background: var(--color-surface-page);
+		border: 1px solid var(--color-border-default);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-xs);
+		transition-timing-function: var(--ease-out);
+		transition-duration: var(--duration-fast);
+		transition-property: border-color, box-shadow;
+
+		&::placeholder {
+			color: var(--color-text-tertiary);
+			opacity: 1;
+		}
+
+		&::-webkit-search-cancel-button {
+			appearance: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid transparent;
+			outline-offset: 0;
+			border-color: var(--color-border-focus);
+			box-shadow: var(--shadow-xs), var(--ring-focus);
+		}
+	}
+
+	.clear {
+		--icon-size: var(--icon-md);
+
+		position: absolute;
+		inset-inline-end: var(--space-1-5);
+		display: grid;
+		place-items: center;
+		inline-size: var(--space-8);
+		block-size: var(--space-8);
+		color: var(--color-text-tertiary);
+		background: none;
+		border: 0;
+		border-radius: var(--radius-sm);
+		transition:
+			background-color var(--duration-fast) var(--ease-out),
+			color var(--duration-fast) var(--ease-out);
+
+		&:hover {
+			color: var(--color-text-primary);
+			background: var(--color-surface-muted);
+		}
+	}
+}

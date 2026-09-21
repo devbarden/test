@@ -17,7 +17,7 @@ before changing anything under `src/backend` or a `*.server.ts` file.
 ```bash
 npm run db:up               # Postgres + Redis in Docker (dev and test)
 npm run dev                 # http://localhost:3000
-npm run lint                # Biome + comment banners + architecture + styles
+npm run lint                # Biome: format, lint, import layering
 npm run typecheck
 npm test                    # unit tests (no I/O)
 npm run test:integration    # repository/limiter/lock against real Postgres + Redis
@@ -26,7 +26,7 @@ npm run db:migrate:create   # CREATE a migration from schema changes
 npm run db:migrate          # create + apply locally
 ```
 
-Run `npm run lint` (Biome, comment banners, architecture, styles), `npm run
+Run `npm run lint` (Biome, including the import layering), `npm run
 typecheck` and `npm test` before reporting a change as done.
 
 ⚠ Never run `prisma migrate reset` or point any command at a non-local
@@ -55,14 +55,12 @@ does.
 - CSS uses one block: `/* ═══…` … `═══… */` with the text indented by five
   spaces.
 - YAML, `.gitignore` and `.env*` use the same shape with `#`.
-- Prisma schema uses `///` doc comments on models and fields.
+- Prisma schema has no comments; the rationale for the model lives in
+  `docs/architecture.md`.
 - Not allowed: a plain `// comment`, a trailing `code // comment`, a
   `/* block */` in TypeScript, a comment that restates the code.
 - The only exceptions: `// biome-ignore <rule>: <reason>`,
   `// @ts-expect-error <reason>` and `// TODO: …`.
-
-`npm run lint:comments` (`scripts/check-comments.ts`) enforces this and fails
-the lint on any violation.
 
 ### Formatting and naming
 
@@ -94,7 +92,12 @@ src/backend/        infrastructure — config, auth, errors, DI, middleware,
                     http, database, Redis, rate limiting, gateways,
                     lifecycle. Never imports a feature's services: only the
                     composition root (di/container.server.ts) knows them
-src/routes/         thin route files: URL, guards and head() → a screen
+src/routes/         thin route files: URL, guards and head() → a screen.
+                    `/` landing, `/sign-in`, and the signed-in workspace
+                    under `/app` (app/route.tsx is its guard and shell):
+                    /app/applications, …/create, …/$applicationId and
+                    /app/billing beside them. Old /applications/* paths
+                    301 to these (backend/http/legacy-app-paths.server.ts)
 src/screens/<x>/    one page each (landing, auth, workspace, dashboard,
                     application, billing): composes features, owns the
                     page-only UI
@@ -113,9 +116,10 @@ src/lib/            infrastructure safe on both sides, by concern:
 ```
 
 Frontend imports flow one way — `routes → screens → features → components ·
-hooks · lib` — and `npm run lint:architecture` fails on any import that
-goes back up, between two screens, or between two features (the few
-allowed feature dependencies are listed in `scripts/check-architecture.ts`).
+hooks · lib` — and Biome's `noRestrictedImports` (per-folder `overrides` in
+`biome.json`) fails any import that goes back up, between two screens, or
+between two features (an allowed feature dependency is simply left out of
+that feature's list, e.g. `generation → applications`).
 Features are combined in the screen that needs them, never inside each
 other: a feature that must react to another one takes a callback
 (`useDeleteApplication({ onSettled })`, `useSyncPlanChanges(onChange)`).
@@ -170,8 +174,8 @@ repository (Prisma, every query scoped by owner) → Postgres.
 
 ### Frontend rules
 
-- Styles are CSS Modules — read `docs/styles.md` before writing one;
-  `npm run lint:styles` enforces it. In short:
+- Styles are CSS Modules — read `docs/styles.md` before writing one.
+  In short:
   - each module is one `@layer` block named after its folder (`ui`,
     `components`, `features`, `screens`), so a `className` passed down
     always beats the component's own rules;
@@ -191,20 +195,25 @@ repository (Prisma, every query scoped by owner) → Postgres.
 - Screens are named `<name>-screen.tsx` and export `<Name>Screen`.
 - `components/ui` is the design system. A new variant goes into the
   component, not into a one-off override at the call site.
+- Dialogs are react-call callables, as in our other projects: define one
+  with `createCallable` on top of `components/ui/dialog` (a native modal
+  `<dialog>`), add its `.Root` to `components/dialogs/dialog-roots`, and
+  `await XDialog.call({…})` wherever it is needed. No open/close state in
+  the caller.
 
 ### Translations and public pages
 
 - Every user-visible string goes through Paraglide: `m['dotted.key']()`,
   with the key in BOTH `messages/en.json` and `messages/ru.json`. Biome's
-  `noJsxLiterals` fails a raw string in JSX; `npm run i18n:check` (run by
-  `typecheck`) fails a missing key or a dropped `{placeholder}`.
+  `noJsxLiterals` fails a raw string in JSX; `typecheck` fails a key
+  missing from either locale (`src/lib/i18n/messages-parity.ts`).
 - Always a full, static key — never one built from a template string: a
   computed key keeps every message of every locale in the bundle.
 - Nothing message-backed at module scope: a `const` holding `m[...]()`
   captures the first request's locale forever. Use functions.
 - Two locale zones (see `src/lib/i18n/localized-routes.ts`): public pages carry
-  the locale in the URL (`/ru/`); `/applications`, `/sign-in` and `/api`
-  read the `PARAGLIDE_LOCALE` cookie and never get a prefix.
+  the locale in the URL (`/ru/`); `/app`, `/sign-in` and `/api` read the
+  `PARAGLIDE_LOCALE` cookie and never get a prefix.
 - A new public page goes into `LOCALIZED_PATHS` in `src/lib/seo/robots-and-sitemap.ts` (the
   sitemap) and gets canonical + hreflang via `src/lib/seo/seo-links.ts`;
   anything private gets `noindex` and a robots `Disallow`. `llms.txt` is
