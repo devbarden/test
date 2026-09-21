@@ -17,14 +17,6 @@ const TONE_CLASS = {
 	success: styles.success,
 } satisfies Record<PanelTone, string | undefined>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The one container shape. In the app it is a borderless surface told
-//   apart by its tint — grey for content, green for encouragement. On the
-//   public pages it is `raised`: white, hairline-bordered and lifted by a
-//   shadow, because it sits on a patterned page rather than a plain one.
-//   `as` makes the panel itself the landmark or list item, instead of
-//   wrapping a <section> in a <div> to get one.
-// ═══════════════════════════════════════════════════════════════════════════
 export function Panel({
 	as: Element = 'div',
 	className,

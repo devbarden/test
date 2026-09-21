@@ -1,11 +1,4 @@
 @layer ui {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Sizes and shapes only set the private `--_` properties; the root
-	     rule is the one place that turns them into CSS, so a variant can
-	     never forget a property and two variants never fight over one. The
-	     root declares every one of them, so none is inherited from an
-	     ancestor that happens to use the same name.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		--_height: auto;
 		--_padding: 0;
@@ -36,12 +29,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Label and spinner share one grid cell. While loading the label turns
-	     transparent rather than hidden, so it still holds the button's width
-	     and still names the button for a screen reader ("Generate Now,
-	     busy").
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.content {
 		display: inline-grid;
 		place-items: center;
@@ -95,11 +82,6 @@
 		--icon-size: var(--icon-lg);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The pill is the public pages' shape: bolder, fully rounded, and it
-	     lifts under the pointer. Inside the app buttons stay quiet
-	     rectangles.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.pill {
 		--_padding: var(--space-8);
 
@@ -184,14 +166,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     A ghost has no size: it is a line of text that happens to be a
-	     button, padded just enough for a focus ring and pulled back by as
-	     much so it lines up with the text around it. Unlike primary and
-	     secondary it does not grey out when disabled — as in the mockup's
-	     empty letter panel, "Copy to clipboard" is present but has nothing
-	     to copy yet. The cursor and the disabled state still tell it apart.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.ghost {
 		--_padding: var(--space-1);
 		--icon-size: var(--icon-lg);

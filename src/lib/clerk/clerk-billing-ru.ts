@@ -1,10 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   Clerk's own Russian dictionary leaves almost all of billing untranslated
-//   (120 of 125 strings in @clerk/localizations 4.17), so a Russian page
-//   would open an English pricing table and an English checkout. This fills
-//   the gap; it is merged under Clerk's ruRU, so a string Clerk translates
-//   itself in a later release still wins. {{placeholders}} are Clerk's and
-//   must survive unchanged.
+//   Clerk's ruRU leaves billing untranslated. Merged under it, so a string
+//   Clerk translates itself later still wins.
 // ═══════════════════════════════════════════════════════════════════════════
 export const CLERK_BILLING_RU = {
 	accountCredit: 'Баланс аккаунта',

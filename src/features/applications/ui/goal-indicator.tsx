@@ -3,10 +3,6 @@ import { StepProgress } from '@/components/ui/step-progress'
 import { m } from '@/paraglide/messages'
 import { useGoalProgress } from '../hooks/use-goal-progress'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Progress towards the goal, shown only until it is reached; after that
-//   the workspace header shows the daily allowance instead.
-// ═══════════════════════════════════════════════════════════════════════════
 export function GoalIndicator() {
 	const { count, goal, isKnown } = useGoalProgress()
 

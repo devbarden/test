@@ -8,12 +8,6 @@ type SubmitButtonProps = {
 	isGenerating: boolean
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Once a letter exists the button turns secondary: the letter is now the
-//   primary thing on the screen, and generating again is a fallback. While
-//   generating it stays in the accent colour with a spinner, as in the
-//   mockup, and is busy rather than disabled so focus does not jump away.
-// ═══════════════════════════════════════════════════════════════════════════
 export function SubmitButton({
 	disabled,
 	hasLetter,

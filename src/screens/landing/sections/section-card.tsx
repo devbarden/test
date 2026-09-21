@@ -11,11 +11,6 @@ type SectionCardProps = {
 	title: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One card of a <SectionCards> list: an icon chip, an optional marker
-//   across from it (a step's number), a title and a line of body. `spacious`
-//   gives a card with no marker the height its neighbours get from one.
-// ═══════════════════════════════════════════════════════════════════════════
 export function SectionCard({
 	body,
 	icon,

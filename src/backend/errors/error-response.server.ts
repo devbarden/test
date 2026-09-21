@@ -1,16 +1,8 @@
 import type { AppError } from './app-error.server'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The two ways an AppError leaves the process — and the only two. Both
-//   carry the public payload and nothing else.
-//
-//   errorResponse   an HTTP answer: `{ error }` with the real status and a
-//                   Retry-After when there is one
-//   toClientError   what a server function throws across the RPC boundary.
-//                   The serializer copies every own property of the thrown
-//                   object to the browser (stack, cause, Prisma metadata),
-//                   so the original is never rethrown: a fresh Error whose
-//                   message is the payload is (see readApiError)
+//   The RPC serializer copies every own property of a thrown object, so only
+//   a fresh Error carrying the payload is thrown.
 // ═══════════════════════════════════════════════════════════════════════════
 export function errorResponse(error: AppError): Response {
 	const headers = new Headers({ 'Cache-Control': 'no-store' })

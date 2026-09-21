@@ -12,13 +12,6 @@ import { PlanLimitDialog } from '@/features/billing/ui/plan-limit-dialog'
 import { getUserQueryClient } from '@/lib/query/user-query-client'
 import { WorkspaceStatus } from './workspace-status'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The client arrives with the user's letters already restored from browser
-//   storage, so the first paint is the cached state, not a spinner (see
-//   getUserQueryClient for why it is not created here). A plan change
-//   refetches whatever its limits came from, on every page of the
-//   workspace, so it is wired here rather than in a screen.
-// ═══════════════════════════════════════════════════════════════════════════
 export function WorkspaceShell({ userId }: { userId: string }) {
 	const queryClient = getUserQueryClient(userId, PERSISTED_APPLICATIONS)
 

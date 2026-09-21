@@ -15,11 +15,8 @@ function isAllowed(character: string): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Removes ASCII control characters, keeping tabs and line breaks. Text in
-//   this app is prose typed by a person or written by a model, and neither
-//   has a use for them — while Postgres refuses a NUL in a text column
-//   outright, which would fail a save AFTER a letter had already been
-//   generated and paid for.
+//   Postgres rejects a NUL in a text column, which would fail the save
+//   after the letter was already generated.
 // ═══════════════════════════════════════════════════════════════════════════
 export function toPlainText(value: string): string {
 	return Array.from(value).filter(isAllowed).join('')

@@ -1,8 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   The breakpoints script needs to know. Media queries cannot read a
-//   custom property, so CSS spells the same values out (see tokens.css);
-//   these are their twins for matchMedia, kept next to nothing else on
-//   purpose.
+//   Media queries cannot read custom properties: keep in sync with
+//   tokens.css.
 // ═══════════════════════════════════════════════════════════════════════════
 export const PHONE_QUERY = '(width < 40rem)'
 

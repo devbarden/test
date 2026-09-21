@@ -17,15 +17,8 @@ type DashboardSearchProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The field shows what is typed at once; the search itself — the URL, and
-//   with it the request — follows a quarter of a second after the last
-//   keystroke, and at once when the field is cleared. Only a change that
-//   alters the words searches again: a trailing space does not.
-//
-//   The URL can also change on its own, with Back or Forward. The field
-//   then takes the URL's text, unless it already says the same thing —
-//   so a search that lands while the user keeps typing never overwrites
-//   what they typed since.
+//   Back/Forward sync the field from the URL unless it already matches, so
+//   typing is never overwritten.
 // ═══════════════════════════════════════════════════════════════════════════
 export function DashboardSearch({
 	onSearchChange,

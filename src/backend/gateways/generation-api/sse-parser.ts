@@ -3,32 +3,11 @@ export type SseEvent = {
 	event: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A line — or an event, which is its `data` lines together — longer than
-//   this is not a delta but a broken or hostile stream. The parser fails it
-//   rather than buffering forever while waiting for a line break, or a
-//   blank line, that never comes.
-// ═══════════════════════════════════════════════════════════════════════════
 const MAX_LENGTH = 64 * 1024
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A Server-Sent Events parser as a TransformStream<string, SseEvent>,
-//   following the WHATWG "event stream interpretation" rules:
-//
-//   - A line ends at CR, LF or CRLF — and a CRLF may be split across two
-//     network chunks, so a trailing CR is held until the next chunk shows
-//     whether an LF follows it (or the stream ends, which settles it too).
-//   - A line starting with ':' is a comment. The Generation API opens every
-//     stream with `: keepalive`, which the published spec does not mention.
-//   - `data` lines accumulate (joined by LF); a blank line dispatches the
-//     event, unless no data was collected.
-//   - An event cut off by the end of the stream is DISCARDED, as the spec
-//     requires: a half-received `data:` line is exactly what a dropped
-//     connection looks like, and it must not be parsed as if it were whole.
-//
-//   Hand-written rather than pulled in: it is ~60 lines, it is the one piece
-//   of the integration whose edge cases decide whether a letter arrives
-//   intact, and owning it is what lets the tests pin those edge cases down.
+//   WHATWG rules. A CR at a chunk's end waits for a possible LF; an event cut
+//   off by the end of the stream is discarded.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createSseParser(): TransformStream<string, SseEvent> {
 	let buffer = ''

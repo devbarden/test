@@ -14,15 +14,8 @@ export type LetterNotice =
 	| { kind: 'stopped'; savedLetterKept: boolean }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   What the letter panel shows, as a pure function of the generation and
-//   the saved application — the editor's real state logic, kept out of the
-//   component so it can be tested without rendering.
-//
-//   A saved letter always wins over a broken one: if "Try Again" fails or is
-//   stopped, the previous complete letter stays on screen. Partial text is
-//   shown only when there is nothing better, so the user can still read
-//   (or copy) what arrived. The one exception is a letter that arrived
-//   whole but could not be saved: it is the only copy, so it is shown.
+//   A saved letter wins over a failed or stopped retry; partial text shows
+//   only when there is nothing better.
 // ═══════════════════════════════════════════════════════════════════════════
 export function letterContent(
 	state: GenerationState,
@@ -48,10 +41,6 @@ export function letterContent(
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A refusal over a plan limit is explained in a dialog when it happens
-//   (usePlanLimits), not left standing in the panel over the letter.
-// ═══════════════════════════════════════════════════════════════════════════
 const PLAN_LIMIT_CODES: readonly ApiErrorCode[] = [
 	'application_limit_reached',
 	'quota_exceeded',

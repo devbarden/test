@@ -10,13 +10,6 @@ type IconButtonProps = Omit<ComponentProps<'button'>, 'children'> & {
 	variant?: IconButtonVariant
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `label` is required: an icon-only control with no accessible name is
-//   invisible to a screen reader, and a type error is the only check that
-//   never gets skipped. It is rendered as hidden text rather than an
-//   aria-label so that page translators and find-in-page see it too; the
-//   title gives sighted pointer users the same words.
-// ═══════════════════════════════════════════════════════════════════════════
 export function IconButton({
 	className,
 	icon,

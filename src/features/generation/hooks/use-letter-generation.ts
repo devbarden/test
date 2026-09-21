@@ -22,16 +22,6 @@ export type GenerationResult =
 	| { outcome: 'aborted' | 'completed' }
 	| { error: ApiError; outcome: 'failed' }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One generation at a time per editor. Starting a new one aborts the
-//   previous request, and unmounting aborts whatever is in flight — the
-//   server sees the disconnect and cancels the upstream call, so a letter
-//   nobody is waiting for does not keep spending the shared rate limit.
-//
-//   `onComplete` receives the application as the server SAVED it, and runs
-//   before the state returns to idle, so the cache already holds the letter
-//   when the streaming view hands over to it.
-// ═══════════════════════════════════════════════════════════════════════════
 export function useLetterGeneration() {
 	const [state, dispatch] = useReducer(generationReducer, IDLE_GENERATION)
 	const controllerRef = useRef<AbortController | null>(null)
@@ -75,11 +65,6 @@ export function useLetterGeneration() {
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Outside the hook so the React Compiler can still compile the hook: it
-//   does not yet lower `for (;;)` or `try … finally`, and skips any function
-//   that contains them. Never throws — every ending is an outcome.
-// ═══════════════════════════════════════════════════════════════════════════
 async function streamLetter(
 	command: GenerateCommand,
 	signal: AbortSignal,

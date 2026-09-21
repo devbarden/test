@@ -1,11 +1,4 @@
 @layer ui {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The tint reaches a hair past the letters on both sides, and the
-	     negative margin gives that hair back, so marking a word never moves
-	     the text around it; `clone` keeps the rounding on each line a match
-	     wraps across. In forced colours the system's own highlight pair
-	     takes over, since a custom background would be dropped.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		padding: 0 0.125em;
 		margin: 0 -0.125em;

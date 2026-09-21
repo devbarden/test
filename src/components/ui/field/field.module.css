@@ -12,11 +12,6 @@
 		color: var(--color-text-label);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The description turns red with the control's own `aria-invalid`,
-	     so what a screen reader is told and what the eye sees come from
-	     one attribute.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.description {
 		font: var(--type-body-sm);
 		color: var(--color-text-secondary);
@@ -44,13 +39,6 @@
 			opacity: 1;
 		}
 
-		/* ═══════════════════════════════════════════════════════════════════
-		     The mockup's focus: a green border and a soft 4px ring. The
-		     outline is transparent so it paints nothing normally, yet
-		     forced-colours mode — which drops border colours and every
-		     box-shadow — draws it, and the focused field stays findable
-		     there.
-		   ═══════════════════════════════════════════════════════════════════ */
 		&:focus-visible {
 			outline: 2px solid transparent;
 			outline-offset: 0;

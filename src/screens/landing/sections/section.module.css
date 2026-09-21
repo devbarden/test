@@ -1,11 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The landing's shared rhythm: plain sections sit straight on the
-	     dotted page, "ink" sections are a deep green card the width of the
-	     page, and the two alternate so a long page reads as distinct
-	     chapters. Each opens with a kicker and a claim, sometimes a lead
-	     sentence under it.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		padding-block: var(--space-10);
 		scroll-margin-block-start: var(--space-24);

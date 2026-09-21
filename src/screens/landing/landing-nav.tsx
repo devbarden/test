@@ -5,12 +5,6 @@ import { m } from '@/paraglide/messages'
 import styles from './landing-nav.module.css'
 import { LANDING_NAV } from './landing-sections'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A floating plate rather than a full-width bar: it reads as part of the
-//   page instead of browser chrome, and the dotted background stays visible
-//   around it. The in-page links are plain fragments — they are the same
-//   page in every language, and a crawler follows them as is.
-// ═══════════════════════════════════════════════════════════════════════════
 export function LandingNav() {
 	return (
 		<header className={styles.root}>

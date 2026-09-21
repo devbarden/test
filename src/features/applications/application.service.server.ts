@@ -20,12 +20,6 @@ type SaveLetterCommand = {
 	letter: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The signed-in user's letters. The user comes from the request scope
-//   (`userActor`), never from an argument, so no caller can ask for someone
-//   else's data by passing a different id. How many letters they may keep
-//   comes from the same place: it is part of their plan.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createApplicationService({
 	applicationRepository,
 	logger,
@@ -54,10 +48,8 @@ export function createApplicationService({
 	}
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   Every write that ADDS an active application — a new letter, an undone
-	//   delete — goes through here: under the user's advisory lock, the cap is
-	//   checked and the write happens on the same transaction, so two of them
-	//   racing cannot both squeeze past the last free slot.
+	//   Cap check and write share one locked transaction, so two racing
+	//   writes cannot both take the last slot.
 	// ═════════════════════════════════════════════════════════════════════════
 	function withRoom<T>(write: (tx: DbClient) => Promise<T>): Promise<T> {
 		return applicationRepository.withUserLock(userId, async (tx) => {
@@ -104,11 +96,8 @@ export function createApplicationService({
 
 	return {
 		// ═════════════════════════════════════════════════════════════════════
-		//   Would `saveLetter` accept this letter? Asked by the generation
-		//   service BEFORE it spends anything on the model: the same rule, so
-		//   a letter is never generated only to be refused at save time. It
-		//   is re-checked at save, under the lock — this answer can go stale
-		//   while the letter streams.
+		//   Re-checked at save under the lock: this answer can go stale while
+		//   the letter streams.
 		// ═════════════════════════════════════════════════════════════════════
 		async assertCanSave(applicationId?: string): Promise<void> {
 			if (applicationId) await findOwned(applicationId)
@@ -164,11 +153,6 @@ export function createApplicationService({
 			return toApplicationDto(restored)
 		},
 
-		// ═════════════════════════════════════════════════════════════════════
-		//   Called by the generation service once a letter has streamed to
-		//   completion: a regenerated letter replaces the letter and its input
-		//   together, keeping the pair consistent; a new one needs room.
-		// ═════════════════════════════════════════════════════════════════════
 		saveLetter({
 			applicationId,
 			input,

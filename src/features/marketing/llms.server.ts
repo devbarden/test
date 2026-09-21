@@ -14,16 +14,8 @@ import {
 } from './model/product-content'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   /llms.txt is the short index an AI system reads first: what the product
-//   is, how it works, where the pages are. /llms-full.txt is the whole
-//   public site as one markdown document, once per language.
-//
-//   Both are rendered from the same messages the landing renders from, so
-//   they cannot drift from what visitors see — a hand-written file in
-//   public/ goes on describing a product that has since changed. Every
-//   message is read with an explicit locale: the documents are built once
-//   per process, from whichever request arrives first, and the ambient
-//   locale would freeze that visitor's language into every crawler's copy.
+//   Explicit locale: built once per process, the ambient one would freeze
+//   the first visitor's language into every copy.
 // ═══════════════════════════════════════════════════════════════════════════
 const EN = { locale: baseLocale }
 

@@ -4,33 +4,11 @@ node_modules
 .tanstack
 .vite
 dist
-coverage
 .env
 .env.*
 !.env.example
 .DS_Store
 *.log
-
-# ═══════════════════════════════════════════════════════════════════════════
-#   Clerk's keyless mode writes a temporary development instance here when
-#   no keys are configured. It belongs to one machine and is never shared.
-# ═══════════════════════════════════════════════════════════════════════════
 .clerk
-
-# ═══════════════════════════════════════════════════════════════════════════
-#   Playwright traces, screenshots and reports from local runs.
-# ═══════════════════════════════════════════════════════════════════════════
-test-results
-playwright-report
-
-# ═══════════════════════════════════════════════════════════════════════════
-#   The Prisma client is generated on install and on build from
-#   prisma/schema.prisma; committing it would only let the two drift.
-# ═══════════════════════════════════════════════════════════════════════════
 src/generated
-
-# ═══════════════════════════════════════════════════════════════════════════
-#   Paraglide compiles messages/*.json into typed functions on dev, build,
-#   typecheck and test; like the Prisma client, it is never committed.
-# ═══════════════════════════════════════════════════════════════════════════
 src/paraglide

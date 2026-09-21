@@ -15,11 +15,6 @@
 		pointer-events: none;
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The height of a medium button, so it lines up with the action beside
-	     it. The browser's own clear button is hidden: it looks different in
-	     every engine, and the component draws one that matches the product.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.input {
 		inline-size: 100%;
 		block-size: var(--control-height-md);

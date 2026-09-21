@@ -14,9 +14,6 @@ const envSchema = z.object({
 	GENERATION_API_URL: z
 		.url()
 		.default('https://test-assignment-api.variant.net/v1/generate'),
-	LOG_LEVEL: z
-		.enum(['trace', 'debug', 'info', 'warn', 'error', 'silent'])
-		.default('info'),
 	NODE_ENV: z
 		.enum(['development', 'production', 'test'])
 		.default('development'),
@@ -24,21 +21,8 @@ const envSchema = z.object({
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Parsed when the server boots (lifecycle/server-lifecycle.nitro.ts), so
-//   a deploy with a missing or malformed variable crashes before it listens
-//   and never takes traffic, instead of failing the first user who reaches
-//   the code path that needs it. The container then registers one parsed
-//   copy as a value.
-//
-//   Operational limits live here too, as code rather than environment: they
-//   are decisions reviewed in a pull request, not knobs to turn in a
-//   dashboard. Limits that depend on the plan live in the billing catalogue
-//   and reach the limiter per request, never through this file.
-//
-//   The generation bounds are chosen together: a letter may take at most
-//   maxDurationMs, which is shorter than lockTtlMs, so the one-generation-
-//   per-user lock can never expire under a generation that is still
-//   running.
+//   maxDurationMs < lockTtlMs, so the one-generation lock never expires under
+//   a running letter.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 	const parsed = envSchema.safeParse(env)
@@ -70,7 +54,6 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 		},
 		http: { maxRequestBodyBytes: 1024 * 1024 },
 		isProduction: vars.NODE_ENV === 'production',
-		logLevel: vars.LOG_LEVEL,
 		nodeEnv: vars.NODE_ENV,
 		rateLimits: {
 			generationsPerMinute: 4,

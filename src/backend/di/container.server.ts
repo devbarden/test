@@ -9,21 +9,8 @@ import { coreModule } from './core.module.server'
 import type { CradleOf } from './module'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The composition root — the one backend file allowed to know every
-//   feature. Each module (infrastructure and one per feature) lists its own
-//   registrations next to the code it wires, and this file only merges
-//   them: a new feature adds one line here.
-//
-//   Lifetimes:
-//   - singleton  config, clients, pools, gateways, rate limiter — process-wide
-//   - scoped     services and repositories — one set per request, so they
-//                can close over the request's actor and logger
-//
-//   `strict: true` makes a singleton that depends on something scoped a
-//   resolution error rather than a silent capture of the first request's
-//   user. `userActor` is registered only on user scopes
-//   (request-scope.server.ts), so resolving a user-facing service from a
-//   system scope fails loudly instead of running without an owner.
+//   `strict: true` turns a singleton that captures a scoped value (the first
+//   request's user) into an error.
 // ═══════════════════════════════════════════════════════════════════════════
 const modules = {
 	...coreModule,

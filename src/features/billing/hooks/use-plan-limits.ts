@@ -7,13 +7,6 @@ import { useEntitlements } from './use-entitlements'
 const SECONDS_PER_HOUR = 3600
 const DAY_IN_HOURS = 24
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `reached` answers from the usage already on screen, so a user out of
-//   letters hears it before a request is spent; the server still decides,
-//   and when it refuses anyway (usage moved in another tab), `explain`
-//   shows the same dialog. The limits come from the session — always
-//   there — and only the reset time needs the usage query.
-// ═══════════════════════════════════════════════════════════════════════════
 export function usePlanLimits() {
 	const { data } = useQuery(billingQueries.overview())
 	const { entitlements, plan } = useEntitlements()

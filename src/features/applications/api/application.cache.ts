@@ -10,32 +10,14 @@ import { applicationKeys } from './application.queries'
 
 type ApplicationList = InfiniteData<ApplicationPage, string | undefined>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The letters are what the workspace keeps in browser storage between
-//   visits. Bump the version whenever the shape of a cached application,
-//   page or stats object changes.
-// ═══════════════════════════════════════════════════════════════════════════
 export const PERSISTED_APPLICATIONS: PersistedQueries = {
 	roots: applicationKeys.all,
 	version: 'applications-v3',
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Writes to the query cache that make a change visible before the server
-//   round trip that confirms it. Each caller still invalidates afterwards,
-//   so the cache converges on what the server actually holds.
-// ═══════════════════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════════════════
-//   A letter that was not in the list: a new one, or one brought back by
-//   Undo. The list is ordered by id, newest first — ids are UUIDv7, so
-//   their text order is their creation order — and the letter goes to its
-//   own place, not to the top: an undone delete returns where it was. A
-//   search's list only takes it if it matches that search.
-//
-//   Any copy already there is dropped first, so a refetch that raced the
-//   insert can never show the same card twice. A letter older than every
-//   loaded one, while more pages exist, is left for the next page to bring.
+//   Placed by id, not on top, so Undo restores it in place; an existing
+//   copy is dropped first so a racing refetch cannot show it twice.
 // ═══════════════════════════════════════════════════════════════════════════
 export function insertApplication(
 	queryClient: QueryClient,
@@ -98,10 +80,6 @@ export function removeApplication(queryClient: QueryClient, id: string): void {
 	adjustTotal(queryClient, -1)
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Every cached list — the full one and one per search — with the search
-//   it was fetched for, which is the last part of its key.
-// ═══════════════════════════════════════════════════════════════════════════
 function updateLists(
 	queryClient: QueryClient,
 	update: (pages: ApplicationPage[], search: string) => ApplicationPage[],
@@ -138,10 +116,8 @@ function adjustTotal(queryClient: QueryClient, delta: number): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A letter opened from the list starts from the list's copy, stamped with
-//   the time the LIST was fetched — not "now" — so a copy that is already
-//   stale (restored from storage, say) is revalidated on open instead of
-//   passing for fresh for another thirty seconds.
+//   Stamped with the list's fetch time, not now, so a stale copy
+//   revalidates on open.
 // ═══════════════════════════════════════════════════════════════════════════
 export function applicationFromList(
 	queryClient: QueryClient,

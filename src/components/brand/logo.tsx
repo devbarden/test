@@ -2,10 +2,6 @@ import { BRAND_NAME } from '@/lib/site'
 import styles from './logo.module.css'
 import { type LogoPath, MARK_PATHS, WORDMARK_PATHS } from './logo-paths'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The full lockup from the mockup, 179×48. The wordmark is drawn, so the
-//   name is also given as text for assistive tech and search.
-// ═══════════════════════════════════════════════════════════════════════════
 type LogoTone = 'default' | 'inverse'
 
 const WORDMARK_CLASS = {

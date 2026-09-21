@@ -1,8 +1,4 @@
 @layer features {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Clerk draws its own menu items with 16px icons; the one item added
-	     here matches them.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.itemIcon {
 		--icon-size: var(--icon-md);
 	}

@@ -5,10 +5,8 @@ import { useClearCacheOnSignOut } from '@/lib/query/use-clear-cache-on-sign-out'
 import { WorkspaceShell } from './workspace-shell'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Keyed by user: a different account in the same tab gets its own query
-//   client and persisted cache, never a frame of the previous user's
-//   letters. A session that ends while the app is open — the user menu,
-//   another tab, expiry — lands on sign-in.
+//   Keyed by user: another account never sees a frame of the previous user's
+//   letters.
 // ═══════════════════════════════════════════════════════════════════════════
 export function WorkspaceGate() {
 	const { isLoaded, userId } = useAuth()

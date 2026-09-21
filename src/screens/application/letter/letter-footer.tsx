@@ -13,11 +13,8 @@ type LetterFooterProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   While text is arriving, Copy gives way to Stop: copying half a letter is
-//   never what anybody wants, and stopping a letter that went off in the
-//   wrong direction saves waiting for the rest of it. Once the server is
-//   saving, Stop is gone — the letter is being kept whatever the browser
-//   does, and "Stop" would promise the opposite.
+//   No Stop while saving: the server keeps the letter whatever the browser
+//   does.
 // ═══════════════════════════════════════════════════════════════════════════
 export function LetterFooter({ canStop, content, onStop }: LetterFooterProps) {
 	switch (content.kind) {

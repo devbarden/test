@@ -1,8 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The dot grid ends where the footer starts: a solid page colour
-	     closes the page, and the small print reads on a clean ground.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		padding-block: var(--space-14);
 		margin-block-start: var(--space-10);

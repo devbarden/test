@@ -16,10 +16,8 @@ type ApplicationCardProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The whole card opens the application, through one link stretched over
-//   it, while Delete and Copy sit above that link. Nesting the buttons
-//   inside an <a> instead would be invalid HTML and would make every click
-//   on them navigate as well.
+//   Buttons sit above one stretched link: buttons inside an <a> are invalid
+//   HTML.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationCard({
 	application,

@@ -8,10 +8,6 @@ import { createLockService } from '../redis/lock.server'
 import { createRedisClient } from '../redis/redis.server'
 import { createClerkWebhookVerifier } from '../webhooks/clerk-webhook-verifier.server'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Infrastructure — nothing here knows a feature: process-wide singletons
-//   (config, clients, pools, gateways, the limiter, the lock).
-// ═══════════════════════════════════════════════════════════════════════════
 export const coreModule = {
 	clerkWebhookVerifier: asFunction(createClerkWebhookVerifier).singleton(),
 	config: asValue(createAppConfig()),

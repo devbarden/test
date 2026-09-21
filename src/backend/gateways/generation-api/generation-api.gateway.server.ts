@@ -18,11 +18,6 @@ export type GenerationRequest = {
 	system: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The one place that speaks the Generation API's wire format. Everything
-//   above it sees an async iterable of text fragments and AppErrors — never
-//   SSE, never the provider's status codes or error bodies.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createGenerationApiGateway({
 	config,
 	rootLogger,
@@ -40,21 +35,8 @@ export function createGenerationApiGateway({
 	} = config.generation
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   Two phases, so the caller can answer with a real HTTP status for
-	//   everything that goes wrong before the first byte: this resolves only
-	//   once the provider has said 200, and throws otherwise. Failures after
-	//   that surface while iterating the returned stream.
-	//
-	//   Three clocks bound a request: the watchdog allows firstByteTimeoutMs
-	//   to the first byte and idleTimeoutMs between events, and
-	//   maxDurationMs caps the whole letter. That last one is not about
-	//   health — a slow letter that keeps streaming is fine — but about the
-	//   one-generation lock, whose TTL must outlast any generation.
-	//
-	//   Redirects are refused rather than followed: this endpoint never
-	//   moves, and following one would re-send the prompt (and, same-origin,
-	//   the token) to wherever a misconfigured proxy points, or silently
-	//   turn the POST into a GET.
+	//   Redirects are refused: following one would resend the prompt and the
+	//   token elsewhere.
 	// ═════════════════════════════════════════════════════════════════════════
 	async function openStream({
 		prompt,
@@ -108,11 +90,8 @@ export function createGenerationApiGateway({
 	}
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   The documented protocol ends a letter by closing the connection; the
-	//   live service sends `data: [DONE]` first. Both count as a clean finish.
-	//   A connection that BREAKS surfaces as a read error, which is what
-	//   separates it from the two above. Unknown events are ignored rather
-	//   than rejected, so the provider can add one without breaking us.
+	//   A closed connection and `data: [DONE]` both end a letter; a broken one
+	//   throws on read.
 	// ═════════════════════════════════════════════════════════════════════════
 	async function* readDeltas(
 		body: NonNullable<Response['body']>,
@@ -162,9 +141,8 @@ export function createGenerationApiGateway({
 		}
 
 		// ═════════════════════════════════════════════════════════════════════
-		//   A 401 means OUR token was refused — a deployment problem, not the
-		//   user's. It is reported to them as the service being unavailable and
-		//   logged at error level, since nobody can generate until it is fixed.
+		//   Our token was refused: a deployment problem, shown to the user as
+		//   unavailable.
 		// ═════════════════════════════════════════════════════════════════════
 		if (response.status === 401) {
 			rootLogger.error({ requestId }, 'Generation API rejected the token')
@@ -191,11 +169,8 @@ function parseDelta(data: string): string {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A 200 that is not an event stream — a proxy's HTML page, a JSON error
-//   some gateway sends with a success status — would otherwise parse as a
-//   stream with no deltas and surface only after the fact as an empty
-//   letter. Refused here, it is an honest 502 before the first byte. A
-//   response that names no type at all is given the benefit of the doubt.
+//   A 200 that is not SSE (a proxy page, a JSON error) would become an empty
+//   letter.
 // ═══════════════════════════════════════════════════════════════════════════
 function isEventStream(response: Response): boolean {
 	const type = response.headers.get('content-type')
@@ -203,11 +178,6 @@ function isEventStream(response: Response): boolean {
 	return type === null || type.toLowerCase().startsWith(EVENT_STREAM)
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Provider text reaches the log only as an excerpt: an SSE event may be
-//   up to 64 kB, and a delta is the user's letter — neither belongs in a
-//   log line whole.
-// ═══════════════════════════════════════════════════════════════════════════
 function excerpt(text: string): string {
 	return text.length > LOG_EXCERPT_LIMIT
 		? `${text.slice(0, LOG_EXCERPT_LIMIT)}…`
@@ -222,11 +192,6 @@ function parseRetryAfter(header: string | null): number {
 		: DEFAULT_RETRY_AFTER_SECONDS
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   An error body is read only as far as the log needs it. However the
-//   provider misbehaves, a refusal cannot make this process buffer an
-//   unbounded response.
-// ═══════════════════════════════════════════════════════════════════════════
 async function readPrefix(response: Response, limit: number): Promise<string> {
 	if (!response.body) return ''
 

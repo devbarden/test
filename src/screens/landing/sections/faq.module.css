@@ -5,12 +5,6 @@
 		color: var(--color-text-primary);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     `interpolate-size` lets the height animate to `auto`, and
-	     `::details-content` is the box a <details> hides its body in. A
-	     browser without them opens the panel instantly — the same content,
-	     no motion.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.item {
 		interpolate-size: allow-keywords;
 

@@ -14,13 +14,6 @@ export type PlanLimitDialogProps = {
 
 const EXIT_TRANSITION_MS = 200
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Said once, when the user runs into a limit, instead of a standing
-//   warning under the button: what the limit is, when it lifts, and — only
-//   when there is a bigger plan — the way to it. `upgradeLimit` is that
-//   plan's number; without it the dialog has nothing to sell and a single
-//   button.
-// ═══════════════════════════════════════════════════════════════════════════
 export const PlanLimitDialog = createCallable<PlanLimitDialogProps, void>(
 	({ call, hoursUntilReset, limit, reason, upgradeLimit }) => {
 		const close = () => call.end()

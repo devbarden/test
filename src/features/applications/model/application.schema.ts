@@ -11,15 +11,8 @@ export const INPUT_LIMITS = {
 } as const
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The single definition of a valid application, shared by the form (to
-//   enable "Generate Now") and by /api/generate (to refuse anything else).
-//   `max` runs BEFORE `trim` on purpose: the counter under the textarea
-//   shows the raw length, and the button must agree with the counter —
-//   1201 characters of which one is a trailing space is still "over".
-//
-//   Control characters are dropped before anything else sees the text (see
-//   toPlainText): a NUL pasted into a field would otherwise pass here and
-//   fail only at save time, after the letter was generated.
+//   `max` runs before `trim` so the button agrees with the raw-length
+//   counter under the textarea.
 // ═══════════════════════════════════════════════════════════════════════════
 const text = (maxLength: number) =>
 	z.string().max(maxLength).overwrite(toPlainText).trim()
@@ -42,11 +35,6 @@ export const EMPTY_APPLICATION_INPUT: ApplicationInput = {
 	tone: DEFAULT_LETTER_TONE,
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What the API returns. Dates travel as ISO strings: the same shape goes
-//   through server functions, the NDJSON stream and the browser's persisted
-//   query cache, and only a string survives all three unchanged.
-// ═══════════════════════════════════════════════════════════════════════════
 export const applicationDtoSchema = z.object({
 	createdAt: z.iso.datetime(),
 	id: z.uuid(),

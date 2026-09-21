@@ -21,15 +21,6 @@ export function isBillingEvent(event: WebhookEvent): event is BillingEvent {
 	return /^(subscription|subscriptionItem|paymentAttempt)\./.test(event.type)
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Billing events are recorded, not acted on. Access is decided by the
-//   plan and features Clerk writes into each session token, so there is no
-//   local copy of a subscription to keep in sync — and nothing that can
-//   drift from what Clerk charges for. What the events add is visibility:
-//   a structured log line per lifecycle change, and a warning for the ones
-//   a person should look at (a payment that failed, a subscription that
-//   fell behind).
-// ═══════════════════════════════════════════════════════════════════════════
 export function createBillingWebhookService({ logger }: { logger: Logger }) {
 	return {
 		record(event: BillingEvent): void {

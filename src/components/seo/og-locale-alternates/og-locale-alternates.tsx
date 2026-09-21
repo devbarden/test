@@ -4,10 +4,8 @@ import { isLocalizablePath } from '@/lib/i18n/localized-routes'
 import { useLocale } from '@/lib/i18n/use-locale'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Rendered as elements beside <HeadContent />, not returned from a route's
-//   head(): HeadContent dedupes meta by property, so several
-//   og:locale:alternate tags would collapse into one. Only on pages that
-//   actually exist in every language.
+//   Not in head(): HeadContent dedupes meta by property, which would
+//   collapse the alternates into one.
 // ═══════════════════════════════════════════════════════════════════════════
 export function OgLocaleAlternates() {
 	const locale = useLocale()

@@ -4,13 +4,6 @@ import type { RateLimiter } from '@/backend/rate-limit/rate-limiter.server'
 import type { ApplicationService } from '@/features/applications/application.service.server'
 import type { BillingOverview } from './model/billing-overview'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What the signed-in user's plan grants and how much of it is used — the
-//   numbers the UI turns into "7 letters left today" and upgrade prompts.
-//   Usage is read from the same counters that enforce it (the daily quota
-//   budget in Redis, the application count behind the cap), so the screen
-//   can never promise a letter the server would then refuse.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createBillingService({
 	applicationService,
 	rateLimiter,

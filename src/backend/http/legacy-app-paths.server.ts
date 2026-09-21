@@ -1,12 +1,3 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//   The workspace used to live at /applications, with billing inside it
-//   (/applications/billing) and a new letter at /applications/new. It moved
-//   under /app, with billing beside the letters. Bookmarks, the installed
-//   PWA's old start URL and links pasted into chats still point at the old
-//   shape, so every such address answers with a permanent redirect to its
-//   new one, query string included, before routing or locale handling
-//   ever sees it.
-// ═══════════════════════════════════════════════════════════════════════════
 const LEGACY_PREFIX = /^\/applications(?=\/|$)/
 
 const RENAMED: Record<string, string> = {

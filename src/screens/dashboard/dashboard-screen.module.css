@@ -18,11 +18,6 @@
 			gap: var(--space-4);
 		}
 
-		/* ═══════════════════════════════════════════════════════════════════
-		     Kept mounted while empty so the last card can animate out on its
-		     own (see dashboard-screen.tsx); an empty grid must still take no
-		     space.
-		   ═══════════════════════════════════════════════════════════════════ */
 		&:empty {
 			display: none;
 		}
@@ -39,10 +34,6 @@
 		transition: opacity var(--duration-base) var(--ease-out);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     A line with no height is enough for the observer; it sits in the
-	     grid's bottom margin, so it adds no space of its own.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.sentinel {
 		block-size: 1px;
 		margin-block-start: calc(var(--space-6) * -1 - 1px);

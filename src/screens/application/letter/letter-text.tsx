@@ -8,25 +8,13 @@ type LetterTextProps = {
 	text: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Paragraphs are real <p> elements rather than one pre-wrapped block, so
-//   the letter has structure for assistive tech and spacing that does not
-//   depend on how many blank lines the model chose to emit. While
-//   streaming, a caret sits at the end of the last paragraph — where the
-//   next word will land.
-// ═══════════════════════════════════════════════════════════════════════════
 export function LetterText({ streaming = false, text }: LetterTextProps) {
 	const paragraphs = text.trim().split(/\n\s*\n/)
 	const lastIndex = paragraphs.length - 1
 	const following = useRef(true)
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   When the letter is taller than the panel it scrolls, and two things
-	//   depend on where the reader is: the fade (shown while more lies below)
-	//   and, while streaming, following the newest line — but only for a
-	//   reader who has not scrolled up to reread. A resize observer on the
-	//   text sees every new word that changes its height; the attribute is
-	//   written straight to the DOM so scrolling never re-renders React.
+	//   Written straight to the DOM so scrolling never re-renders React.
 	// ═════════════════════════════════════════════════════════════════════════
 	const track = (scroller: HTMLDivElement | null) => {
 		if (!scroller) return

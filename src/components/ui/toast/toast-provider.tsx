@@ -20,15 +20,8 @@ type ActiveToast = ToastOptions & { id: number }
 const ToastContext = createContext<((toast: ToastOptions) => void) | null>(null)
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One toast at a time: a new one replaces the current one instead of
-//   stacking. The product only ever toasts to offer "Undo" for the action
-//   just taken, and an undo for an older action, still on screen under a
-//   newer one, would be a trap. The timer waits while the toast is hovered
-//   or holds focus, so reaching for "Undo" never races the dismissal.
-//
-//   Focus comes back to where it was when the toast is dismissed from
-//   inside it: otherwise pressing Undo drops a keyboard user at the top of
-//   the document.
+//   One toast at a time: an Undo for an older action still on screen would
+//   be a trap. Focus returns to where it was when the toast closes.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ToastProvider({ children }: { children: ReactNode }) {
 	const [toast, setToast] = useState<ActiveToast | null>(null)

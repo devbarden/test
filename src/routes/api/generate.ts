@@ -4,10 +4,6 @@ import { readJsonBody } from '@/backend/http/request-body.server'
 import { userApiScopeMiddleware } from '@/backend/middleware/api-scope.middleware'
 import { generateCommandSchema } from '@/features/generation/model/protocol'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Four short fields: 16 kB is generous for multi-byte text and JSON
-//   escaping, and refuses anything else before it is buffered.
-// ═══════════════════════════════════════════════════════════════════════════
 const MAX_BODY_BYTES = 16 * 1024
 
 export const Route = createFileRoute('/api/generate')({

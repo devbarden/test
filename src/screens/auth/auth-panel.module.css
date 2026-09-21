@@ -48,10 +48,6 @@
 		list-style: none;
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The line joining the steps runs from under each icon to the next
-	     one, and stops at the last.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.step {
 		position: relative;
 		display: flex;

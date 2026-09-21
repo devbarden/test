@@ -1,13 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   The product catalogue, in code. Clerk Billing holds the same plans and
-//   features and is the source of truth for WHO has what; this file is the
-//   source of truth for what a feature MEANS — the limits and options it
-//   unlocks.
-//
-//   Access is decided by FEATURE, never by plan name: a limit reads
-//   "does this user have extended_history", not "is this user on Pro". Plans
-//   can then be repackaged — a cheaper tier with only one feature, a
-//   promotion that grants one — without touching the code that enforces it.
+//   Access is checked by feature, never by plan name, so plans can be
+//   repackaged without touching the code that enforces them.
 // ═══════════════════════════════════════════════════════════════════════════
 export const BILLING_FEATURES = [
 	'extended_daily_quota',
@@ -68,11 +61,6 @@ export type Subscription = {
 	plan: PlanId
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The one reading of Clerk's `has()`, shared by the server that enforces
-//   a plan and the browser that only shows it, so the two can never
-//   disagree about what a session grants.
-// ═══════════════════════════════════════════════════════════════════════════
 export function subscriptionFrom(has: HasCheck): Subscription {
 	return {
 		entitlements: entitlementsFor(

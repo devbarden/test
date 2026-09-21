@@ -7,16 +7,6 @@ type FocusRequest = {
 	isReady: (items: readonly ApplicationDto[]) => boolean
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Where keyboard focus goes when a card leaves or comes back. The focused
-//   Delete button unmounts with its card, and focus would fall to <body>;
-//   instead it moves to the neighbouring card, or to the page when the list
-//   is empty, and Undo brings it to the restored card.
-//
-//   A request waits until the rendered list shows the change — the list is
-//   deferred and animated, so the card is added or removed a moment after
-//   the cache changes, not in the same render.
-// ═══════════════════════════════════════════════════════════════════════════
 export function useListFocus(items: readonly ApplicationDto[] | undefined) {
 	const request = useRef<FocusRequest | null>(null)
 

@@ -1,8 +1,3 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//   Network chunks do not respect line boundaries: one chunk can end in the
-//   middle of a JSON event, the next can carry three. This re-cuts the text
-//   stream on "\n" and holds the unterminated tail back until it is whole.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createLineSplitter(): TransformStream<string, string> {
 	let buffer = ''
 

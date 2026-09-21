@@ -1,12 +1,8 @@
 export const UNKNOWN_CLIENT_IP = 'unknown'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Railway's edge is the one trusted proxy, and it APPENDS the peer it saw
-//   to X-Forwarded-For. Every entry to the left of it was written by the
-//   client and can be forged, so the trustworthy address is the rightmost
-//   one. The per-IP rate limit depends on this: trusting the leftmost entry
-//   would let anyone pick a fresh bucket per request. If a CDN is ever put in
-//   front of Railway, switch to its own client-IP header instead.
+//   Railway appends the real peer to X-Forwarded-For; everything left of it
+//   is client-forgeable.
 // ═══════════════════════════════════════════════════════════════════════════
 export function getClientIp(headers: Headers): string {
 	const forwarded = headers

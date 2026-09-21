@@ -7,18 +7,6 @@ type LetterData = { input: ApplicationInput; letter: string }
 
 type Page = { cursor?: string; take: number; terms?: readonly string[] }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Every method takes the owner's `userId` and puts it in the WHERE clause
-//   itself (`owned`). There is no "find by id" that a service could call
-//   and then forget to check ownership on: a row that belongs to someone
-//   else is indistinguishable from a row that does not exist. That is what
-//   makes guessing another user's id useless — no IDOR by construction.
-//
-//   Methods that take part in "check, then write" also take an optional
-//   client, so a service can compose them inside one transaction
-//   (withUserLock) and have all of them run on that transaction's
-//   connection.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createApplicationRepository({ db }: { db: PrismaClient }) {
 	const owned = (userId: string) => ({ userId })
 	const active = (userId: string) => ({ ...owned(userId), deletedAt: null })
@@ -56,17 +44,6 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 
 		findActive,
 
-		// ═════════════════════════════════════════════════════════════════════
-		//   Keyset pagination on the UUIDv7 primary key: "older than the last
-		//   id you saw". Unlike OFFSET it costs the same on page 50 as on page
-		//   1, and a letter created or deleted between two page loads cannot
-		//   shift a row into both pages or out of both.
-		//
-		//   Search terms each have to appear in the job title or the company
-		//   (ILIKE, case-insensitive). No trigram index: the owner filter
-		//   comes first on the existing index and a user holds at most a few
-		//   hundred letters, so the pattern only ever runs over those.
-		// ═════════════════════════════════════════════════════════════════════
 		listActive(
 			userId: string,
 			{ cursor, take, terms = [] }: Page,
@@ -122,11 +99,6 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 			return count === 1 ? findActive(userId, id) : null
 		},
 
-		// ═════════════════════════════════════════════════════════════════════
-		//   Serialises writes that must see a consistent count for one user —
-		//   "check the per-user cap, then insert". Two tabs finishing a letter
-		//   at the same instant would otherwise both read 199 and both insert.
-		// ═════════════════════════════════════════════════════════════════════
 		withUserLock<T>(
 			userId: string,
 			callback: (tx: Prisma.TransactionClient) => Promise<T>,
@@ -137,9 +109,8 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Prisma's `contains` becomes ILIKE '%term%' without escaping the term, so
-//   a user's `%` or `_` would act as a wildcard — `%` alone matched every
-//   letter. Backslash is Postgres's default LIKE escape.
+//   Prisma's `contains` does not escape `%` and `_`: `%` alone matched
+//   every letter.
 // ═══════════════════════════════════════════════════════════════════════════
 function literalPattern(term: string): string {
 	return term.replace(/[\\%_]/g, (character) => `\\${character}`)

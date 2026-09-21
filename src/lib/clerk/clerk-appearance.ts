@@ -6,8 +6,8 @@ type ClerkProps = ComponentProps<typeof ClerkProvider>
 type Appearance = ClerkProps['appearance']
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Clerk renders its own UI, so it gets the product's tokens by value:
-//   its variables API does not read CSS custom properties.
+//   Tokens by value: Clerk's variables API does not read CSS custom
+//   properties.
 // ═══════════════════════════════════════════════════════════════════════════
 export const clerkAppearance: Appearance = {
 	elements: {

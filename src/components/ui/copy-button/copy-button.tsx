@@ -4,8 +4,8 @@ import { m } from '@/paraglide/messages'
 import { Button } from '../button'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Functions, not strings: a message read at module scope would capture
-//   the locale of whichever request first imported this file, forever.
+//   Functions: a message read at module scope keeps the first request's
+//   locale forever.
 // ═══════════════════════════════════════════════════════════════════════════
 const LABELS = {
 	copied: () => m['copyButton.copied'](),
@@ -30,12 +30,6 @@ type CopyButtonProps = {
 	text?: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   No text means nothing to copy yet — the button stays in place, disabled,
-//   so the footer does not shift when the letter arrives. `subject` names
-//   what is copied for a screen reader, where a page of cards would
-//   otherwise offer twenty identical "Copy" buttons.
-// ═══════════════════════════════════════════════════════════════════════════
 export function CopyButton({ subject, text }: CopyButtonProps) {
 	const { copy, status } = useCopyToClipboard()
 

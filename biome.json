@@ -67,9 +67,7 @@
 				"src/components/**",
 				"src/hooks/**",
 				"src/lib/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
+				"!**/*.server.ts"
 			],
 			"linter": {
 				"rules": {
@@ -90,12 +88,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/features/account/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
+			"includes": ["src/features/account/**", "!**/*.server.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -124,12 +117,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/features/applications/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
+			"includes": ["src/features/applications/**", "!**/*.server.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -158,12 +146,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/features/billing/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
+			"includes": ["src/features/billing/**", "!**/*.server.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -192,12 +175,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/features/generation/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
+			"includes": ["src/features/generation/**", "!**/*.server.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -225,12 +203,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/features/marketing/**",
-				"!**/*.server.ts",
-				"!**/*.test.ts",
-				"!**/*.test.tsx"
-			],
+			"includes": ["src/features/marketing/**", "!**/*.server.ts"],
 			"linter": {
 				"rules": {
 					"style": {

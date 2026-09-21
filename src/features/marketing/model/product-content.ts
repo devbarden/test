@@ -11,17 +11,6 @@ export type ProductStepId = 'one' | 'two' | 'three'
 
 export type ProductBenefitId = 'voice' | 'saved' | 'goal'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One source for the copy that is said three times: on the page, in its
-//   structured data (HowTo, FAQPage) and in llms.txt. Functions, never
-//   strings, so each reader resolves them in its own locale — a value read
-//   at module scope would freeze the language of the first request. The
-//   optional locale is for llms.txt, which is always English.
-//
-//   Every key is spelled out: a key built from a template string stops the
-//   bundler proving which messages a chunk uses, and it keeps every message
-//   of every locale instead.
-// ═══════════════════════════════════════════════════════════════════════════
 export const PRODUCT_STEPS: readonly Entry<ProductStepId>[] = [
 	{
 		body: (options) => m['landing.steps.one.body']({}, options),

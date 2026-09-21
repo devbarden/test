@@ -10,10 +10,8 @@ type ToastProps = ToastOptions & {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Hover and focus pause the timer independently: moving the pointer away
-//   must not dismiss a toast the keyboard is still inside, and tabbing
-//   between its two buttons is one focus-within, not a blur and a focus
-//   that restart the countdown.
+//   Hover and focus pause the timer independently, so moving the pointer
+//   away never dismisses a toast the keyboard is inside.
 // ═══════════════════════════════════════════════════════════════════════════
 export function Toast({
 	action,

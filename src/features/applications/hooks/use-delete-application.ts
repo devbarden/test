@@ -14,22 +14,6 @@ type DeleteOptions = {
 	onSettled?: () => void
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Delete immediately and offer Undo, rather than asking "Are you sure?".
-//   The card disappears optimistically; Undo restores the soft-deleted row
-//   on the server — the exact letter, not a copy the client sends back —
-//   and it returns to its own place in the list.
-//
-//   A failure puts back only the letter that failed, never a snapshot of the
-//   whole cache: with two deletes in flight, rolling one back to its
-//   snapshot would resurrect the other. A second click on a card already
-//   on its way out is ignored, and "not found" from a delete counts as
-//   done — the letter is gone either way, and an error toast would replace
-//   the Undo the user may be reaching for.
-//
-//   `onSettled` lets the caller refresh what else counted the letter — the
-//   plan's usage, say — without this feature knowing about billing.
-// ═══════════════════════════════════════════════════════════════════════════
 export function useDeleteApplication({
 	onRestored,
 	onSettled,

@@ -1,12 +1,4 @@
 @layer ui {
-	/* ═══
-	     A native modal <dialog>: the browser traps focus, closes it on Esc,
-	     puts it in the top layer above every z-index and hands focus back
-	     to the button that opened it. It fades in from `@starting-style`
-	     and out once it loses `[open]`; `overlay` and `display` transition
-	     discretely so it stays painted while it fades. A browser without
-	     that support simply shows and hides it.
-	   ═══ */
 	.root {
 		inline-size: min(28rem, calc(100vw - var(--layout-gutter) * 2));
 		max-inline-size: none;

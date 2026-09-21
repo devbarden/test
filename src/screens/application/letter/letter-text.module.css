@@ -1,11 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The letter scrolls inside the panel when the panel is held to the
-	     form's height. While more of it lies below, the last lines fade out
-	     towards the footer — the same cue as the dashboard card's cut — and
-	     the fade lifts once the reader reaches the end. `data-more` is set
-	     by letter-text.tsx, which is the only place that can tell.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		flex: 1 1 auto;
 		min-block-size: 0;

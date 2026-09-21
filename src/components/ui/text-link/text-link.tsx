@@ -14,12 +14,6 @@ const TONE_CLASS = {
 	muted: styles.muted,
 } satisfies Record<TextLinkTone, string | undefined>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A link inside running text or a quiet list. The accent tone is
-//   underlined — colour alone must not be what tells a link from a word —
-//   and the muted tone is for navigation lists, where position already
-//   says "this is a link".
-// ═══════════════════════════════════════════════════════════════════════════
 function TextAnchor({ className, tone = 'accent', ...props }: TextAnchorProps) {
 	return (
 		<a {...props} className={clsx(styles.root, TONE_CLASS[tone], className)} />

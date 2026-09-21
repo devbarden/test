@@ -1,11 +1,6 @@
 import type { Logger } from '../observability/logger.server'
 import { type AppError, toAppError } from './app-error.server'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The single place a failure is logged, at the level it deserves: a 4xx is
-//   the caller's problem and a warning; a 5xx is ours and an error, with the
-//   original cause attached for the log only.
-// ═══════════════════════════════════════════════════════════════════════════
 export function logAndNormalizeError(error: unknown, logger: Logger): AppError {
 	const appError = toAppError(error)
 

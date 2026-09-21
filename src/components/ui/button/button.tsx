@@ -7,10 +7,8 @@ type ButtonProps = ButtonStyleProps &
 	Omit<ComponentProps<'button'>, keyof ButtonContentProps>
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A loading button is NOT disabled. The mockup keeps it in its accent
-//   colour, and a disabled button drops out of the tab order, taking the
-//   user's focus with it mid-action. It is marked busy and swallows clicks
-//   instead.
+//   Loading is not disabled: a disabled button leaves the tab order and
+//   drops the user's focus mid-action.
 // ═══════════════════════════════════════════════════════════════════════════
 export function Button({
 	children,

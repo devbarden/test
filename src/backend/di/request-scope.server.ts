@@ -4,15 +4,6 @@ import type { Actor, SystemActor, UserActor } from '../auth/actor'
 import { getRequestContext } from '../http/request-context.server'
 import { type AppContainer, getAppContainer } from './container.server'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One DI scope per request, carrying who it acts for and a logger that
-//   already names the request and the actor — every service resolved from
-//   it logs with that context without being told.
-//
-//   `userActor` is registered only on a user scope. A user-facing service
-//   declares it as a dependency, so resolving one from a system scope (a
-//   webhook, a job) fails loudly instead of running without an owner.
-// ═══════════════════════════════════════════════════════════════════════════
 function createRequestScope(actor: Actor): AppContainer {
 	const container = getAppContainer()
 	const scope = container.createScope()

@@ -10,10 +10,6 @@ type PageHeaderProps = {
 	tone?: 'default' | 'muted'
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The muted tone is the mockup's "New application": a heading standing in
-//   until the user has typed enough for the real one.
-// ═══════════════════════════════════════════════════════════════════════════
 export function PageHeader({
 	actions,
 	size = 'lg',

@@ -35,9 +35,8 @@ const CLERK_LOCALIZATIONS: Record<Locale, Localization> = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Takes the locale instead of reading it: the React Compiler memoizes the
-//   caller's JSX on its reactive inputs, and a reader with no argument looks
-//   like a constant to it — Clerk would keep the first language it got.
+//   Takes the locale as an argument: the React Compiler would treat a
+//   reader with no argument as a constant and keep the first language.
 // ═══════════════════════════════════════════════════════════════════════════
 export function getClerkLocalization(locale: Locale): Localization {
 	return CLERK_LOCALIZATIONS[locale]

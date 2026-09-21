@@ -9,11 +9,6 @@ type AppShellProps = {
 	status?: ReactNode
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The workspace frame: header and one <main>. It renders identically with
-//   empty slots while Clerk loads, so the page never reflows when the
-//   account menu and the goal counter arrive.
-// ═══════════════════════════════════════════════════════════════════════════
 export function AppShell({ account, children, status }: AppShellProps) {
 	return (
 		<Container>

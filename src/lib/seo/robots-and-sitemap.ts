@@ -2,32 +2,19 @@ import { baseLocale, locales } from '@/lib/i18n/locale'
 import { SITE_URL } from '@/lib/site'
 import { localizedUrl } from './seo-links'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The indexable pages, written out by hand and never derived from the
-//   route tree: a new private route is then unindexed by default instead of
-//   published the moment it is added. No <lastmod>: the landing has no real
-//   edit date, and a build timestamp would mark it "modified today" on every
-//   deploy — which is precisely how a crawler learns to ignore the field.
-// ═══════════════════════════════════════════════════════════════════════════
 const LOCALIZED_PATHS = [{ changefreq: 'weekly', path: '/', priority: '1.0' }]
 
 const ALTERNATE_PRIORITY = '0.8'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Robots rules are PREFIX matches, so `/app` is spelled as its three
-//   exact shapes rather than a bare prefix that would also swallow any
-//   future `/apply` or `/app-guide`. Sign-in is deliberately absent: it carries
-//   noindex in its own head, and a disallow would stop a crawler from ever
-//   reading that — leaving it "indexed, though blocked".
+//   Robots rules are prefixes: a bare `/app` would also block `/apply`.
+//   Sign-in is not disallowed, so crawlers can read its noindex.
 // ═══════════════════════════════════════════════════════════════════════════
 const DISALLOWED = ['/app$', '/app?', '/app/', '/api/', '/_serverFn/']
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   AI crawlers are welcome — being quoted by an assistant is how a tool
-//   like this gets found now — and they get a group of their own that
-//   repeats every Disallow. RFC 9309 is winner-takes-all: a crawler that
-//   matches a named group ignores `*` entirely, so a group listing only
-//   `Allow: /` would open the app to it.
+//   RFC 9309: a crawler matching a named group ignores `*`, so the AI group
+//   repeats every Disallow.
 // ═══════════════════════════════════════════════════════════════════════════
 const AI_CRAWLERS = [
 	'GPTBot',

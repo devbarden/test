@@ -15,19 +15,19 @@ before changing anything under `src/backend` or a `*.server.ts` file.
 ## Commands
 
 ```bash
-npm run db:up               # Postgres + Redis in Docker (dev and test)
-npm run dev                 # http://localhost:3000
+npm run dev                 # starts Postgres + Redis in Docker, migrates, http://localhost:3000
 npm run lint                # Biome: format, lint, import layering
 npm run typecheck
-npm test                    # unit tests (no I/O)
-npm run test:integration    # repository/limiter/lock against real Postgres + Redis
-npm run e2e                 # Playwright, full stack with a fake Generation API
 npm run db:migrate:create   # CREATE a migration from schema changes
 npm run db:migrate          # create + apply locally
+npm run db:down             # stop the local databases
 ```
 
-Run `npm run lint` (Biome, including the import layering), `npm run
-typecheck` and `npm test` before reporting a change as done.
+Run `npm run lint` and `npm run typecheck` before reporting a change as
+done. There are no automated tests.
+
+Development runs on local Postgres and Redis from `docker-compose.yml`;
+`.env.example` already points at them.
 
 ⚠ Never run `prisma migrate reset` or point any command at a non-local
 database without explicit approval. Production migrations are applied only
@@ -52,8 +52,7 @@ does.
 
 - Inside a function or JSX, the banner is indented with the code and its
   rules are shortened to keep the same right edge.
-- CSS uses one block: `/* ═══…` … `═══… */` with the text indented by five
-  spaces.
+- CSS has no comments.
 - YAML, `.gitignore` and `.env*` use the same shape with `#`.
 - Prisma schema has no comments; the rationale for the model lives in
   `docs/architecture.md`.
@@ -65,7 +64,7 @@ does.
 ### Formatting and naming
 
 - Biome: tabs, single quotes, no semicolons, sorted object keys, JSX
-  attributes and CSS properties. `npm run biome:lint:fix` fixes it.
+  attributes and CSS properties. `npm run lint:fix` fixes it.
 - `*.server.ts` is server-only and must never be imported, directly, by a
   file that reaches the client bundle. Server functions (`*.api.ts`) and
   middleware files drop the suffix because the client imports them; they
@@ -169,8 +168,6 @@ repository (Prisma, every query scoped by owner) → Postgres.
 5. `x.api.ts` — `createServerFn` + `userScopeMiddleware` +
    `.validator(validateInput(schema))` + one service call.
 6. `x.queries.ts` — key and query factories for the client.
-7. Unit tests for the service (fakes in `src/test/fakes`), integration tests
-   for the repository.
 
 ### Frontend rules
 
@@ -218,21 +215,11 @@ repository (Prisma, every query scoped by owner) → Postgres.
   sitemap) and gets canonical + hreflang via `src/lib/seo/seo-links.ts`;
   anything private gets `noindex` and a robots `Disallow`. `llms.txt` is
   built from the same messages (`features/marketing/llms.server.ts`).
-- `VITE_SITE_URL` is the public origin, inlined at build time; without it
-  every page is served noindex.
-
-## Tests
-
-- **Unit** (`*.test.ts`) — no network, no database; fakes for repositories
-  and gateways.
-- **Integration** (`*.integration.test.ts`) — real Postgres and Redis from
-  `docker compose` (`db-test`, Redis db 1); each test starts clean.
-- **E2E** (`e2e/`) — the real app against the test database and a local fake
-  of the Generation API (`e2e/fake-generation-api.ts`), so runs are
-  deterministic and never spend the shared upstream quota.
+- `SITE_URL` (`src/lib/site.ts`) is the public origin, a constant: change
+  it there when the domain changes. Only a production build is indexable.
 
 ## Commits
 
-Small, conventional (`feat(scope):`, `fix:`, `refactor:`, `test:`,
+Small, conventional (`feat(scope):`, `fix:`, `refactor:`,
 `docs:`, `chore:`), each one a single reviewable step with a body that says
 why. Never commit `.env` or anything under `src/generated`.

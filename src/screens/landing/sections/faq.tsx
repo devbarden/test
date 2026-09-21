@@ -7,11 +7,6 @@ import { Reveal } from '../reveal/reveal'
 import styles from './faq.module.css'
 import { Section } from './section'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Native <details>, no accordion library: the answers are in the HTML
-//   whether or not a panel is open, so a crawler and find-in-page read every
-//   one, and the open/close animation is CSS alone (see faq.module.css).
-// ═══════════════════════════════════════════════════════════════════════════
 export function Faq() {
 	return (
 		<Section

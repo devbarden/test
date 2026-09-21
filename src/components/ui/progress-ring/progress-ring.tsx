@@ -9,9 +9,8 @@ type ProgressRingProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The compact twin of Meter: the same native <meter> for assistive tech,
-//   drawn as a ring where a bar has no room. At zero the fill is not drawn
-//   at all — a round line cap of length zero would still paint a dot.
+//   At zero the fill is not drawn: a round cap of length zero still paints
+//   a dot.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ProgressRing({
 	label,

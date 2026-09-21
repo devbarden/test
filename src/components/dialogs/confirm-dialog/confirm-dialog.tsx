@@ -14,11 +14,8 @@ export type ConfirmDialogProps = {
 const EXIT_TRANSITION_MS = 200
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A question the code can await: `if (await ConfirmDialog.call({…}))`.
-//   The same callable pattern as every dialog in the product (react-call):
-//   no open/close state in the caller, and `<DialogRoots />` mounts the one
-//   place it renders. Cancel comes first and takes the focus, so Enter on
-//   a destructive question never destroys anything.
+//   Cancel comes first and takes focus, so Enter never confirms a
+//   destructive question.
 // ═══════════════════════════════════════════════════════════════════════════
 export const ConfirmDialog = createCallable<ConfirmDialogProps, boolean>(
 	({ call, cancelLabel, confirmLabel, message, title, tone = 'default' }) => (

@@ -3,16 +3,8 @@ import { isIndexable, SITE_URL } from '@/lib/site'
 const CANONICAL_HOST = new URL(SITE_URL).host
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The header half of "what may be indexed"; the page's robots meta is the
-//   other. One production build serves the real domain, any staging host
-//   and every Railway preview URL alike, so nothing known at build time can
-//   tell them apart — the Host header can. A search engine honours the
-//   stricter of header and meta, so a non-canonical host is told noindex
-//   here without the HTML changing.
-//
-//   Redirects never carry it (a crawler must follow a redirect to the
-//   canonical page, not drop it), a 404 is noindex everywhere, and the API
-//   and server functions are never a page.
+//   One build serves the domain and every preview URL; only the Host header
+//   tells them apart.
 // ═══════════════════════════════════════════════════════════════════════════
 export function robotsHeader(
 	request: Request,

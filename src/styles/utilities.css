@@ -1,7 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-     The only global classes, used by name from any component. The last
-     layer, so a utility wins over whatever the element's own module says.
-   ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
 	.visually-hidden {
 		position: absolute;

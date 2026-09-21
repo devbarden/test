@@ -10,33 +10,14 @@ const CACHE_KEY_PREFIX = 'alt-shift:cache:'
 
 const PERSIST_THROTTLE_MS = 500
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What a caller chooses to keep: the query-key roots worth restoring, and
-//   a version bumped whenever their shape changes — a persisted cache
-//   written by an older build is then discarded instead of being fed to
-//   components that expect the new shape.
-// ═══════════════════════════════════════════════════════════════════════════
 export type PersistedQueries = {
 	roots: readonly string[]
 	version: string
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The server is the source of truth; this is how letters are ALSO
-//   restored "by means of the browser": the query cache is written to
-//   localStorage, per user, and read back on the next visit before the
-//   first render. The dashboard therefore paints the letters immediately —
-//   and still shows them when the API cannot be reached — then revalidates.
-//
-//   Restored queries are marked stale at once. What was persisted may be
-//   seconds old and still inside staleTime, and it may predate the last
-//   change (the throttled write missed an Undo right before a reload): the
-//   cached letters are painted, and every query revalidates as it mounts.
-//
-//   Restoring is synchronous on purpose. localStorage is synchronous, so the
-//   cache can be filled before any component mounts; the asynchronous
-//   restore of PersistQueryClientProvider left a window in which queries
-//   started fetching and the restored letters never reached the screen.
+//   Restored synchronously: the async PersistQueryClientProvider let queries
+//   fetch first, and the restored letters never reached the screen.
 // ═══════════════════════════════════════════════════════════════════════════
 export function restoreCache(
 	queryClient: QueryClient,
@@ -67,12 +48,6 @@ export function restoreCache(
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Writes the chosen successful queries back to storage as they change,
-//   throttled. Returns the unsubscribe function. Without localStorage (Safari
-//   with storage blocked, some webviews) nothing is written and the app
-//   simply works from the network.
-// ═══════════════════════════════════════════════════════════════════════════
 export function persistCache(
 	queryClient: QueryClient,
 	userId: string,
@@ -98,11 +73,6 @@ export function persistCache(
 	})
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Signing out removes every user's cached letters from this browser: on a
-//   shared computer, the next person must not find the previous one's
-//   letters in storage.
-// ═══════════════════════════════════════════════════════════════════════════
 export function clearPersistedCaches(): void {
 	const storage = getLocalStorage()
 

@@ -3,13 +3,6 @@ import {
 	ValidationError,
 } from '../errors/app-error.server'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Reads a JSON body without trusting the client about its size: the
-//   declared Content-Length is checked first (cheap refusal), and the bytes
-//   are then counted as they arrive, cancelling the read the moment the cap
-//   is passed — a chunked upload that declares nothing cannot make us
-//   buffer more than `maxBytes`.
-// ═══════════════════════════════════════════════════════════════════════════
 export async function readJsonBody(
 	request: Request,
 	maxBytes: number,
@@ -59,13 +52,7 @@ async function readCappedText(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The server-wide body cap. A declared Content-Length is checked up front
-//   (the HTTP parser then holds the body to it). A request that declares
-//   none — a chunked upload — gets its body re-wrapped in a stream that
-//   counts bytes and errors past the cap, so no handler can be made to
-//   buffer an unbounded body, whatever it does with it. Browsers always
-//   declare a length for the bodies this app sends, so the re-wrap only
-//   ever applies to traffic that did not come from the app.
+//   A chunked body declares no length, so it is counted as it streams.
 // ═══════════════════════════════════════════════════════════════════════════
 export function withBodyLimit(request: Request, maxBytes: number): Request {
 	const declared = request.headers.get('content-length')
@@ -91,9 +78,8 @@ export function withBodyLimit(request: Request, maxBytes: number): Request {
 	)
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   Rebuilt field by field rather than as `new Request(request, …)`: the
-	//   server hands in its own Request implementation, which the platform
-	//   constructor cannot copy from.
+	//   Not `new Request(request, …)`: the server's own Request cannot be
+	//   copied by it.
 	// ═════════════════════════════════════════════════════════════════════════
 	return new Request(request.url, {
 		body: limited,

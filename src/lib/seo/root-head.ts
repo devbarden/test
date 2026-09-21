@@ -10,17 +10,6 @@ const FONTS_TO_PRELOAD = [
 	'/fonts/FixelDisplay-SemiBold.woff2',
 ]
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The document-wide defaults. Every public page overrides title,
-//   description and the card per meta name; what survives here is what a
-//   route with no `head()` of its own inherits — the app and sign-in, never
-//   shared on purpose but all of them pasteable into a chat window.
-//
-//   The robots tag says "index" only for a production build that knows its
-//   own address (see `isIndexable`); a host that is not that address is
-//   still told noindex by the X-Robots-Tag header, which a search engine
-//   honours over this tag.
-// ═══════════════════════════════════════════════════════════════════════════
 export function rootHead() {
 	const title = m['meta.root.title']()
 	const description = m['meta.root.description']()

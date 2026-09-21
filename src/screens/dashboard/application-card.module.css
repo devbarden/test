@@ -1,11 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The mockup's card: a fixed 240px tile, five and a half lines of
-	     letter and the actions under them. The text is cut, not clamped, and
-	     a short fade in the card's own colour runs over the cut, so it reads
-	     as more letter below rather than as a rendering bug. The colour is a
-	     property so the fade follows the card when its hover tint changes.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		--_surface: var(--color-surface-muted);
 

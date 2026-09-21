@@ -1,11 +1,4 @@
 @layer base {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Classes for React's <ViewTransition enter="…" exit="…">. They are
-	     view-transition classes, not CSS classes, so they live here rather
-	     than in a module that would hash their names. `:only-child` limits
-	     them to a real enter or exit; an element that merely moves keeps the
-	     browser's default morph.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	::view-transition-new(.pop-in):only-child {
 		animation: pop-in var(--duration-base) var(--ease-out) both;
 	}
@@ -28,15 +21,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Page transitions. The router starts them and names their types (see
-	     lib/page-transition.ts); every rule here hangs off the `page` type,
-	     so none of it touches an animation React starts inside a page. The
-	     page slides a little in the direction of travel while it
-	     cross-fades; a move between sections has no direction and only
-	     fades. The app header is named in its own module, so it holds still
-	     above the page.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	:root:active-view-transition-type(page) main {
 		view-transition-name: page;
 		view-transition-class: page;
@@ -77,10 +61,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     `*` in the reduced-motion switch does not reach the view-transition
-	     pseudo-elements.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	@media (prefers-reduced-motion: reduce) {
 		::view-transition-group(*),
 		::view-transition-old(*),

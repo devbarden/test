@@ -1,9 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     A static dot grid under the whole page — texture without colour: on
-	     a white page a coloured haze reads as a stain. It never moves, so it
-	     costs nothing while scrolling.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		position: relative;
 		min-block-size: 100dvh;

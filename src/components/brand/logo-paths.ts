@@ -1,12 +1,5 @@
 export type LogoPath = { d: string; evenOdd?: boolean; x: number; y: number }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The mark and the wordmark exactly as drawn in the Figma mockup, lifted
-//   from its vector data rather than redrawn: the wordmark is lettering, not
-//   text in a font, so only the original outlines match it pixel for pixel.
-//   The mark is 44×44 and its own origin; the wordmark's offsets already
-//   place it in the 179×48 lockup.
-// ═══════════════════════════════════════════════════════════════════════════
 export const MARK_PATHS: readonly LogoPath[] = [
 	{
 		d: 'M18.7 3.3C15.2 2 11.6 1.8 8.3 2.7C6 3.3 3.8 4.5 1.8 6L0.4 7.2L0 7.6L0.9 8.4C1 8.4 1 8.5 1.1 8.6C1.3 8.8 1.5 8.9 1.8 9.1L2.4 9.5L3 9C3.1 8.9 3.3 8.7 3.5 8.6C5.3 7.1 7.3 6.1 9.4 5.6C12.1 4.9 15 5 17.9 6.1C20.3 7 25.2 8.1 31.1 5.6L31.3 5.5L31.6 5.2C31.6 5.1 31.7 5.1 31.8 5C32.3 4.4 32.8 3.8 33.2 3.1L35.2 0L32 1.8C27.3 4.4 23 4.9 18.7 3.3Z',

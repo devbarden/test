@@ -1,12 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   Applied to every response by the server entry.
-//
-//   The CSP is deliberately limited to the directives that cannot break the
-//   app: no framing (clickjacking), no <base> hijack, no plugins, forms post
-//   only to us. A script-src policy is left out on purpose — Clerk loads its
-//   UI and bot protection from its own and Cloudflare's domains, and a
-//   policy that drifts from theirs fails as a blank sign-in page in
-//   production. It belongs with a nonce-based setup, not a guessed allowlist.
+//   No script-src: Clerk loads scripts from its own and Cloudflare's domains.
 // ═══════════════════════════════════════════════════════════════════════════
 const BASE_HEADERS: Record<string, string> = {
 	'Content-Security-Policy':

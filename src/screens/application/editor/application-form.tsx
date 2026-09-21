@@ -20,11 +20,6 @@ type ApplicationFormProps = {
 	value: ApplicationInput
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The tone choice appears only for those whose plan includes tones;
-//   everyone else writes in the default tone, which is also what is sent
-//   (see effectiveTone).
-// ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationForm({
 	hasLetter,
 	isGenerating,

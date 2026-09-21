@@ -8,10 +8,6 @@ import { m } from '@/paraglide/messages'
 import { useGoalProgress } from '../hooks/use-goal-progress'
 import styles from './goal-banner.module.css'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Owns its own visibility: the rule "shown until the goal is met" is the
-//   banner's, so no screen that renders it can forget to apply it.
-// ═══════════════════════════════════════════════════════════════════════════
 export function GoalBanner() {
 	const { count, goal, isKnown, isReached } = useGoalProgress()
 	const titleId = useId()

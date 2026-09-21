@@ -3,16 +3,6 @@ import { WalletIcon } from 'lucide-react'
 import { m } from '@/paraglide/messages'
 import styles from './account-menu.module.css'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Clerk's account menu, with the plan added to it: the mockup's header has
-//   no room for a billing control, and "Plan & billing" belongs with the
-//   account anyway.
-// ═══════════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════════
-//   Clerk's trigger fills the header's framed slot and takes the icon
-//   buttons' hover; the avatar shrinks to an icon's size inside the frame.
-//   Clerk styles by value, so these are CSS values it passes through.
-// ═══════════════════════════════════════════════════════════════════════════
 const TRIGGER_APPEARANCE = {
 	elements: {
 		avatarBox: { height: '1.5rem', width: '1.5rem' },

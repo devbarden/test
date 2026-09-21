@@ -25,15 +25,8 @@ type PlanPickerProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The plans drawn by the app itself, not by Clerk's pricing table: the
-//   cards speak the product's language and look, and Clerk keeps only the
-//   parts that must be its own — the checkout drawer, which handles the
-//   card, 3-D Secure and receipts, and the subscription details behind
-//   "Manage".
-//
-//   Actions wait for the current plan, read from the same server overview
-//   as the usage above, so a card never offers an upgrade to the plan the
-//   user already has while a fresh session token is on its way.
+//   Actions wait for the current plan so a card never offers the plan the
+//   user already has.
 // ═══════════════════════════════════════════════════════════════════════════
 export function PlanPicker({ currentPlan }: PlanPickerProps) {
 	const { isError, isLoading, offers, retry } = usePlanOffers()

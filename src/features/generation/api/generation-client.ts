@@ -9,12 +9,8 @@ import {
 } from '../model/protocol'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Longer than any silence the server allows itself — 30 s to the model's
-//   first byte, 20 s between fragments, then a save bounded by the
-//   database's statement timeout — so it fires only on a connection that
-//   died without closing. A phone that switches networks mid-letter leaves
-//   exactly that: a socket that never errors, and a letter that would say
-//   "writing" forever.
+//   Longer than any server silence: only a dead socket (a phone switching
+//   networks) trips it.
 // ═══════════════════════════════════════════════════════════════════════════
 const IDLE_TIMEOUT_MS = 60_000
 
@@ -34,13 +30,7 @@ export type LetterStreamEvent = Extract<
 >
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Yields the letter fragment by fragment, then `saving` once it is whole,
-//   and RETURNS the saved application from the server's terminal `done`
-//   event. A body that ends without it is a failure, never a short letter.
-//
-//   `signal` is the caller's Stop. The request itself runs on a connection
-//   signal that also trips when the server goes quiet for too long, and a
-//   trip that was not a Stop is reported as `interrupted`.
+//   A body that ends without `done` is a failure, never a short letter.
 // ═══════════════════════════════════════════════════════════════════════════
 export async function* requestLetter(
 	command: GenerateCommand,
@@ -101,10 +91,7 @@ async function postCommand(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   An AbortSignal that follows `parent` and also fires after `timeoutMs`
-//   without a `reset`. Linked by hand rather than with AbortSignal.any,
-//   which Safari only gained in 17.4 — on an older iPhone every letter
-//   would fail on a TypeError before the request was even sent.
+//   Linked by hand: AbortSignal.any is missing before Safari 17.4.
 // ═══════════════════════════════════════════════════════════════════════════
 function createIdleAbort(parent: AbortSignal, timeoutMs: number) {
 	const controller = new AbortController()
@@ -152,9 +139,7 @@ async function failureFromResponse(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A reader loop instead of `for await` over the stream itself: async
-//   iteration of a ReadableStream reached Safari late, and the e2e suite
-//   runs Chromium only, so nothing would have caught it breaking there.
+//   A reader loop: Safari got async iteration of streams late.
 // ═══════════════════════════════════════════════════════════════════════════
 async function* readAll<T>(stream: ReadableStream<T>): AsyncGenerator<T> {
 	const reader = stream.getReader()

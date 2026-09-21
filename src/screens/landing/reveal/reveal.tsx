@@ -5,17 +5,8 @@ import styles from './reveal.module.css'
 let sharedObserver: IntersectionObserver | null = null
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One observer for the whole page rather than one per block, and each
-//   block is revealed once, then forgotten: scrolling back up never replays
-//   an animation the reader has already seen.
-//
-//   A block starts `idle`, which is fully visible — the server HTML, a
-//   crawler and a browser without JavaScript all see everything. The first
-//   look decides its fate: a block already on screen, or above it (a reload
-//   halfway down, a link to #faq), is `shown` as it stands, with no replay;
-//   only a block below the fold is hidden (`off`) until it scrolls in (`on`).
-//   Measuring the block itself, not the observer's shrunken root, keeps a
-//   block in the bottom strip of the screen from vanishing on load.
+//   Blocks start visible (SSR, no JS, crawlers); only those below the fold
+//   hide until scrolled in.
 // ═══════════════════════════════════════════════════════════════════════════
 function revealObserver(): IntersectionObserver {
 	sharedObserver ??= new IntersectionObserver(
@@ -45,13 +36,6 @@ function revealObserver(): IntersectionObserver {
 	return sharedObserver
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `immediate` animates straight from the server HTML, for what is on screen
-//   at load; `stagger` reveals the direct children one after another.
-//
-//   A ref callback with a cleanup (React 19) instead of an effect: the node
-//   is observed exactly while it is mounted, with no ref object to hold.
-// ═══════════════════════════════════════════════════════════════════════════
 function observe(element: HTMLElement | null) {
 	if (!element) return
 

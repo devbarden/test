@@ -21,12 +21,6 @@ type PlanCardProps = {
 	period: BillingPeriod
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One plan, in the app's own surfaces: the paid plan sits on the green
-//   of encouragement, the free one on the grey of everyday content. With
-//   the annual period chosen, the price is what a month costs within the
-//   year, and the note says what is actually charged.
-// ═══════════════════════════════════════════════════════════════════════════
 export function PlanCard({ action, isCurrent, offer, period }: PlanCardProps) {
 	const locale = useLocale()
 	const isFree = offer.fee.amount === 0

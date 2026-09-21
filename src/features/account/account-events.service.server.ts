@@ -6,20 +6,6 @@ import {
 	isBillingEvent,
 } from '@/features/billing/billing-webhook.service.server'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What happens here when something happens to an account in Clerk — the
-//   one place that maps a verified event to the features it concerns:
-//
-//   user.deleted      the account's letters go with it, so personal data
-//                     does not outlive the person's decision to leave
-//   billing events    recorded for visibility; access itself follows the
-//                     plan in the session token, not these events
-//   anything else     ignored, so enabling a new event in Clerk's dashboard
-//                     cannot break the endpoint
-//
-//   Idempotent — Svix retries until it sees a 2xx, and erasing an already
-//   erased user deletes nothing and succeeds.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createAccountEventsService({
 	applicationMaintenanceService,
 	billingWebhookService,

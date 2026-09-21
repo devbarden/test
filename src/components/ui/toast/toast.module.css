@@ -1,9 +1,4 @@
 @layer ui {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The message wraps: error sentences are long, Russian ones longer,
-	     and a toast that ran past its own box on a phone hid the Undo
-	     beside it.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		position: fixed;
 		inset-block-end: var(--space-6);

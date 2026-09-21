@@ -13,12 +13,6 @@ type ApplicationScreenProps = {
 	justSaved: boolean
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Opened from the dashboard, the letter is already in the list cache and
-//   renders on the first frame; the detail query then revalidates it.
-//   Opened from a link, it is fetched. The editor mounts only once the
-//   letter is known: its form is initialised from it exactly once.
-// ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationScreen({
 	applicationId,
 	justSaved,

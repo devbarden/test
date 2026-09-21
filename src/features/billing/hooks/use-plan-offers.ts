@@ -33,13 +33,6 @@ type PlanOffers = {
 	retry: () => void
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The plans as Clerk sells them — price, trial, the features each one
-//   carries — read through the catalogue, so a card lists the same limits
-//   the server enforces rather than the marketing names typed into Clerk's
-//   dashboard (which are English only). A trial is offered only to a user
-//   who has not had one.
-// ═══════════════════════════════════════════════════════════════════════════
 export function usePlanOffers(): PlanOffers {
 	const plans = usePlans({ for: 'user' })
 	const subscription = useSubscription()
@@ -82,10 +75,6 @@ function toOffer(
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A free plan comes back from Clerk with an empty currency, so "$0" is
-//   written in the currency the paid plans are sold in.
-// ═══════════════════════════════════════════════════════════════════════════
 function shopCurrency(plans: readonly ClerkPlan[]): string {
 	return plans.find((plan) => plan.fee?.currency)?.fee?.currency ?? 'USD'
 }

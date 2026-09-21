@@ -37,31 +37,8 @@ const SKELETON_KEYS = ['first', 'second'] as const
 const LOAD_AHEAD_MARGIN = '0px 0px 480px 0px'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The cache updates through useSyncExternalStore, which React always
-//   renders synchronously — and a synchronous render never animates. The
-//   grid therefore renders a deferred copy of the list: the change commits
-//   a moment later as a Transition, and <ViewTransition> animates it. A
-//   deleted card fades out while its neighbours slide into the gap, and a
-//   card brought back by Undo or loaded by scrolling fades in.
-//
-//   The grid, its loading row and the empty state all read deferred
-//   copies from the same render, so they never disagree for a frame: the
-//   skeleton row leaves in the very commit that brings the cards replacing
-//   it. The error follows the live query, where a frame's delay would only
-//   make it late. The <ul> stays
-//   mounted while it is empty: a card only animates its exit when it is
-//   removed on its own, not together with the list around it.
-//
-//   The search lives in the URL (`?q=`), owned by the route; the field
-//   appears once there is anything to search. While a new search loads,
-//   the previous results stay, marked busy, and "nothing found" waits for
-//   the real answer.
-//
-//   The list pages in as it scrolls: a sentinel under the grid asks for the
-//   next page a little before it comes into view, and the row of skeleton
-//   cards shown meanwhile has the exact shape of real ones, so the cards
-//   that replace them do not move anything. A failed page stops the
-//   scrolling and offers a retry instead.
+//   useSyncExternalStore renders synchronously and never animates, so the
+//   list is deferred for <ViewTransition>.
 // ═══════════════════════════════════════════════════════════════════════════
 type DashboardScreenProps = {
 	onSearchChange: (search: string) => void

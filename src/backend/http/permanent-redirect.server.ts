@@ -1,10 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   A URL that is not the canonical spelling of a page — `/ru` without its
-//   slash, `/RU/` — is answered by the router with a 307. To a crawler a 307
-//   is temporary: it keeps the wrong spelling and re-checks it forever. The
-//   spelling will never become right, so it is said permanently, as a 308
-//   (a 301 that keeps the method). Any other redirect — to sign-in, say —
-//   is left temporary, as it should be.
+//   A 307 to the canonical spelling becomes a 308, so crawlers drop the wrong
+//   URL.
 // ═══════════════════════════════════════════════════════════════════════════
 export function asPermanentIfSpelling(
 	request: Request,

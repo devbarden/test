@@ -17,17 +17,6 @@ import {
 import type { ApiError } from '@/lib/api/api-error'
 import { redirectToSignIn } from '@/lib/query/query-client'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Generation as the editor needs it: stream a letter for these inputs and
-//   leave every cache that could have changed up to date, whatever the
-//   outcome. A stopped or failed run may still have written something — a
-//   letter saved in the moment Stop was pressed, a day's quota spent — so
-//   the applications and the usage overview are revalidated after each
-//   run, not only after a success.
-//
-//   The saved application goes into the cache before the stream hands over,
-//   so the editor never flashes back to the previous letter.
-// ═══════════════════════════════════════════════════════════════════════════
 export function useGenerateApplication(saved: ApplicationDto | undefined) {
 	const queryClient = useQueryClient()
 	const generation = useLetterGeneration()

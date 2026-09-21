@@ -11,13 +11,8 @@ type DialogProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Rendered only while it is open: it shows itself as a modal on mount and
-//   closes when `closing` turns true, so the owner (a react-call callable)
-//   keeps it mounted just long enough for the exit transition.
-//
-//   Every way out that is not an action — Esc, a click on the backdrop —
-//   ends in the native `close` event, which reports a dismissal unless the
-//   dialog is already closing because an action ended it.
+//   Esc and a backdrop click end in the native `close` event, reported as
+//   a dismissal unless an action is already closing the dialog.
 // ═══════════════════════════════════════════════════════════════════════════
 export function Dialog({
 	actions,

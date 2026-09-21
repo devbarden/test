@@ -22,10 +22,8 @@ export type RateLimitUsage = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Counters live in Redis so the limits hold across replicas. If Redis is
-//   unreachable each limiter falls back to an in-memory one of the same
-//   size: limits then apply per process — looser, but never OFF. Failing
-//   open would hand the shared upstream budget to whoever notices first.
+//   If Redis is down, limits fall back to per-process memory: looser, never
+//   off.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createRateLimiter({
 	config,
@@ -50,10 +48,8 @@ export function createRateLimiter({
 	}
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   One limiter per (tier, limit), all writing the SAME Redis counter for
-	//   a tier: the stored value is points consumed, and the limit is only
-	//   compared against it. A user who upgrades mid-day therefore keeps what
-	//   they already spent and gets the higher ceiling at once.
+	//   All limits of a tier share one counter, so an upgrade keeps what was
+	//   spent.
 	// ═════════════════════════════════════════════════════════════════════════
 	function limiterFor(budget: Budget): RateLimiterRedis {
 		const points = pointsOf(budget)
@@ -79,12 +75,8 @@ export function createRateLimiter({
 	}
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   A refused attempt gives its point straight back. The store counts
-	//   every attempt, refused ones included, so without this a user who
-	//   keeps pressing Generate past the daily quota would push the counter
-	//   beyond it — and after upgrading, those refusals would be spent out of
-	//   the new plan's quota. The counter stays equal to the charges that
-	//   were actually allowed.
+	//   A refused attempt gives its point back, so refusals never eat a later
+	//   plan's quota.
 	// ═════════════════════════════════════════════════════════════════════════
 	async function consume(budget: Budget): Promise<void> {
 		const limiter = limiterFor(budget)
@@ -109,11 +101,6 @@ export function createRateLimiter({
 		}
 	}
 
-	// ═════════════════════════════════════════════════════════════════════════
-	//   Gives a point back when a request was counted but never got to do
-	//   the work. Best effort: a refund that fails only costs the user one
-	//   point until the window rolls over.
-	// ═════════════════════════════════════════════════════════════════════════
 	async function refund(budget: Budget): Promise<void> {
 		await limiterFor(budget)
 			.reward(budget.key, 1)
@@ -128,14 +115,6 @@ export function createRateLimiter({
 	return {
 		consume,
 
-		// ═════════════════════════════════════════════════════════════════════
-		//   Charges several budgets as one: in order, and if any of them
-		//   refuses, the ones already charged are refunded before the refusal
-		//   is rethrown. A caller is never billed for work that a later budget
-		//   stopped from happening. Order the cheapest, most personal budgets
-		//   first and shared ones last, so a user who is over their own limit
-		//   never spends the shared one.
-		// ═════════════════════════════════════════════════════════════════════
 		async consumeAll(budgets: readonly Budget[]): Promise<void> {
 			const charged: Budget[] = []
 

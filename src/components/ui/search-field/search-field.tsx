@@ -13,11 +13,6 @@ type SearchFieldProps = Omit<
 	value: string
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A labelled search input with its own clear button. Escape clears it
-//   too, and clearing keeps the focus in the field — the button that took
-//   the click disappears with the text.
-// ═══════════════════════════════════════════════════════════════════════════
 export function SearchField({
 	className,
 	clearLabel,

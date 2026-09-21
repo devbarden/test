@@ -14,11 +14,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Two blank letters, drawn in a sheet's portrait proportions — a wide
-	     strip reads as a squashed card, not as paper. A green heading line,
-	     then body lines of uneven length, the way a paragraph ends.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.illustration {
 		display: flex;
 		margin-block-end: var(--space-10);

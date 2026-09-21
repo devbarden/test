@@ -1,11 +1,5 @@
 import type { ApiError } from '@/lib/api/api-error'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `waiting` and `streaming` are separate on purpose: the first is the
-//   seconds before the model says anything (the orb), the second is text
-//   arriving (the letter writing itself). `failed` and `stopped` keep the
-//   partial text, so the user sees what they got before it broke off.
-// ═══════════════════════════════════════════════════════════════════════════
 export type GenerationState =
 	| { status: 'idle' }
 	| { status: 'waiting' }
@@ -38,9 +32,7 @@ export function generationReducer(
 	}
 
 	// ═══════════════════════════════════════════════════════════════════════
-	//   Everything below belongs to a generation in flight. A fragment that
-	//   arrives after Stop — the network does not un-send it — must not
-	//   bring a stopped letter back to life.
+	//   A fragment that arrives after Stop must not revive the letter.
 	// ═══════════════════════════════════════════════════════════════════════
 	if (!isGenerating(state)) return state
 
@@ -70,9 +62,7 @@ export function isGenerating(state: GenerationState): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Once the server says `saving` the letter is being written to the
-//   database whatever the browser does, so Stop is no longer offered: it
-//   would report "not saved" about a letter that is.
+//   After `saving` the letter is stored regardless, so no Stop.
 // ═══════════════════════════════════════════════════════════════════════════
 export function isStoppable(state: GenerationState): boolean {
 	return state.status === 'waiting' || state.status === 'streaming'

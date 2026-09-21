@@ -1,8 +1,4 @@
 @layer components {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The mockup draws the rule as an inside stroke, inside the padding; a
-	     CSS border sits outside it, so the padding gives back its 1px.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.root {
 		display: flex;
 		flex-wrap: wrap;
@@ -18,12 +14,6 @@
 		padding-block-end: calc(var(--space-3) - 1px);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The actions take the rest of the title's row, aligned to its end.
-	     When they no longer fit beside the title — a search field and a
-	     button on a phone — the whole group wraps under it and gets the
-	     full width.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.actions {
 		display: flex;
 		flex: 1 1 auto;

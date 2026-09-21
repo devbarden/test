@@ -9,11 +9,6 @@ import { localizeHref } from '@/paraglide/runtime'
 import styles from './landing-footer.module.css'
 import { LANDING_NAV } from './landing-sections'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The language links are plain anchors on purpose: they are how a
-//   crawler that never clicks the switcher still finds every translation
-//   from every page, alongside the hreflang tags in the head.
-// ═══════════════════════════════════════════════════════════════════════════
 export function LandingFooter() {
 	const pathname = usePathname()
 	const productId = useId()

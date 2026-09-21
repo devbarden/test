@@ -15,15 +15,8 @@ import { m } from '@/paraglide/messages'
 const PATH = '/'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Structured data is built per request from the translated messages: it
-//   must describe the page in the language the page is in.
-//
-//   `Service`, not `SoftwareApplication`: Google treats the latter as a
-//   rich-result type that requires ratings, and without real ones it sits
-//   in Search Console as permanently invalid. `Service` is never validated
-//   and is still read by AI answer engines. HowTo and FAQPage no longer earn
-//   rich results either, but an ineligible type is not an error, and they
-//   are exactly what an assistant quotes when asked how the product works.
+//   `Service`, not `SoftwareApplication`: the latter needs ratings or Search
+//   Console flags it invalid.
 // ═══════════════════════════════════════════════════════════════════════════
 function organizationSchema() {
 	return {

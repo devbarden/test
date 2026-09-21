@@ -6,11 +6,6 @@
 		block-size: 1.75rem;
 	}
 
-	/* ═══
-	     Both circles have a path length of 100, so the fill's dash offset
-	     is simply the part not yet used. The ring starts at twelve o'clock
-	     and fills clockwise.
-	   ═══ */
 	.ring {
 		inline-size: 100%;
 		block-size: 100%;

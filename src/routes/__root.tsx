@@ -27,11 +27,6 @@ export const Route = createRootRoute({
 	shellComponent: RootDocument,
 })
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `lang` comes from the same resolver as every message on the page, on
-//   the server and in the browser alike, so the attribute a screen reader
-//   picks its voice from always matches the language it is reading.
-// ═══════════════════════════════════════════════════════════════════════════
 function RootDocument({ children }: { children: ReactNode }) {
 	const locale = useLocale()
 
@@ -50,9 +45,8 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Keyed by locale: a language switch remounts every page below the root,
-//   so no component keeps a sentence the React Compiler memoized in the
-//   language being left (see lib/i18n/use-change-locale.ts).
+//   Keyed by locale so a language switch drops text the React Compiler
+//   memoized in the old language.
 // ═══════════════════════════════════════════════════════════════════════════
 function LocalizedOutlet() {
 	const locale = useLocale()

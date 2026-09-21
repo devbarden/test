@@ -21,21 +21,6 @@ type LanguageSwitcherProps = {
 	variant?: 'labelled' | 'icon' | 'ghost'
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A globe that opens the list of languages, each named in itself — a
-//   picker is read by someone who may not read the current language yet.
-//   `labelled` names the current language beside the globe; `icon` and
-//   `ghost` are the globe alone, outlined like the header's other icon
-//   buttons or bare on the landing's nav.
-//
-//   A disclosure, not an ARIA menu: a short list of links and buttons that
-//   Tab moves through, closed by Escape, a click outside or focus leaving
-//   it. On a public page each option is a real link to that page's
-//   translation, so it can be crawled and opened in a new tab (a modified
-//   click is left to the browser); inside the app the language lives in a
-//   cookie, so the options are buttons. Either way the switch happens in
-//   place, without a reload (see useChangeLocale).
-// ═══════════════════════════════════════════════════════════════════════════
 export function LanguageSwitcher({
 	variant = 'labelled',
 }: LanguageSwitcherProps) {

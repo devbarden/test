@@ -9,12 +9,8 @@ import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/site'
 import { localizeUrl } from '@/paraglide/runtime'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Built with Paraglide's `localizeUrl`, the same function the router's
-//   output rewrite runs, so the canonical, the hreflang cluster, the sitemap
-//   and every <a> on the page spell a URL identically. A hand-built prefix
-//   drifts: it writes `/ru` where the links say `/ru/`, and a search engine
-//   then sees two URLs for one page and a canonical naming the one nothing
-//   links to.
+//   The router's own localizeUrl, so canonical, hreflang and links never
+//   disagree on `/ru` vs `/ru/`.
 // ═══════════════════════════════════════════════════════════════════════════
 export function localizedUrl(path: string, locale: Locale): string {
 	return localizeUrl(`${SITE_URL}${path}`, { locale }).href
@@ -24,11 +20,6 @@ export function currentUrl(path: string): string {
 	return localizedUrl(path, getLocaleSnapshot())
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The cluster is per PAGE and reciprocal — every translation lists every
-//   other and itself, plus x-default for a visitor whose language is none of
-//   them — and the sitemap repeats it exactly (see robots-and-sitemap.ts).
-// ═══════════════════════════════════════════════════════════════════════════
 export function alternateLinks(path: string) {
 	return [
 		...locales.map((locale) => ({
@@ -64,8 +55,7 @@ export function socialMeta(title: string, description: string, url: string) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   `<` is escaped because the JSON lands inside a <script> element: a
-//   string containing "</script>" would otherwise end it early.
+//   `<` is escaped: a "</script>" inside the JSON would end the tag early.
 // ═══════════════════════════════════════════════════════════════════════════
 export function jsonLdScripts(schemas: readonly object[]) {
 	return schemas.map((schema) => ({

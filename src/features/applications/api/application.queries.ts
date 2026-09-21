@@ -25,11 +25,6 @@ export const applicationQueries = {
 			queryKey: applicationKeys.detail(id),
 		}),
 
-	// ═════════════════════════════════════════════════════════════════════
-	//   One cached list per search (normalised, so "Apple " and "apple"
-	//   share it). While a new search loads, the previous results stay on
-	//   screen instead of collapsing to skeletons on every keystroke.
-	// ═════════════════════════════════════════════════════════════════════
 	list: (search = '') =>
 		infiniteQueryOptions({
 			getNextPageParam: (lastPage: ApplicationPage) =>

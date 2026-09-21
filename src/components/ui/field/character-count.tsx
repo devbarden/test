@@ -5,11 +5,6 @@ type CharacterCountProps = {
 	max: number
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Only the overflow is announced. A live region that spoke on every
-//   keystroke would read "123 of 1200" to a screen-reader user after each
-//   letter they type; they need to hear about the limit once it matters.
-// ═══════════════════════════════════════════════════════════════════════════
 export function CharacterCount({ length, max }: CharacterCountProps) {
 	const overflow = length - max
 

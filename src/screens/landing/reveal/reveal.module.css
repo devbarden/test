@@ -1,11 +1,4 @@
 @layer screens {
-	/* ═══════════════════════════════════════════════════════════════════════
-	     `data-reveal` is written by the observer in reveal.tsx: `idle` until
-	     it has looked, `shown` when it was already in view, `off` below the
-	     fold and `on` once scrolled into view — the only state that
-	     animates. A block reveals either itself (`single`) or its children
-	     one after another (`stagger`), never both.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.single {
 		&[data-reveal="off"] {
 			opacity: 0;
@@ -58,9 +51,6 @@
 		}
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Paper has no scroll: whatever the observer left hidden is printed.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	@media print {
 		.single[data-reveal],
 		.stagger[data-reveal] > * {

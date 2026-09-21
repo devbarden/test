@@ -16,11 +16,6 @@ type LetterPanelProps = {
 	ref?: Ref<HTMLElement>
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   One polite status region narrates the generation for a screen reader —
-//   started, saving, ready — instead of the text itself, which would be
-//   read word by word as it streams in.
-// ═══════════════════════════════════════════════════════════════════════════
 export function LetterPanel({
 	canStop,
 	content,

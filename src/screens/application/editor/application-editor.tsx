@@ -25,18 +25,8 @@ type ApplicationEditorProps = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One editor for both "new" and "existing". A new application gets its id
-//   from the server when its first letter is saved; from then on every
-//   generation here, "Try Again" included, names that id and rewrites the
-//   same record instead of adding a letter per click. What the form holds
-//   is a draft: the server saves it together with the letter it produced,
-//   never on its own, so the stored inputs always describe the stored
-//   letter.
-//
-//   `justSaved` marks the hand-over from /new to the letter's own URL: that
-//   is a different route, so the editor remounts, and without moving focus
-//   to the letter the focused submit button would vanish from under a
-//   keyboard user.
+//   After the first save the route changes and the editor remounts; focus
+//   moves to the letter so a keyboard user is not left on a vanished button.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationEditor({
 	justSaved = false,

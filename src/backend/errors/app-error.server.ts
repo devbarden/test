@@ -3,12 +3,6 @@ import type { ApiError, ApiErrorCode } from '@/lib/api/api-error'
 
 type AppErrorOptions = ErrorOptions & { retryAfterSeconds?: number }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Every failure the backend means to report is an AppError: a public code
-//   and an HTTP status. The message is for the log only — it may name a
-//   table, an upstream request id, a stack of causes — and it never leaves
-//   the process: `toPayload` is the only thing a client ever sees.
-// ═══════════════════════════════════════════════════════════════════════════
 export class AppError extends Error {
 	readonly code: ApiErrorCode
 	readonly retryAfterSeconds: number | undefined
@@ -96,22 +90,12 @@ export class UpstreamError extends AppError {
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A capability this deployment was not given — an optional secret left
-//   unset. It is our configuration, not the caller's mistake, so it answers
-//   503 and never pretends the request was wrong.
-// ═══════════════════════════════════════════════════════════════════════════
 export class NotConfiguredError extends AppError {
 	constructor(message: string) {
 		super('unavailable', 503, message)
 	}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Collapses anything thrown into an AppError. A ZodError is a request the
-//   client got wrong; everything else is ours, reported as `internal` with
-//   the original kept as `cause` for the log.
-// ═══════════════════════════════════════════════════════════════════════════
 export function toAppError(error: unknown): AppError {
 	if (error instanceof AppError) return error
 

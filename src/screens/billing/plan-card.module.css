@@ -15,10 +15,6 @@
 		justify-content: space-between;
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     Two lines reserved, so the prices of cards side by side stay on one
-	     line however long each plan's description runs.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.description {
 		min-block-size: calc(var(--text-md-leading) * 2);
 		font: var(--type-body-md);

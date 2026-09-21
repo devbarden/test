@@ -1,10 +1,6 @@
 import { m } from '@/paraglide/messages'
 import { type ApiError, readApiError } from './api-error'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The sentence a person reads for each failure. Exhaustive by type: a new
-//   error code does not compile until it has one.
-// ═══════════════════════════════════════════════════════════════════════════
 export function apiErrorMessage(error: ApiError): string {
 	switch (error.code) {
 		case 'rate_limited':

@@ -15,10 +15,6 @@ const TONE_CLASS = {
 	info: styles.info,
 } satisfies Record<AlertTone, string | undefined>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   `alert` interrupts a screen reader, `status` waits its turn: a failed
-//   generation is worth interrupting for, a stop the user asked for is not.
-// ═══════════════════════════════════════════════════════════════════════════
 export function Alert({ children, className, tone }: AlertProps) {
 	const Icon = tone === 'danger' ? CircleAlertIcon : InfoIcon
 

@@ -10,19 +10,19 @@ Generation API, текст появляется потоком, а готовы�
 ```bash
 cp .env.example .env    # вписать ключи Clerk и токен Generation API
 npm install
-npm run dev             # http://localhost:3000
+npm run dev             # поднимет Postgres и Redis в Docker, применит миграции, http://localhost:3000
 ```
 
 | Команда | Что делает |
 | --- | --- |
 | `npm run dev` | dev-сервер |
 | `npm run build && npm start` | продакшен-сборка и запуск (так же стартует Railway) |
-| `npm test` | unit-тесты (Vitest) |
-| `npm run e2e` | e2e-тесты (Playwright, десктоп и мобильный) |
+| `npm run db:down` | остановить локальные Postgres и Redis |
+| `npm run db:migrate` | создать и применить миграцию локально |
 | `npm run typecheck` | TypeScript |
-| `npm run biome:lint` | линтер и форматирование |
+| `npm run lint` | линтер и форматирование (`lint:fix` — исправить) |
 
-Переменные окружения описаны в `.env.example`. Токен Generation API читает
+Нужны Node 24+ и Docker. Переменные окружения описаны в `.env.example`, адреса локальных баз там уже прописаны. Токен Generation API читает
 только сервер, в клиентский бандл он не попадает.
 
 ## Стек
@@ -35,7 +35,7 @@ npm run dev             # http://localhost:3000
 - **Clerk** — аутентификация
 - **CSS Modules + дизайн-токены** — без Tailwind и без UI-китов
 - **zod** — один контракт данных для формы, сервера и хранилища
-- **Vitest** и **Playwright**, **Biome**
+- **Biome**
 - **Railway** — деплой (`railway.json`)
 
 ## Архитектура
@@ -217,19 +217,6 @@ components → features → screens → utilities`), так что переоп�
 - битые данные в хранилище → теряется только битая запись;
 - сессия Clerk истекла во время работы → редирект на вход;
 - `prefers-reduced-motion` → анимации выключаются одним правилом.
-
-## Тесты
-
-- **Unit (Vitest, 48 тестов):** SSE-парсер (разрывы чанков, CRLF на
-  границе, обрыв посреди события), upstream-клиент (keepalive, `[DONE]`,
-  маппинг ошибок), обработчик роута, промпт, rate limiter, хранилище,
-  клиент потока и автомат генерации.
-- **E2E (Playwright, десктоп и мобильный):** empty state; генерация →
-  сохранение → восстановление после перезагрузки; лимит символов; отказ
-  API; удаление и Undo. `/api/generate` подменяется ответом в том же
-  NDJSON-протоколе, поэтому тесты детерминированы и не тратят общий лимит.
-  Для запуска нужны ключи Clerk от development-инстанса: тестовый
-  пользователь `e2e+clerk_test@example.com` создаётся автоматически.
 
 ## Замеченное в макетах
 

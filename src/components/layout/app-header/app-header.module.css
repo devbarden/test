@@ -11,10 +11,6 @@
 			margin-block: var(--space-4) var(--space-6);
 		}
 
-		/* ═══════════════════════════════════════════════════════════════════
-		     Named only while the router animates a page change, so the header
-		     holds still above the page instead of cross-fading with it.
-		   ═══════════════════════════════════════════════════════════════════ */
 		:global(:root:active-view-transition-type(page)) & {
 			view-transition-name: app-header;
 		}
@@ -36,12 +32,6 @@
 		align-items: center;
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	     The account menu wears the outline icon button's frame, so the three
-	     controls read as one set. The frame belongs to the slot, not to
-	     Clerk's button: it is there from the first paint, before Clerk's
-	     script has loaded, and nothing jumps when the avatar appears.
-	   ═══════════════════════════════════════════════════════════════════════ */
 	.account {
 		display: flex;
 		inline-size: var(--control-height-sm);

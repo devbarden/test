@@ -21,11 +21,6 @@ const VARIANT_CLASS = {
 	secondary: styles.secondary,
 } satisfies Record<ButtonVariant, string | undefined>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   A ghost button is a bare label with an icon, so it takes no size and no
-//   shape — the union makes `size` on a ghost a type error instead of a
-//   prop that is silently ignored.
-// ═══════════════════════════════════════════════════════════════════════════
 export type ButtonStyleProps = { fullWidth?: boolean } & (
 	| {
 			shape?: ButtonShape

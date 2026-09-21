@@ -4,20 +4,6 @@ type LocationChange = {
 	toLocation: { pathname: string }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   The view-transition types of a navigation, read by
-//   styles/view-transitions.css. `page` gates every page-level rule, so an
-//   animation React starts on its own — a card leaving the dashboard — never
-//   picks up the page's names. The direction comes from depth: going into a
-//   letter slides forward, going back up to the list slides back.
-//
-//   A move between pages of the same depth has no direction and only
-//   cross-fades — the letters and billing are siblings under /app. A
-//   search-only change is the same page and does not animate; nor does the
-//   editor swapping /app/applications/create for the saved letter's own
-//   URL, which opts out at its call site (see
-//   screens/application/new-application-screen.tsx).
-// ═══════════════════════════════════════════════════════════════════════════
 export function pageTransitionTypes({
 	fromLocation,
 	pathChanged,

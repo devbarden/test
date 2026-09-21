@@ -18,11 +18,8 @@ type SegmentedControlProps<Value extends string> = {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A radio group drawn as a segmented switch. Real radio inputs underneath
-//   (visually hidden, not display:none) keep what a screen reader and the
-//   keyboard expect from a single choice: one tab stop, arrows to move, the
-//   legend read as the question. The description is tied to the group, so
-//   a screen reader hears why an option is disabled, not only that it is.
+//   Radios are visually hidden, not display:none, so the keyboard and
+//   screen readers still treat it as one choice.
 // ═══════════════════════════════════════════════════════════════════════════
 export function SegmentedControl<Value extends string>({
 	description,

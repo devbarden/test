@@ -17,11 +17,6 @@ import { toPlainText } from '@/lib/plain-text'
 import { buildCoverLetterPrompt } from './cover-letter-prompt'
 import type { GenerateCommand, GenerationEvent } from './model/protocol'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Save failures the user can act on keep their own code; anything else
-//   (the database being down) is reported as `save_failed`, which tells the
-//   UI to keep the letter on screen for copying.
-// ═══════════════════════════════════════════════════════════════════════════
 const SAVE_ERRORS_SHOWN_AS_IS = new Set<ApiError['code']>([
 	'not_found',
 	'application_limit_reached',
@@ -32,31 +27,8 @@ type RelayOutcome =
 	| { error: ApiError | null; ok: false }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   A letter goes through four phases, each refusing as early and as
-//   cheaply as it can:
-//
-//   1. allowed?   the plan covers the tone; the application is the user's
-//                 own (Try Again) or the cap leaves room (a new one)
-//   2. reserve    one generation per user at a time (Redis lock), then the
-//                 minute budget, the plan's daily quota and the shared
-//                 upstream budget — charged together, refunded together
-//   3. relay      fragments pass from the provider to the browser as they
-//                 arrive, and are collected
-//   4. finish     the save starts, `saving` is announced, and the letter
-//                 is announced as `done` only once it is stored
-//
-//   Phases 1–2 and opening the upstream stream happen before the first
-//   byte, so their refusals become HTTP statuses; phases 3–4 can only
-//   report through an `error` event.
-//
-//   The daily quota buys a SAVED letter. When a run ends without one for a
-//   reason that is not the user's — the provider down or breaking off, an
-//   empty answer, the database refusing the save — its point is given
-//   back, so an outage never eats a free user's day. A Stop is not
-//   refunded: the model was paid for, and a free Stop would let anyone
-//   drain the shared upstream budget at no cost to themselves. The minute
-//   and upstream budgets are never refunded once the provider was called:
-//   they meter calls, not letters.
+//   A run that fails for a reason not the user's refunds the daily quota;
+//   a Stop does not — the model was already paid for.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createGenerationService({
 	applicationService,
@@ -116,12 +88,6 @@ export function createGenerationService({
 		}
 	}
 
-	// ═════════════════════════════════════════════════════════════════════════
-	//   Each fragment is cleaned the way the saved letter is (toPlainText) —
-	//   a control character is dropped before the browser shows it, not only
-	//   before the database stores it — so what streamed onto the screen and
-	//   what `done` carries back are the same text.
-	// ═════════════════════════════════════════════════════════════════════════
 	async function* relay(
 		deltas: AsyncIterable<string>,
 		signal: AbortSignal,
@@ -217,13 +183,8 @@ export function createGenerationService({
 
 			if (outcome.ok) {
 				// ═══════════════════════════════════════════════════════════════
-				//   The save starts BEFORE `saving` is sent, not after the
-				//   browser reads it. A generator runs only when its consumer
-				//   pulls, and a browser that goes away right after `saving`
-				//   never pulls again: saving after the yield would drop a
-				//   finished, paid-for letter that the UI had already stopped
-				//   offering to cancel. `finish` never rejects, so nothing is
-				//   left unhandled if nobody awaits it.
+				//   The save starts before `saving` is yielded: a browser that leaves
+				//   never pulls again, and the paid-for letter would be lost.
 				// ═══════════════════════════════════════════════════════════════
 				const saved = finish(command, outcome.letter, startedAt)
 
@@ -240,12 +201,8 @@ export function createGenerationService({
 
 	return {
 		// ═════════════════════════════════════════════════════════════════════
-		//   Resolves once the letter has STARTED; everything refused before
-		//   that throws. The lock is released when the stream ends, and also
-		//   the moment the request is aborted (Stop): a generator suspended
-		//   at a `yield` that nobody reads again never reaches its `finally`,
-		//   and the lock would otherwise refuse the user's next Generate
-		//   until its TTL.
+		//   Also released on abort: a generator suspended at an unread `yield`
+		//   never reaches its `finally`.
 		// ═════════════════════════════════════════════════════════════════════
 		async start(
 			command: GenerateCommand,

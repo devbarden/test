@@ -7,12 +7,6 @@ import { PRODUCT_STEP_ICONS } from '@/features/marketing/ui/product-icons'
 import { m } from '@/paraglide/messages'
 import styles from './auth-panel.module.css'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What the product does, beside the form, for a visitor who came straight
-//   to sign-in: the same three steps the landing tells, as a timeline.
-//   Desktop only — on a phone the form is the whole page. The form owns
-//   the page's h1, so the panel's outline starts at h2.
-// ═══════════════════════════════════════════════════════════════════════════
 export function AuthPanel() {
 	const stepsLabelId = useId()
 

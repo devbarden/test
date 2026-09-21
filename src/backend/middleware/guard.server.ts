@@ -14,21 +14,6 @@ type Refuse<R> = (error: AppError) => R
 
 type GuardOptions = { precheck?: () => Promise<void> }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   What every guard does, whatever transport it runs in front of — the
-//   middleware files differ only in how a refusal travels (a thrown RPC
-//   error, or a JSON response):
-//
-//   0. precheck             optional, before anything costs a lookup — the
-//                           same-origin check of cookie-authenticated routes
-//   1. who is calling       a Clerk session (or 401), or a named system
-//                           source, and a request scope bound to it
-//   2. charge the budget    per user, or per source and IP, before any work
-//   3. run the handler      with that scope
-//   4. anything thrown      logged once — with the scope's logger when there
-//                           is one, so a refusal names the user — and handed
-//                           to `refuse` as a normalized AppError
-// ═══════════════════════════════════════════════════════════════════════════
 export async function guardUser<T, R>(
 	handle: Handle<T>,
 	refuse: Refuse<R>,
