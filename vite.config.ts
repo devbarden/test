@@ -47,6 +47,16 @@ const COOKIE_LOCALE_STRATEGY: (
 )[] = ['cookie', 'preferredLanguage', 'baseLocale']
 
 export default defineConfig({
+	// ═════════════════════════════════════════════════════════════════════════
+	//   Every module names its outermost element `.root`, so a hashed class
+	//   has to carry its file to mean anything in the element inspector:
+	//   `button-module__root__x7Kq2`, not `_root_x7Kq2`. The name is built from
+	//   the path alone, so the server render and the client bundle agree.
+	// ═════════════════════════════════════════════════════════════════════════
+	css: {
+		devSourcemap: true,
+		modules: { generateScopedName: '[name]__[local]__[hash:base64:5]' },
+	},
 	plugins: [
 		tanstackStart(),
 		nitro({

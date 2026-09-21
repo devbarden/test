@@ -17,6 +17,10 @@ export const BILLING_FEATURES = [
 
 export type BillingFeature = (typeof BILLING_FEATURES)[number]
 
+export function isBillingFeature(slug: string): slug is BillingFeature {
+	return (BILLING_FEATURES as readonly string[]).includes(slug)
+}
+
 export const PLAN_IDS = ['free', 'pro'] as const
 
 export type PlanId = (typeof PLAN_IDS)[number]

@@ -17,7 +17,7 @@ export function AuthPanel() {
 	const stepsLabelId = useId()
 
 	return (
-		<aside className={styles.panel}>
+		<aside className={styles.root}>
 			<HomeLink className={styles.brand} />
 			<div className={styles.copy}>
 				<div className={styles.intro}>

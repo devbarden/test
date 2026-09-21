@@ -1,16 +1,17 @@
-.status {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-	align-items: center;
-	max-inline-size: 28rem;
-	padding-block: var(--space-14);
-	margin-inline: auto;
-	text-align: center;
-}
+@layer components {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		align-items: center;
+		max-inline-size: 28rem;
+		padding-block: var(--space-14);
+		margin-inline: auto;
+		text-align: center;
+	}
 
-.description {
-	font-size: var(--text-lg);
-	line-height: var(--text-lg-leading);
-	color: var(--color-text-secondary);
+	.description {
+		font: var(--type-body-lg);
+		color: var(--color-text-secondary);
+	}
 }

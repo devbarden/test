@@ -2,12 +2,20 @@ import clsx from 'clsx'
 import { type ComponentProps, createElement, type Ref } from 'react'
 import styles from './panel.module.css'
 
+type PanelTone = 'muted' | 'success' | 'raised'
+
 type PanelProps = Omit<ComponentProps<'div'>, 'ref'> & {
 	as?: 'article' | 'div' | 'li' | 'section'
 	interactive?: boolean
 	ref?: Ref<HTMLElement>
-	tone?: 'muted' | 'success' | 'raised'
+	tone?: PanelTone
 }
+
+const TONE_CLASS = {
+	muted: styles.muted,
+	raised: styles.raised,
+	success: styles.success,
+} satisfies Record<PanelTone, string | undefined>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The one container shape. In the app it is a borderless surface told
@@ -27,8 +35,8 @@ export function Panel({
 	return createElement(Element, {
 		...props,
 		className: clsx(
-			styles.panel,
-			styles[tone],
+			styles.root,
+			TONE_CLASS[tone],
 			interactive && styles.interactive,
 			className,
 		),

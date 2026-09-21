@@ -1,8 +1,9 @@
-.eyebrow {
-	font-size: var(--text-xs);
-	font-weight: var(--weight-semibold);
-	line-height: var(--text-xs-leading);
-	color: var(--color-accent);
-	text-transform: uppercase;
-	letter-spacing: var(--tracking-eyebrow);
+@layer ui {
+	.root {
+		font: var(--type-body-xs);
+		font-weight: var(--weight-semibold);
+		color: var(--color-accent);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-eyebrow);
+	}
 }

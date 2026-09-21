@@ -6,20 +6,21 @@ import { type LogoPath, MARK_PATHS, WORDMARK_PATHS } from './logo-paths'
 //   The full lockup from the mockup, 179×48. The wordmark is drawn, so the
 //   name is also given as text for assistive tech and search.
 // ═══════════════════════════════════════════════════════════════════════════
-export function Logo({ tone = 'default' }: { tone?: 'default' | 'inverse' }) {
+type LogoTone = 'default' | 'inverse'
+
+const WORDMARK_CLASS = {
+	default: styles.wordmark,
+	inverse: styles.wordmarkInverse,
+} satisfies Record<LogoTone, string | undefined>
+
+export function Logo({ tone = 'default' }: { tone?: LogoTone }) {
 	return (
-		<span className={styles.logo}>
+		<span className={styles.root}>
 			<svg aria-hidden="true" className={styles.lockup} viewBox="0 0 179 48">
-				<g className={styles.markFill} transform="translate(0 2)">
+				<g className={styles.mark} transform="translate(0 2)">
 					{renderPaths(MARK_PATHS)}
 				</g>
-				<g
-					className={
-						tone === 'inverse' ? styles.wordmarkInverse : styles.wordmarkFill
-					}
-				>
-					{renderPaths(WORDMARK_PATHS)}
-				</g>
+				<g className={WORDMARK_CLASS[tone]}>{renderPaths(WORDMARK_PATHS)}</g>
 			</svg>
 			<span className="visually-hidden">{BRAND_NAME}</span>
 		</span>

@@ -20,7 +20,7 @@ export function Meter({ label, max, value, valueText }: MeterProps) {
 	const ratio = max > 0 ? Math.min(value / max, 1) : 0
 
 	return (
-		<div className={styles.meter}>
+		<div className={styles.root}>
 			<div aria-hidden="true" className={styles.header}>
 				<span className={styles.label}>{label}</span>
 				<span className={styles.value}>{valueText}</span>

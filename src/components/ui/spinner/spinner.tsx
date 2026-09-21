@@ -11,7 +11,7 @@ export function Spinner({ className }: SpinnerProps) {
 	return (
 		<svg
 			aria-hidden="true"
-			className={clsx(styles.spinner, className)}
+			className={clsx(styles.root, className)}
 			fill="none"
 			viewBox="0 0 24 24"
 		>

@@ -27,7 +27,7 @@ export function ApplicationCard({
 		applicationTitle(application.input) ?? m['dashboard.card.untitled']()
 
 	return (
-		<Panel className={styles.card} data-application-id={application.id}>
+		<Panel className={styles.root} data-application-id={application.id}>
 			<Link
 				className={styles.link}
 				params={{ applicationId: application.id }}

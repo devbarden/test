@@ -23,16 +23,13 @@ export function Field({
 
 	return (
 		<FieldContext value={{ descriptionId, id, invalid }}>
-			<div className={clsx(styles.field, className)}>
+			<div className={clsx(styles.root, className)}>
 				<label className={styles.label} htmlFor={id}>
 					{label}
 				</label>
 				{children}
 				{description && (
-					<div
-						className={clsx(styles.description, invalid && styles.invalid)}
-						id={descriptionId}
-					>
+					<div className={styles.description} id={descriptionId}>
 						{description}
 					</div>
 				)}

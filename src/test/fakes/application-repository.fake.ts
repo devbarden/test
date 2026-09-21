@@ -51,15 +51,6 @@ export function createFakeApplicationRepository(seed: Application[] = []) {
 			active(userId)
 				.filter((row) => !cursor || row.id < cursor)
 				.slice(0, take),
-		purgeDeletedBefore: async (cutoff) => {
-			const expired = [...rows.values()].filter(
-				(row) => row.deletedAt && row.deletedAt < cutoff,
-			)
-
-			for (const row of expired) rows.delete(row.id)
-
-			return expired.length
-		},
 		restore: async (userId, id) => {
 			const row = rows.get(id)
 

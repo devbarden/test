@@ -4,7 +4,7 @@ import {
 	Outlet,
 	Scripts,
 } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { NotFound, RouteError } from '@/components/fallbacks'
 import { StandalonePage } from '@/components/layout/standalone-page'
 import { OgLocaleAlternates } from '@/components/seo/og-locale-alternates'
@@ -12,7 +12,7 @@ import { useLocale } from '@/lib/i18n/use-locale'
 import { rootHead } from '@/lib/seo/root-head'
 
 export const Route = createRootRoute({
-	component: Outlet,
+	component: LocalizedOutlet,
 	errorComponent: (props) => (
 		<StandalonePage>
 			<RouteError {...props} />
@@ -46,5 +46,20 @@ function RootDocument({ children }: { children: ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
+	)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Keyed by locale: a language switch remounts every page below the root,
+//   so no component keeps a sentence the React Compiler memoized in the
+//   language being left (see lib/i18n/use-change-locale.ts).
+// ═══════════════════════════════════════════════════════════════════════════
+function LocalizedOutlet() {
+	const locale = useLocale()
+
+	return (
+		<Fragment key={locale}>
+			<Outlet />
+		</Fragment>
 	)
 }

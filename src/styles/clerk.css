@@ -1,0 +1,13 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+     Clerk injects its styles without a layer, so they beat every layered
+     rule of ours — which keeps its forms looking as clerk-appearance.ts
+     says, but also let its own outline reset win over the product's focus
+     ring. This one rule is deliberately unlayered too, to give every Clerk
+     control the same green ring as the rest of the app. `:where()` keeps it
+     at the specificity of a bare `:focus-visible`, so Clerk's own
+     class-level focus styles still decide wherever they exist.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:where([class*="cl-"]):focus-visible {
+	outline: var(--focus-ring);
+	outline-offset: var(--focus-ring-offset);
+}

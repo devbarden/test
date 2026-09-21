@@ -27,7 +27,7 @@ export function GenerationAllowance() {
 	if (remaining > LOW_ALLOWANCE) return null
 
 	return (
-		<p aria-live="polite" className={styles.allowance}>
+		<p aria-live="polite" className={styles.root}>
 			<span className={remaining === 0 ? styles.exhausted : undefined}>
 				{remaining === 0
 					? m['editor.allowance.none']()

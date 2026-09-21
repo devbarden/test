@@ -8,7 +8,7 @@ import styles from './application-card.module.css'
 // ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationCardSkeleton() {
 	return (
-		<Panel aria-hidden="true" className={styles.card}>
+		<Panel aria-hidden="true" className={styles.root}>
 			<div className={styles.skeleton}>
 				<Skeleton className={styles.shortLine} />
 				<Skeleton />

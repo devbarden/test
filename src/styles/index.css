@@ -1,0 +1,24 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+     The one global stylesheet, linked first in <head>. Its first line fixes
+     the order of the cascade layers for the whole document, so a later
+     layer beats an earlier one whatever the specificity or the order the
+     chunks arrive in:
+
+       reset → tokens → base → ui → components → features → screens → utilities
+
+     Each CSS module lives in the layer of its folder (docs/styles.md), which
+     is what makes `className` a safe override: a screen's `.card` beats the
+     panel's own `.raised.interactive` because `screens` comes after `ui`,
+     not because it happened to load later. Anything unlayered — Clerk's
+     injected styles, and clerk.css that answers them — sits above all of
+     them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer reset, tokens, base, ui, components, features, screens, utilities;
+
+@import "./fonts.css";
+@import "./reset.css";
+@import "./tokens.css";
+@import "./base.css";
+@import "./view-transitions.css";
+@import "./utilities.css";
+@import "./clerk.css";

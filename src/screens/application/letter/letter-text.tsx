@@ -17,7 +17,7 @@ export function LetterText({ streaming = false, text }: LetterTextProps) {
 	const lastIndex = paragraphs.length - 1
 
 	return (
-		<div aria-busy={streaming} className={styles.letter}>
+		<div aria-busy={streaming} className={styles.root}>
 			{paragraphs.map((paragraph, index) => (
 				// biome-ignore lint/suspicious/noArrayIndexKey: paragraphs only ever grow at the end while streaming
 				<p key={index}>

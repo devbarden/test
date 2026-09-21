@@ -76,17 +76,14 @@ export function subscribeToLocale(listener: () => void): () => void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The user-initiated switch. Paraglide's own `setLocale` reloads the
-//   document, and that is wanted rather than tolerated: every component
-//   read its copy once when it rendered, and the React Compiler memoizes
-//   that output, so only a fresh render guarantees no stale sentence
-//   survives. On the landing the switch is also a navigation to the
-//   prefixed URL.
+//   Records the choice without reloading: Paraglide writes the cookie the
+//   app and the server read. On a public page the URL still names the old
+//   locale until the caller navigates to the prefixed one.
 // ═══════════════════════════════════════════════════════════════════════════
-export function changeLocale(locale: Locale): void {
-	if (locale === getLocale()) return
+export function storeLocale(locale: Locale): void {
+	paraglideSetLocale(locale, { reload: false })
+}
 
-	paraglideSetLocale(locale)
-
+export function notifyLocaleChange(): void {
 	for (const listener of localeListeners) listener()
 }

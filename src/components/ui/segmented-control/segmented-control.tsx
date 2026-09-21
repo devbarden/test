@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import { type ReactNode, useId } from 'react'
 import styles from './segmented-control.module.css'
 
@@ -11,6 +10,7 @@ export type SegmentedOption<Value extends string> = {
 
 type SegmentedControlProps<Value extends string> = {
 	description?: ReactNode
+	hideLabel?: boolean
 	label: string
 	onChange: (value: Value) => void
 	options: readonly SegmentedOption<Value>[]
@@ -26,6 +26,7 @@ type SegmentedControlProps<Value extends string> = {
 // ═══════════════════════════════════════════════════════════════════════════
 export function SegmentedControl<Value extends string>({
 	description,
+	hideLabel = false,
 	label,
 	onChange,
 	options,
@@ -37,19 +38,14 @@ export function SegmentedControl<Value extends string>({
 	return (
 		<fieldset
 			aria-describedby={description ? descriptionId : undefined}
-			className={styles.group}
+			className={styles.root}
 		>
-			<legend className={styles.legend}>{label}</legend>
+			<legend className={hideLabel ? 'visually-hidden' : styles.legend}>
+				{label}
+			</legend>
 			<div className={styles.track}>
 				{options.map((option) => (
-					<label
-						className={clsx(
-							styles.option,
-							option.value === value && styles.checked,
-							option.disabled && styles.disabled,
-						)}
-						key={option.value}
-					>
+					<label className={styles.option} key={option.value}>
 						<input
 							checked={option.value === value}
 							className="visually-hidden"

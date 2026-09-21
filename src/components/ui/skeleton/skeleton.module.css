@@ -1,20 +1,22 @@
-.skeleton {
-	display: block;
-	background: var(--color-skeleton);
-	animation: pulse 1.4s ease-in-out infinite;
-}
+@layer ui {
+	.root {
+		display: block;
+		background: var(--color-skeleton);
+		animation: pulse 1.4s ease-in-out infinite;
+	}
 
-.line {
-	block-size: 0.875rem;
-	border-radius: var(--radius-full);
-}
+	.line {
+		block-size: 0.875rem;
+		border-radius: var(--radius-full);
+	}
 
-.block {
-	border-radius: var(--radius-lg);
-}
+	.block {
+		border-radius: var(--radius-lg);
+	}
 
-@keyframes pulse {
-	50% {
-		opacity: 0.5;
+	@keyframes pulse {
+		50% {
+			opacity: 0.5;
+		}
 	}
 }

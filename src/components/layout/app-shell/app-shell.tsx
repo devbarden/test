@@ -18,7 +18,7 @@ export function AppShell({ account, children, status }: AppShellProps) {
 	return (
 		<Container>
 			<AppHeader account={account} status={status} />
-			<main className={styles.main} tabIndex={-1}>
+			<main className={styles.root} tabIndex={-1}>
 				{children}
 			</main>
 		</Container>

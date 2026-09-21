@@ -1,11 +1,17 @@
-.spinner {
-	inline-size: 1.25em;
-	block-size: 1.25em;
-	animation: spin 0.8s steps(8) infinite;
-}
+@layer ui {
+	/* ═══════════════════════════════════════════════════════════════════════
+	     Sized like an icon, so a button's `--icon-size` fits it to the
+	     label; on its own it follows the text around it.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.root {
+		inline-size: var(--icon-size, 1.25em);
+		block-size: var(--icon-size, 1.25em);
+		animation: spin 0.8s steps(8) infinite;
+	}
 
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 }

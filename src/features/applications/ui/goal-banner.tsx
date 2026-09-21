@@ -21,7 +21,7 @@ export function GoalBanner() {
 	return (
 		<Panel
 			aria-labelledby={titleId}
-			className={styles.banner}
+			className={styles.root}
 			role="region"
 			tone="success"
 		>

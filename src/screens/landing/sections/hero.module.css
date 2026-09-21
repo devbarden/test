@@ -1,44 +1,43 @@
-.hero {
-	padding-block: 8rem var(--space-10);
-}
+@layer screens {
+	.root {
+		padding-block: var(--space-32) var(--space-10);
 
-@media (min-width: 768px) {
-	.hero {
-		padding-block: 10rem var(--space-14);
+		@media (width >= 48rem) {
+			padding-block: var(--space-40) var(--space-14);
+		}
 	}
-}
 
-.copy {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-}
+	.copy {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
 
-.title {
-	max-inline-size: 50rem;
-	margin-block-start: var(--space-6);
-}
+	.title {
+		max-inline-size: 50rem;
+		margin-block-start: var(--space-6);
+	}
 
-.lead {
-	max-inline-size: 42rem;
-	margin-block-start: var(--space-6);
-	font-size: var(--text-lg);
-	line-height: var(--leading-relaxed);
-	color: var(--color-text-secondary);
-	text-wrap: pretty;
-}
+	.lead {
+		max-inline-size: 42rem;
+		margin-block-start: var(--space-6);
+		font: var(--type-prose-lg);
+		color: var(--color-text-secondary);
+		text-wrap: pretty;
+	}
 
-.actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--space-3);
-	justify-content: center;
-	margin-block-start: var(--space-10);
-}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		justify-content: center;
+		margin-block-start: var(--space-10);
+	}
 
-.note {
-	margin-block-start: var(--space-4);
-	font-size: var(--text-sm);
-	color: var(--color-text-tertiary);
+	.note {
+		margin-block-start: var(--space-4);
+		font: var(--type-body-sm);
+		color: var(--color-text-tertiary);
+	}
 }

@@ -1,32 +1,30 @@
-.progress {
-	display: flex;
-	align-items: center;
-}
+@layer ui {
+	.root {
+		display: flex;
+		align-items: center;
+	}
 
-.step {
-	background: var(--color-progress-todo);
-	border-radius: var(--radius-full);
-	transition: background-color var(--duration-slow) var(--ease-out);
-}
+	.dots {
+		--_step-width: 0.5rem;
 
-.done {
-	background: var(--color-progress-done);
-}
+		gap: var(--space-1);
+	}
 
-.dots {
-	gap: var(--space-1);
-}
+	.bars {
+		--_step-width: 2rem;
 
-.dots .step {
-	inline-size: 0.5rem;
-	block-size: 0.5rem;
-}
+		gap: var(--space-2);
+	}
 
-.bars {
-	gap: var(--space-2);
-}
+	.step {
+		inline-size: var(--_step-width);
+		block-size: 0.5rem;
+		background: var(--color-progress-todo);
+		border-radius: var(--radius-full);
+		transition: background-color var(--duration-slow) var(--ease-out);
 
-.bars .step {
-	inline-size: 2rem;
-	block-size: 0.5rem;
+		&.done {
+			background: var(--color-progress-done);
+		}
+	}
 }

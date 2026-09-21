@@ -52,7 +52,7 @@ export function DashboardScreen() {
 	}
 
 	return (
-		<div className={styles.screen}>
+		<div className={styles.root}>
 			<PageHeader
 				actions={
 					<ButtonLink iconStart={<PlusIcon />} size="md" to="/applications/new">

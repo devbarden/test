@@ -1,13 +1,14 @@
-.allowance {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--space-1) var(--space-3);
-	justify-content: center;
-	font-size: var(--text-sm);
-	line-height: var(--text-sm-leading);
-	color: var(--color-text-tertiary);
-}
+@layer features {
+	.root {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-3);
+		justify-content: center;
+		font: var(--type-body-sm);
+		color: var(--color-text-tertiary);
+	}
 
-.exhausted {
-	color: var(--color-text-danger);
+	.exhausted {
+		color: var(--color-text-danger);
+	}
 }

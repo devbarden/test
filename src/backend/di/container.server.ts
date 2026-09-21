@@ -1,11 +1,5 @@
-import {
-	type AwilixContainer,
-	asFunction,
-	createContainer,
-	InjectionMode,
-} from 'awilix'
+import { type AwilixContainer, createContainer, InjectionMode } from 'awilix'
 import { accountModule } from '@/features/account/account.module.server'
-import { createApplicationJobs } from '@/features/applications/application.jobs.server'
 import { applicationsModule } from '@/features/applications/applications.module.server'
 import { billingModule } from '@/features/billing/billing.module.server'
 import { generationModule } from '@/features/generation/generation.module.server'
@@ -37,12 +31,6 @@ const modules = {
 	...applicationsModule,
 	...billingModule,
 	...generationModule,
-
-	// ═════════════════════════════════════════════════════════════════════════
-	//   The job runner's catalogue: every feature's scheduled jobs, merged.
-	//   A second feature with jobs spreads its own factory in here.
-	// ═════════════════════════════════════════════════════════════════════════
-	scheduledJobs: asFunction(createApplicationJobs).scoped(),
 }
 
 type RequestCradle = {

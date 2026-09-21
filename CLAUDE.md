@@ -17,7 +17,7 @@ before changing anything under `src/backend` or a `*.server.ts` file.
 ```bash
 npm run db:up               # Postgres + Redis in Docker (dev and test)
 npm run dev                 # http://localhost:3000
-npm run lint                # Biome + comment banners + architecture
+npm run lint                # Biome + comment banners + architecture + styles
 npm run typecheck
 npm test                    # unit tests (no I/O)
 npm run test:integration    # repository/limiter/lock against real Postgres + Redis
@@ -26,7 +26,7 @@ npm run db:migrate:create   # CREATE a migration from schema changes
 npm run db:migrate          # create + apply locally
 ```
 
-Run `npm run lint` (Biome, comment banners, architecture), `npm run
+Run `npm run lint` (Biome, comment banners, architecture, styles), `npm run
 typecheck` and `npm test` before reporting a change as done.
 
 ⚠ Never run `prisma migrate reset` or point any command at a non-local
@@ -91,7 +91,7 @@ the lint on any violation.
 
 ```
 src/backend/        infrastructure — config, auth, errors, DI, middleware,
-                    http, database, Redis, rate limiting, gateways, jobs,
+                    http, database, Redis, rate limiting, gateways,
                     lifecycle. Never imports a feature's services: only the
                     composition root (di/container.server.ts) knows them
 src/routes/         thin route files: URL, guards and head() → a screen
@@ -129,7 +129,7 @@ repository (Prisma, every query scoped by owner) → Postgres.
 - **Every query is scoped by `userId` inside the repository.** Services never
   load a row by id and then check ownership.
 - **Services get the user from `userActor`**, never from an argument.
-  `userActor` exists only on user scopes; system code (webhooks, cron) runs
+  `userActor` exists only on user scopes; system code (webhooks) runs
   on a system scope and cannot resolve user services.
 - **Errors are `AppError`s with a code from `src/lib/api/api-error.ts`.** Adding
   a code means adding its sentence in `src/lib/api/api-error-message.ts`; the
@@ -137,8 +137,8 @@ repository (Prisma, every query scoped by owner) → Postgres.
   reach a client.
 - **Every user-facing server function uses `userScopeMiddleware`; every
   cookie-authenticated `/api` route uses `userApiScopeMiddleware`** (it adds
-  the CSRF check). Webhooks and cron use `systemApiScopeMiddleware` and
-  authenticate by signature or secret.
+  the CSRF check). Webhooks use `systemApiScopeMiddleware` and
+  authenticate by signature.
 - **Configuration is parsed once at boot** in `config.server.ts`. A new
   environment variable is added to its schema and to `.env.example` in the
   same change. Product limits are code in the config, not env.
@@ -150,11 +150,10 @@ repository (Prisma, every query scoped by owner) → Postgres.
   (`backend/middleware/validate-input.ts`), never the bare schema: TanStack
   reports a bare schema's failure as a plain `Error`, which surfaces as
   `internal` instead of `invalid_request`.
-- **Features own what an event or a job means; the backend only transports
-  it.** A Clerk event is handled in `features/account`
+- **Features own what an event means; the backend only transports it.** A
+  Clerk event is handled in `features/account`
   (`account-events.service.server.ts`) after `clerkWebhookVerifier` proves
-  it; a scheduled job is a feature's `x.jobs.server.ts`, merged into
-  `scheduledJobs` in the container.
+  it.
 
 ### Adding a server feature
 
@@ -171,16 +170,25 @@ repository (Prisma, every query scoped by owner) → Postgres.
 
 ### Frontend rules
 
-- Styles are CSS Modules that use **semantic tokens** from
-  `src/styles/tokens.css` (`--color-text-secondary`), never palette values or
-  raw hex.
+- Styles are CSS Modules — read `docs/styles.md` before writing one;
+  `npm run lint:styles` enforces it. In short:
+  - each module is one `@layer` block named after its folder (`ui`,
+    `components`, `features`, `screens`), so a `className` passed down
+    always beats the component's own rules;
+  - `.root` is the component's outer element, parts are camelCase roles,
+    and TSX maps variants explicitly (`TONE_CLASS[tone]`), never
+    `styles[tone]`; every class is read and every `styles.x` exists;
+  - values come from `src/styles/tokens.css`: colour roles, never palette
+    or literals; `font: var(--type-body-sm)` for text; `--space-*`;
+    `--icon-size` for Lucide icons;
+  - nesting for states, context and media queries; media queries only
+    `(width < x)` / `(width >= x)` with x in 30/40/48/60/64rem.
 - Server state lives in TanStack Query through the factories in
   `api/*.queries.ts`; mutations update the cache optimistically (helpers in
   `api/*.cache.ts`) and invalidate on settle.
 - A route file holds only its URL concerns — params, search, guards,
   `head()`, `ssr` — and renders a screen from `src/screens`.
-- Screens are named `<name>-screen.tsx`, export `<Name>Screen`, and the
-  root class of their CSS module is `.screen`.
+- Screens are named `<name>-screen.tsx` and export `<Name>Screen`.
 - `components/ui` is the design system. A new variant goes into the
   component, not into a one-off override at the call site.
 

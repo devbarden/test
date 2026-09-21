@@ -20,14 +20,16 @@ export function LandingFooter() {
 	const languagesId = useId()
 
 	return (
-		<footer className={styles.footer}>
+		<footer className={styles.root}>
 			<Container className={styles.inner}>
 				<div className={styles.brand}>
 					<Logo />
 					<p>{m['landing.footer.tagline']()}</p>
 				</div>
 				<nav aria-labelledby={productId} className={styles.column}>
-					<h2 id={productId}>{m['landing.footer.product']()}</h2>
+					<h2 className={styles.columnTitle} id={productId}>
+						{m['landing.footer.product']()}
+					</h2>
 					{LANDING_NAV.map((section) => (
 						<TextLink hash={section.id} key={section.id} to="." tone="muted">
 							{section.label()}
@@ -35,7 +37,9 @@ export function LandingFooter() {
 					))}
 				</nav>
 				<nav aria-labelledby={languagesId} className={styles.column}>
-					<h2 id={languagesId}>{m['landing.footer.languages']()}</h2>
+					<h2 className={styles.columnTitle} id={languagesId}>
+						{m['landing.footer.languages']()}
+					</h2>
 					{locales.map((locale) => (
 						<a
 							className={styles.language}

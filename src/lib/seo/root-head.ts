@@ -1,6 +1,6 @@
 import { BRAND_NAME, isIndexable, SITE_URL } from '@/lib/site'
 import { m } from '@/paraglide/messages'
-import globalCss from '@/styles/global.css?url'
+import stylesheet from '@/styles/index.css?url'
 import { socialMeta } from './seo-links'
 
 const FONTS_TO_PRELOAD = [
@@ -34,7 +34,7 @@ export function rootHead() {
 				rel: 'preload',
 				type: 'font/woff2',
 			})),
-			{ href: globalCss, rel: 'stylesheet' },
+			{ href: stylesheet, rel: 'stylesheet' },
 			{ href: '/favicon.ico', rel: 'icon', sizes: 'any' },
 			{ href: '/favicon.svg', rel: 'icon', type: 'image/svg+xml' },
 			{ href: '/apple-touch-icon.png', rel: 'apple-touch-icon' },

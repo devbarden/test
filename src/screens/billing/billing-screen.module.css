@@ -1,15 +1,11 @@
-.screen {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-8);
-}
+@layer screens {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-8);
+	}
 
-.plans {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-}
-
-.skeleton {
-	block-size: 12rem;
+	.skeleton {
+		block-size: 12rem;
+	}
 }

@@ -2,11 +2,20 @@ import clsx from 'clsx'
 import type { ComponentProps } from 'react'
 import styles from './heading.module.css'
 
+type HeadingSize = 'sm' | 'md' | 'lg' | 'xl'
+
 type HeadingProps = ComponentProps<'h2'> & {
 	as?: 'h1' | 'h2' | 'h3'
-	size: 'sm' | 'md' | 'lg' | 'xl'
+	size: HeadingSize
 	tone?: 'default' | 'muted'
 }
+
+const SIZE_CLASS = {
+	lg: styles.lg,
+	md: styles.md,
+	sm: styles.sm,
+	xl: styles.xl,
+} satisfies Record<HeadingSize, string | undefined>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Level and size are separate on purpose: the level is the document
@@ -24,8 +33,8 @@ export function Heading({
 		<Level
 			{...props}
 			className={clsx(
-				styles.heading,
-				styles[size],
+				styles.root,
+				SIZE_CLASS[size],
 				tone === 'muted' && styles.muted,
 				className,
 			)}

@@ -1,0 +1,14 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+     The only global classes, used by name from any component. The last
+     layer, so a utility wins over whatever the element's own module says.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		white-space: nowrap;
+		clip-path: inset(50%);
+	}
+}

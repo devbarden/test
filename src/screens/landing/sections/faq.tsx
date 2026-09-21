@@ -1,13 +1,11 @@
 import { PlusIcon } from 'lucide-react'
-import { Container } from '@/components/layout/container'
 import { Panel } from '@/components/ui/panel'
 import { PRODUCT_FAQ } from '@/features/marketing/model/product-content'
 import { m } from '@/paraglide/messages'
 import { LANDING_SECTIONS } from '../landing-sections'
 import { Reveal } from '../reveal/reveal'
 import styles from './faq.module.css'
-import section from './section.module.css'
-import { SectionHeading } from './section-heading'
+import { Section } from './section'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Native <details>, no accordion library: the answers are in the HTML
@@ -16,28 +14,25 @@ import { SectionHeading } from './section-heading'
 // ═══════════════════════════════════════════════════════════════════════════
 export function Faq() {
 	return (
-		<section className={section.section} id={LANDING_SECTIONS.faq.id}>
-			<Container>
-				<div className={section.ink}>
-					<SectionHeading
-						kicker={m['landing.faq.kicker']()}
-						title={m['landing.faq.title']()}
-					/>
-					<Reveal className={styles.list}>
-						<Panel tone="raised">
-							{PRODUCT_FAQ.map((entry) => (
-								<details className={styles.item} key={entry.id} name="faq">
-									<summary className={styles.question}>
-										{entry.question()}
-										<PlusIcon className={styles.icon} />
-									</summary>
-									<p className={styles.answer}>{entry.answer()}</p>
-								</details>
-							))}
-						</Panel>
-					</Reveal>
-				</div>
-			</Container>
-		</section>
+		<Section
+			id={LANDING_SECTIONS.faq.id}
+			kicker={m['landing.faq.kicker']()}
+			title={m['landing.faq.title']()}
+			tone="ink"
+		>
+			<Reveal className={styles.list}>
+				<Panel tone="raised">
+					{PRODUCT_FAQ.map((entry) => (
+						<details className={styles.item} key={entry.id} name="faq">
+							<summary className={styles.question}>
+								{entry.question()}
+								<PlusIcon className={styles.icon} />
+							</summary>
+							<p className={styles.answer}>{entry.answer()}</p>
+						</details>
+					))}
+				</Panel>
+			</Reveal>
+		</Section>
 	)
 }

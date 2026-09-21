@@ -10,7 +10,7 @@ type BadgeProps = {
 
 export function Badge({ children, className, icon }: BadgeProps) {
 	return (
-		<span className={clsx(styles.badge, className)}>
+		<span className={clsx(styles.root, className)}>
 			{icon}
 			{children}
 		</span>

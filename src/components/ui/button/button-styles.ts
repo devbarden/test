@@ -5,6 +5,21 @@ export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type ButtonShape = 'rounded' | 'pill'
 
+type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+
+const SIZE_CLASS = {
+	lg: styles.lg,
+	md: styles.md,
+	sm: styles.sm,
+	xs: styles.xs,
+} satisfies Record<ButtonSize, string | undefined>
+
+const VARIANT_CLASS = {
+	ghost: styles.ghost,
+	primary: styles.primary,
+	secondary: styles.secondary,
+} satisfies Record<ButtonVariant, string | undefined>
+
 // ═══════════════════════════════════════════════════════════════════════════
 //   A ghost button is a bare label with an icon, so it takes no size and no
 //   shape — the union makes `size` on a ghost a type error instead of a
@@ -29,16 +44,16 @@ export function buttonClassName(
 		fullWidth?: boolean
 		shape?: ButtonShape
 		size?: ButtonSize
-		variant?: 'primary' | 'secondary' | 'ghost'
+		variant?: ButtonVariant
 	},
 	className?: string,
 ) {
 	const isGhost = variant === 'ghost'
 
 	return clsx(
-		styles.button,
-		styles[variant],
-		!isGhost && styles[size],
+		styles.root,
+		VARIANT_CLASS[variant],
+		!isGhost && SIZE_CLASS[size],
 		!isGhost && shape === 'pill' && styles.pill,
 		fullWidth && styles.fullWidth,
 		className,

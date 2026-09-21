@@ -3,9 +3,16 @@ import clsx from 'clsx'
 import type { ComponentProps } from 'react'
 import styles from './text-link.module.css'
 
+type TextLinkTone = 'accent' | 'muted'
+
 type TextAnchorProps = ComponentProps<'a'> & {
-	tone?: 'accent' | 'muted'
+	tone?: TextLinkTone
 }
+
+const TONE_CLASS = {
+	accent: styles.accent,
+	muted: styles.muted,
+} satisfies Record<TextLinkTone, string | undefined>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   A link inside running text or a quiet list. The accent tone is
@@ -14,7 +21,9 @@ type TextAnchorProps = ComponentProps<'a'> & {
 //   says "this is a link".
 // ═══════════════════════════════════════════════════════════════════════════
 function TextAnchor({ className, tone = 'accent', ...props }: TextAnchorProps) {
-	return <a {...props} className={clsx(styles.link, styles[tone], className)} />
+	return (
+		<a {...props} className={clsx(styles.root, TONE_CLASS[tone], className)} />
+	)
 }
 
 export const TextLink = createLink(TextAnchor)

@@ -1,85 +1,88 @@
-.field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.375rem;
-	min-inline-size: 0;
-}
+@layer ui {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1-5);
+		min-inline-size: 0;
+	}
 
-.label {
-	font-size: var(--text-sm);
-	font-weight: var(--weight-medium);
-	line-height: var(--text-sm-leading);
-	color: var(--color-text-label);
-}
+	.label {
+		font: var(--type-body-sm);
+		font-weight: var(--weight-medium);
+		color: var(--color-text-label);
+	}
 
-.description {
-	font-size: var(--text-sm);
-	line-height: var(--text-sm-leading);
-	color: var(--color-text-secondary);
-}
+	/* ═══════════════════════════════════════════════════════════════════════
+	     The description turns red with the control's own `aria-invalid`,
+	     so what a screen reader is told and what the eye sees come from
+	     one attribute.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.description {
+		font: var(--type-body-sm);
+		color: var(--color-text-secondary);
 
-.description.invalid {
-	color: var(--color-text-danger);
-}
+		.root:has([aria-invalid="true"]) & {
+			color: var(--color-text-danger);
+		}
+	}
 
-.control {
-	inline-size: 100%;
-	padding: var(--space-2) var(--space-3);
-	font-size: var(--text-md);
-	line-height: var(--text-md-leading);
-	color: var(--color-text-primary);
-	background: var(--color-surface-page);
-	border: 1px solid var(--color-border-default);
-	border-radius: var(--radius-md);
-	box-shadow: var(--shadow-xs);
-	transition-timing-function: var(--ease-out);
-	transition-duration: var(--duration-fast);
-	transition-property: border-color, box-shadow;
-}
+	.control {
+		inline-size: 100%;
+		padding: var(--space-2) var(--space-3);
+		font: var(--type-body-md);
+		color: var(--color-text-primary);
+		background: var(--color-surface-page);
+		border: 1px solid var(--color-border-default);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-xs);
+		transition-timing-function: var(--ease-out);
+		transition-duration: var(--duration-fast);
+		transition-property: border-color, box-shadow;
 
-.control::placeholder {
-	color: var(--color-text-tertiary);
-	opacity: 1;
-}
+		&::placeholder {
+			color: var(--color-text-tertiary);
+			opacity: 1;
+		}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-     The mockup's focus: a green border and a soft 4px ring. The outline is
-     transparent so it paints nothing normally, yet forced-colours mode —
-     which drops border colours and every box-shadow — draws it, and the
-     focused field stays findable there.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.control:focus-visible {
-	outline: 2px solid transparent;
-	outline-offset: 0;
-	border-color: var(--color-border-focus);
-	box-shadow: var(--shadow-xs), var(--ring-focus);
-}
+		/* ═══════════════════════════════════════════════════════════════════
+		     The mockup's focus: a green border and a soft 4px ring. The
+		     outline is transparent so it paints nothing normally, yet
+		     forced-colours mode — which drops border colours and every
+		     box-shadow — draws it, and the focused field stays findable
+		     there.
+		   ═══════════════════════════════════════════════════════════════════ */
+		&:focus-visible {
+			outline: 2px solid transparent;
+			outline-offset: 0;
+			border-color: var(--color-border-focus);
+			box-shadow: var(--shadow-xs), var(--ring-focus);
+		}
 
-.control[aria-invalid="true"] {
-	border-color: var(--color-border-danger);
-}
+		&[aria-invalid="true"] {
+			border-color: var(--color-border-danger);
 
-.control[aria-invalid="true"]:focus-visible {
-	box-shadow: var(--shadow-xs), var(--ring-danger);
-}
+			&:focus-visible {
+				box-shadow: var(--shadow-xs), var(--ring-danger);
+			}
+		}
 
-.control:disabled {
-	color: var(--color-text-secondary);
-	background: var(--color-surface-muted);
-}
+		&:disabled {
+			color: var(--color-text-secondary);
+			background: var(--color-surface-muted);
+		}
+	}
 
-.input {
-	block-size: var(--control-height-sm);
-}
+	.input {
+		block-size: var(--control-height-sm);
+	}
 
-.textArea {
-	block-size: 14.75rem;
-	padding: var(--space-3) 0.875rem;
-	resize: none;
-}
-
-@media (max-width: 639px) {
 	.textArea {
-		block-size: 10rem;
+		block-size: 14.75rem;
+		padding: var(--space-3) var(--space-3-5);
+		resize: none;
+
+		@media (width < 40rem) {
+			block-size: 10rem;
+		}
 	}
 }

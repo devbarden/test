@@ -33,7 +33,7 @@ export function LetterPanel({
 		<Panel
 			aria-label={m['editor.panel.label']()}
 			as="section"
-			className={styles.panel}
+			className={styles.root}
 			ref={ref}
 			tabIndex={-1}
 		>

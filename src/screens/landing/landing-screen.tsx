@@ -8,7 +8,7 @@ import { HowItWorks } from './sections/how-it-works'
 
 export function LandingScreen() {
 	return (
-		<div className={styles.screen}>
+		<div className={styles.root}>
 			<LandingNav />
 			<main>
 				<Hero />

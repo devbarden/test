@@ -40,7 +40,7 @@ export function Toast({
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: hover and focus only pause the dismiss timer; focus bubbles up from the buttons inside
 		<div
-			className={styles.toast}
+			className={styles.root}
 			onBlur={handleBlur}
 			onFocus={() => setHasFocus(true)}
 			onPointerEnter={() => setIsHovered(true)}

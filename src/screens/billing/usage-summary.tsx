@@ -1,17 +1,12 @@
 import { Heading } from '@/components/ui/heading'
 import { Meter } from '@/components/ui/meter'
 import { Panel } from '@/components/ui/panel'
-import type { PlanId } from '@/features/billing/model/billing.catalog'
 import type { BillingOverview } from '@/features/billing/model/billing-overview'
 import { m } from '@/paraglide/messages'
+import { PLAN_NAMES } from './plan-copy'
 import styles from './usage-summary.module.css'
 
 const SECONDS_PER_HOUR = 3600
-
-const PLAN_NAMES: Record<PlanId, () => string> = {
-	free: () => m['billing.plan.free'](),
-	pro: () => m['billing.plan.pro'](),
-}
 
 type UsageSummaryProps = {
 	overview: BillingOverview
@@ -25,7 +20,7 @@ export function UsageSummary({ overview }: UsageSummaryProps) {
 	)
 
 	return (
-		<Panel className={styles.summary}>
+		<Panel className={styles.root}>
 			<Heading size="sm">
 				{m['billing.currentPlan']({ plan: PLAN_NAMES[plan]() })}
 			</Heading>

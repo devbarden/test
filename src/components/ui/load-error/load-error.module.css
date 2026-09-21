@@ -1,6 +1,8 @@
-.loadError {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-	align-items: flex-start;
+@layer ui {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		align-items: flex-start;
+	}
 }

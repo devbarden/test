@@ -7,10 +7,7 @@ function setup() {
 	const eraseUser = vi.fn(async () => 0)
 	const record = vi.fn()
 	const service = createAccountEventsService({
-		applicationMaintenanceService: {
-			eraseUser,
-			purgeDeleted: vi.fn(async () => 0),
-		},
+		applicationMaintenanceService: { eraseUser },
 		billingWebhookService: { record },
 		logger: silentLogger,
 	})

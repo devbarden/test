@@ -20,7 +20,7 @@ import { MeshBackground } from './mesh-background'
 export function AuthScreen() {
 	return (
 		<ClerkBoundary>
-			<div className={styles.screen}>
+			<div className={styles.root}>
 				<main className={styles.formSide}>
 					<MeshBackground />
 					<div className={styles.topBar}>

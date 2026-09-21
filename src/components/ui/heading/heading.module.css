@@ -1,34 +1,30 @@
-.heading {
-	min-inline-size: 0;
-	font-family: var(--font-display);
-	font-weight: var(--weight-semibold);
-	line-height: var(--display-leading);
-	letter-spacing: var(--display-tracking);
-	hyphens: auto;
-	text-wrap: balance;
-	overflow-wrap: break-word;
-}
+@layer ui {
+	.root {
+		min-inline-size: 0;
+		letter-spacing: var(--display-tracking);
+		hyphens: auto;
+		text-wrap: balance;
+		overflow-wrap: break-word;
+	}
 
-.sm {
-	font-size: var(--display-sm);
-}
+	.sm {
+		font: var(--type-display-sm);
+	}
 
-.md {
-	font-size: var(--display-md);
-	line-height: var(--display-md-leading);
-}
+	.md {
+		font: var(--type-display-md);
+	}
 
-.lg {
-	font-size: var(--display-lg);
-	line-height: var(--display-lg-leading);
-}
+	.lg {
+		font: var(--type-display-lg);
+	}
 
-.xl {
-	font-size: var(--display-xl);
-	line-height: var(--display-leading-tight);
-	letter-spacing: var(--display-tracking-tight);
-}
+	.xl {
+		font: var(--type-display-xl);
+		letter-spacing: var(--display-tracking-tight);
+	}
 
-.muted {
-	color: var(--color-text-tertiary);
+	.muted {
+		color: var(--color-text-tertiary);
+	}
 }

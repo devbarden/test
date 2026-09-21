@@ -13,10 +13,10 @@ export function GoalIndicator() {
 	const { count, goal, isKnown, isReached } = useGoalProgress()
 	const label = m['goal.indicator']({ count, goal })
 
-	if (!isKnown) return <div aria-hidden="true" className={styles.indicator} />
+	if (!isKnown) return <div aria-hidden="true" className={styles.root} />
 
 	return (
-		<div className={styles.indicator}>
+		<div className={styles.root}>
 			<span aria-hidden="true" className={styles.label}>
 				{`${count}/${goal}`}
 				<span className={styles.suffix}>{m['goal.indicatorSuffix']()}</span>

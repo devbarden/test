@@ -1,33 +1,33 @@
-.logo {
-	display: flex;
-}
+@layer components {
+	.root {
+		display: flex;
+	}
 
-.homeLink {
-	display: flex;
-	border-radius: var(--radius-sm);
-}
+	.homeLink {
+		display: flex;
+		border-radius: var(--radius-sm);
+	}
 
-.lockup {
-	display: block;
-	inline-size: calc(3rem * 179 / 48);
-	block-size: 3rem;
-}
-
-.markFill {
-	fill: var(--color-brand);
-}
-
-.wordmarkFill {
-	fill: var(--color-brand-text);
-}
-
-.wordmarkInverse {
-	fill: var(--color-text-on-ink);
-}
-
-@media (max-width: 639px) {
 	.lockup {
-		inline-size: calc(2.5rem * 179 / 48);
-		block-size: 2.5rem;
+		display: block;
+		inline-size: calc(3rem * 179 / 48);
+		block-size: 3rem;
+
+		@media (width < 40rem) {
+			inline-size: calc(2.5rem * 179 / 48);
+			block-size: 2.5rem;
+		}
+	}
+
+	.mark {
+		fill: var(--color-brand);
+	}
+
+	.wordmark {
+		fill: var(--color-brand-text);
+	}
+
+	.wordmarkInverse {
+		fill: var(--color-text-on-ink);
 	}
 }

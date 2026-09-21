@@ -14,7 +14,7 @@ const GHOST_CARDS = ['first', 'second'] as const
 // ═══════════════════════════════════════════════════════════════════════════
 export function EmptyState() {
 	return (
-		<Panel className={styles.emptyState}>
+		<Panel className={styles.root}>
 			<div aria-hidden="true" className={styles.illustration}>
 				{GHOST_CARDS.map((key) => (
 					<div className={styles.ghostCard} key={key}>

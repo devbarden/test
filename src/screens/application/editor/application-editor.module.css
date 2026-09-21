@@ -1,30 +1,30 @@
-.editor {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-12);
-}
+@layer screens {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-12);
 
-.workspace {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--space-8);
-	align-items: stretch;
-}
-
-.formColumn {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-	min-inline-size: 0;
-}
-
-@media (max-width: 959px) {
-	.editor {
-		gap: var(--space-8);
+		@media (width < 60rem) {
+			gap: var(--space-8);
+		}
 	}
 
 	.workspace {
-		grid-template-columns: minmax(0, 1fr);
-		gap: var(--space-6);
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-8);
+		align-items: stretch;
+
+		@media (width < 60rem) {
+			grid-template-columns: minmax(0, 1fr);
+			gap: var(--space-6);
+		}
+	}
+
+	.formColumn {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		min-inline-size: 0;
 	}
 }

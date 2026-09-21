@@ -13,5 +13,5 @@ type ContainerProps = {
 //   brand stays put when a visitor moves between them.
 // ═══════════════════════════════════════════════════════════════════════════
 export function Container({ children, className }: ContainerProps) {
-	return <div className={clsx(styles.container, className)}>{children}</div>
+	return <div className={clsx(styles.root, className)}>{children}</div>
 }

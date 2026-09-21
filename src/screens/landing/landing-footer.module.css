@@ -1,48 +1,53 @@
-.footer {
-	padding-block: var(--space-14);
-	margin-block-start: var(--space-10);
-	border-block-start: 1px solid var(--color-border-hairline);
-}
-
-.inner {
-	display: grid;
-	gap: var(--space-10);
-}
-
-@media (min-width: 768px) {
-	.inner {
-		grid-template-columns: 2fr 1fr 1fr;
+@layer screens {
+	/* ═══════════════════════════════════════════════════════════════════════
+	     The dot grid ends where the footer starts: a solid page colour
+	     closes the page, and the small print reads on a clean ground.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.root {
+		padding-block: var(--space-14);
+		margin-block-start: var(--space-10);
+		background: var(--color-surface-page);
+		border-block-start: 1px solid var(--color-border-hairline);
 	}
-}
 
-.brand {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-	max-inline-size: 20rem;
-	font-size: var(--text-sm);
-	color: var(--color-text-secondary);
-}
+	.inner {
+		display: grid;
+		gap: var(--space-10);
 
-.column {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-3);
-	font-size: var(--text-sm);
-}
+		@media (width >= 48rem) {
+			grid-template-columns: 2fr 1fr 1fr;
+		}
+	}
 
-.column h2 {
-	font-size: var(--text-2xs);
-	font-weight: var(--weight-semibold);
-	color: var(--color-text-primary);
-	text-transform: uppercase;
-	letter-spacing: var(--tracking-eyebrow);
-}
+	.brand {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		max-inline-size: 20rem;
+		font: var(--type-body-sm);
+		color: var(--color-text-secondary);
+	}
 
-.language {
-	color: var(--color-text-secondary);
-}
+	.column {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+		font: var(--type-body-sm);
+	}
 
-.language:hover {
-	color: var(--color-text-primary);
+	.columnTitle {
+		font-size: var(--text-2xs);
+		font-weight: var(--weight-semibold);
+		color: var(--color-text-primary);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-eyebrow);
+	}
+
+	.language {
+		color: var(--color-text-secondary);
+
+		&:hover {
+			color: var(--color-text-primary);
+		}
+	}
 }

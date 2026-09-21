@@ -2,11 +2,18 @@ import clsx from 'clsx'
 import { CircleAlertIcon, InfoIcon } from 'lucide-react'
 import styles from './alert.module.css'
 
+type AlertTone = 'danger' | 'info'
+
 type AlertProps = {
 	children: string
 	className?: string
-	tone: 'danger' | 'info'
+	tone: AlertTone
 }
+
+const TONE_CLASS = {
+	danger: styles.danger,
+	info: styles.info,
+} satisfies Record<AlertTone, string | undefined>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   `alert` interrupts a screen reader, `status` waits its turn: a failed
@@ -17,10 +24,10 @@ export function Alert({ children, className, tone }: AlertProps) {
 
 	return (
 		<div
-			className={clsx(styles.alert, styles[tone], className)}
+			className={clsx(styles.root, TONE_CLASS[tone], className)}
 			role={tone === 'danger' ? 'alert' : 'status'}
 		>
-			<Icon aria-hidden="true" className={styles.icon} />
+			<Icon aria-hidden="true" />
 			<p>{children}</p>
 		</div>
 	)

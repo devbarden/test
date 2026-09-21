@@ -1,7 +1,7 @@
 import { Eyebrow } from '@/components/ui/eyebrow'
 import { Heading } from '@/components/ui/heading'
 import { Reveal } from '../reveal/reveal'
-import section from './section.module.css'
+import styles from './section.module.css'
 
 type SectionHeadingProps = {
 	kicker: string
@@ -11,10 +11,10 @@ type SectionHeadingProps = {
 
 export function SectionHeading({ kicker, lead, title }: SectionHeadingProps) {
 	return (
-		<Reveal className={section.heading} stagger>
-			<Eyebrow className={section.kicker}>{kicker}</Eyebrow>
+		<Reveal className={styles.heading} stagger>
+			<Eyebrow className={styles.kicker}>{kicker}</Eyebrow>
 			<Heading size="lg">{title}</Heading>
-			{lead && <p className={section.lead}>{lead}</p>}
+			{lead && <p className={styles.lead}>{lead}</p>}
 		</Reveal>
 	)
 }

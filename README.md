@@ -36,7 +36,7 @@ npm run dev             # http://localhost:3000
 - **CSS Modules + дизайн-токены** — без Tailwind и без UI-китов
 - **zod** — один контракт данных для формы, сервера и хранилища
 - **Vitest** и **Playwright**, **Biome**
-- **Railway** — деплой (`railway.json`, healthcheck на `/api/health`)
+- **Railway** — деплой (`.railway/railway.ts`)
 
 ## Архитектура
 
@@ -131,6 +131,12 @@ guard авторизации выполняется на сервере, а са
 роли. Компоненты ссылаются только на роли (`--color-text-secondary`,
 `--color-surface-muted`), поэтому смена темы — это перенастройка ролей в
 одном месте.
+
+CSS Modules разложены по каскадным слоям (`reset → tokens → base → ui →
+components → features → screens → utilities`), так что переопределение
+через `className` всегда выигрывает у собственных стилей компонента.
+Правила — в [`docs/styles.md`](docs/styles.md), их проверяет
+`npm run lint:styles`.
 
 Закономерности, найденные в макетах:
 

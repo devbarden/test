@@ -33,18 +33,12 @@ const { config, rateLimiter, rootLogger } = container.cradle
 registerProcessLifecycle(container)
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Exempt from the per-IP budget: liveness (it touches nothing, and an
-//   orchestrator polls it), and the callers that authenticate themselves
-//   and have a budget of their own (webhooks and the scheduler). Readiness
-//   is NOT exempt: it queries Postgres and Redis on every call, so an
-//   unlimited endpoint in front of them would be a free way to load both.
+//   Exempt from the per-IP budget: webhooks, which authenticate by
+//   signature and have a budget of their own — Clerk retries from a few
+//   shared IPs, and a busy minute must not lock out its deliveries.
 // ═══════════════════════════════════════════════════════════════════════════
 function isIpBudgetExempt(pathname: string): boolean {
-	return (
-		pathname === '/api/health' ||
-		pathname.startsWith('/api/webhooks/') ||
-		pathname.startsWith('/api/cron/')
-	)
+	return pathname.startsWith('/api/webhooks/')
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

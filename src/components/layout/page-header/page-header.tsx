@@ -21,7 +21,7 @@ export function PageHeader({
 	tone = 'default',
 }: PageHeaderProps) {
 	return (
-		<div className={clsx(styles.pageHeader, size === 'md' && styles.md)}>
+		<div className={clsx(styles.root, size === 'md' && styles.md)}>
 			<Heading as="h1" size={size} tone={tone}>
 				{title}
 			</Heading>

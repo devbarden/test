@@ -20,7 +20,7 @@ export type UserActor = {
 }
 
 export type SystemActor = {
-	source: 'clerk-webhook' | 'cron'
+	source: 'clerk-webhook'
 	type: 'system'
 }
 

@@ -9,38 +9,38 @@ import {
 } from 'react'
 import { IconButton } from '@/components/ui/icon-button'
 import { usePathname } from '@/hooks/use-pathname'
-import {
-	changeLocale,
-	LOCALE_NAMES,
-	type Locale,
-	locales,
-} from '@/lib/i18n/locale'
+import { LOCALE_NAMES, type Locale, locales } from '@/lib/i18n/locale'
 import { isLocalizablePath } from '@/lib/i18n/localized-routes'
+import { useChangeLocale } from '@/lib/i18n/use-change-locale'
 import { useLocale } from '@/lib/i18n/use-locale'
 import { m } from '@/paraglide/messages'
 import { localizeHref } from '@/paraglide/runtime'
 import styles from './language-switcher.module.css'
 
 type LanguageSwitcherProps = {
-	compact?: boolean
+	variant?: 'labelled' | 'icon' | 'ghost'
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   A globe that opens the list of languages, each named in itself — a
 //   picker is read by someone who may not read the current language yet.
-//   `compact` is the icon alone, sized like the header's other icon
-//   buttons.
+//   `labelled` names the current language beside the globe; `icon` and
+//   `ghost` are the globe alone, outlined like the header's other icon
+//   buttons or bare on the landing's nav.
 //
 //   A disclosure, not an ARIA menu: a short list of links and buttons that
 //   Tab moves through, closed by Escape, a click outside or focus leaving
 //   it. On a public page each option is a real link to that page's
 //   translation, so it can be crawled and opened in a new tab (a modified
 //   click is left to the browser); inside the app the language lives in a
-//   cookie, so the options are buttons. Either way the switch reloads the
-//   page: copy is rendered once per locale and memoized.
+//   cookie, so the options are buttons. Either way the switch happens in
+//   place, without a reload (see useChangeLocale).
 // ═══════════════════════════════════════════════════════════════════════════
-export function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+	variant = 'labelled',
+}: LanguageSwitcherProps) {
 	const current = useLocale()
+	const changeLocale = useChangeLocale()
 	const pathname = usePathname()
 	const linked = isLocalizablePath(pathname)
 	const [isOpen, setIsOpen] = useState(false)
@@ -78,7 +78,7 @@ export function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
 
 		event.preventDefault()
 		setIsOpen(false)
-		changeLocale(locale)
+		void changeLocale(locale)
 	}
 
 	const option = (locale: Locale) => {
@@ -111,16 +111,8 @@ export function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: blur only closes the list when focus leaves it; the controls inside are the real buttons and links
-		<div className={styles.switcher} onBlur={handleBlur} ref={root}>
-			{compact ? (
-				<IconButton
-					aria-controls={listId}
-					aria-expanded={isOpen}
-					icon={<GlobeIcon />}
-					label={label}
-					onClick={toggle}
-				/>
-			) : (
+		<div className={styles.root} onBlur={handleBlur} ref={root}>
+			{variant === 'labelled' ? (
 				<button
 					aria-controls={listId}
 					aria-expanded={isOpen}
@@ -134,6 +126,15 @@ export function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
 					<span lang={current}>{LOCALE_NAMES[current]}</span>
 					<ChevronDownIcon className={styles.chevron} />
 				</button>
+			) : (
+				<IconButton
+					aria-controls={listId}
+					aria-expanded={isOpen}
+					icon={<GlobeIcon />}
+					label={label}
+					onClick={toggle}
+					variant={variant === 'icon' ? 'outline' : 'ghost'}
+				/>
 			)}
 			<ul className={styles.list} hidden={!isOpen} id={listId}>
 				{locales.map((locale) => (

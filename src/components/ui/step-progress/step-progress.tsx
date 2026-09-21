@@ -1,13 +1,20 @@
 import clsx from 'clsx'
 import styles from './step-progress.module.css'
 
+type StepProgressVariant = 'dots' | 'bars'
+
 type StepProgressProps = {
 	className?: string
 	label: string
 	max: number
 	value: number
-	variant: 'dots' | 'bars'
+	variant: StepProgressVariant
 }
+
+const VARIANT_CLASS = {
+	bars: styles.bars,
+	dots: styles.dots,
+} satisfies Record<StepProgressVariant, string | undefined>
 
 export function StepProgress({
 	className,
@@ -27,7 +34,7 @@ export function StepProgress({
 			aria-valuemax={max}
 			aria-valuemin={0}
 			aria-valuenow={Math.min(value, max)}
-			className={clsx(styles.progress, styles[variant], className)}
+			className={clsx(styles.root, VARIANT_CLASS[variant], className)}
 			role="progressbar"
 		>
 			{steps.map(({ isDone, step }) => (

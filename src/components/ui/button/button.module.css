@@ -1,196 +1,197 @@
-.button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: var(--weight-semibold);
-	white-space: nowrap;
-	user-select: none;
-	border: 1px solid transparent;
-	border-radius: var(--radius-md);
-	transition-timing-function: var(--ease-out);
-	transition-duration: var(--duration-fast);
-	transition-property: background-color, border-color, color, box-shadow;
-}
+@layer ui {
+	/* ═══════════════════════════════════════════════════════════════════════
+	     Sizes and shapes only set the private `--_` properties; the root
+	     rule is the one place that turns them into CSS, so a variant can
+	     never forget a property and two variants never fight over one. The
+	     root declares every one of them, so none is inherited from an
+	     ancestor that happens to use the same name.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.root {
+		--_height: auto;
+		--_padding: 0;
+		--_font: var(--type-body-md);
+		--_gap: var(--space-2);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-     Label and spinner share one grid cell. While loading the label turns
-     transparent rather than hidden, so it still holds the button's width
-     and still names the button for a screen reader ("Generate Now, busy").
-   ═══════════════════════════════════════════════════════════════════════════ */
-.content {
-	display: inline-grid;
-	place-items: center;
-	min-inline-size: 0;
-}
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-block-size: var(--_height);
+		padding-inline: var(--_padding);
+		font: var(--_font);
+		font-weight: var(--weight-semibold);
+		white-space: nowrap;
+		user-select: none;
+		border: 1px solid transparent;
+		border-radius: var(--radius-md);
+		transition-timing-function: var(--ease-out);
+		transition-duration: var(--duration-fast);
+		transition-property: background-color, border-color, color, box-shadow;
 
-.content > * {
-	grid-area: 1 / 1;
-}
+		&[aria-busy="true"] {
+			cursor: progress;
+		}
 
-.row {
-	display: inline-flex;
-	gap: var(--space-2);
-	align-items: center;
-	min-inline-size: 0;
-}
-
-.concealed {
-	opacity: 0;
-}
-
-.label {
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.button svg {
-	flex-shrink: 0;
-	inline-size: var(--icon-md);
-	block-size: var(--icon-md);
-}
-
-.xs {
-	min-block-size: var(--control-height-xs);
-	padding-inline: var(--space-3);
-	font-size: var(--text-sm);
-	line-height: var(--text-sm-leading);
-}
-
-.sm {
-	min-block-size: var(--control-height-sm);
-	padding-inline: var(--space-4);
-	font-size: var(--text-md);
-	line-height: var(--text-md-leading);
-}
-
-.md {
-	min-block-size: var(--control-height-md);
-	padding-inline: 1.125rem;
-	font-size: var(--text-md);
-	line-height: var(--text-md-leading);
-}
-
-.lg {
-	min-block-size: var(--control-height-lg);
-	padding-inline: 1.75rem;
-	font-size: var(--text-lg);
-	line-height: var(--text-lg-leading);
-}
-
-.lg .row {
-	gap: var(--space-3);
-}
-
-.lg svg {
-	inline-size: var(--icon-lg);
-	block-size: var(--icon-lg);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-     The pill is the public pages' shape: bolder, fully rounded, and it
-     lifts under the pointer. Inside the app buttons stay quiet rectangles.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.pill {
-	padding-inline: var(--space-8);
-	border-radius: var(--radius-full);
-	transition-property:
-		background-color, border-color, color, box-shadow, transform;
-}
-
-.pill.xs,
-.pill.sm {
-	padding-inline: var(--space-5);
-}
-
-@media (hover: hover) {
-	.pill:hover {
-		transform: translateY(-2px);
+		&:disabled {
+			cursor: not-allowed;
+		}
 	}
-}
 
-.pill:active {
-	transform: none;
-}
+	/* ═══════════════════════════════════════════════════════════════════════
+	     Label and spinner share one grid cell. While loading the label turns
+	     transparent rather than hidden, so it still holds the button's width
+	     and still names the button for a screen reader ("Generate Now,
+	     busy").
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.content {
+		display: inline-grid;
+		place-items: center;
+		min-inline-size: 0;
 
-.fullWidth {
-	inline-size: 100%;
-}
+		& > * {
+			grid-area: 1 / 1;
+		}
+	}
 
-.primary {
-	color: var(--color-text-on-accent);
-	background: var(--color-accent);
-	box-shadow: var(--shadow-xs);
-}
+	.row {
+		display: inline-flex;
+		gap: var(--_gap);
+		align-items: center;
+		min-inline-size: 0;
 
-.primary:hover {
-	background: var(--color-accent-hover);
-}
+		&.concealed {
+			opacity: 0;
+		}
+	}
 
-.primary:active {
-	background: var(--color-accent-active);
-}
+	.label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 
-.secondary {
-	color: var(--color-text-label);
-	background: var(--color-surface-page);
-	border-color: var(--color-border-default);
-	box-shadow: var(--shadow-xs);
-}
+	.xs {
+		--_height: var(--control-height-xs);
+		--_padding: var(--space-3);
+		--_font: var(--type-body-sm);
+		--icon-size: var(--icon-md);
+	}
 
-.secondary:hover {
-	background: var(--color-control-hover);
-}
+	.sm {
+		--_height: var(--control-height-sm);
+		--_padding: var(--space-4);
+		--icon-size: var(--icon-md);
+	}
 
-.ghost {
-	padding: var(--space-1);
-	margin: calc(var(--space-1) * -1);
-	font-size: var(--text-md);
-	line-height: var(--text-md-leading);
-	color: var(--color-text-secondary);
-	background: none;
-	border-radius: var(--radius-sm);
-}
+	.md {
+		--_height: var(--control-height-md);
+		--_padding: 1.125rem;
+		--icon-size: var(--icon-md);
+	}
 
-.ghost svg {
-	inline-size: var(--icon-lg);
-	block-size: var(--icon-lg);
-}
+	.lg {
+		--_height: var(--control-height-lg);
+		--_padding: 1.75rem;
+		--_font: var(--type-body-lg);
+		--_gap: var(--space-3);
+		--icon-size: var(--icon-lg);
+	}
 
-.ghost:hover {
-	color: var(--color-text-primary);
-}
+	/* ═══════════════════════════════════════════════════════════════════════
+	     The pill is the public pages' shape: bolder, fully rounded, and it
+	     lifts under the pointer. Inside the app buttons stay quiet
+	     rectangles.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.pill {
+		--_padding: var(--space-8);
 
-.button[aria-busy="true"] {
-	cursor: progress;
-}
+		border-radius: var(--radius-full);
+		transition-property:
+			background-color, border-color, color, box-shadow, transform;
 
-.button:disabled {
-	cursor: not-allowed;
-}
+		&.xs,
+		&.sm {
+			--_padding: var(--space-5);
+		}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-     Only primary and secondary grey out. A disabled ghost keeps its
-     colour, as in the mockup's empty letter panel: "Copy to clipboard" is
-     present but has nothing to copy yet. The cursor and the disabled
-     state still tell it apart.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.primary:disabled {
-	color: var(--color-text-disabled);
-	background: var(--color-control-disabled);
-	box-shadow: none;
-}
+		@media (hover: hover) {
+			&:hover {
+				transform: translateY(-2px);
+			}
+		}
 
-.secondary:disabled {
-	color: var(--color-text-disabled);
-}
+		&:active {
+			transform: none;
+		}
 
-.button:disabled,
-.button[aria-busy="true"] {
-	transform: none;
-}
+		@media (prefers-reduced-motion: reduce) {
+			&:hover {
+				transform: none;
+			}
+		}
+	}
 
-@media (prefers-reduced-motion: reduce) {
-	.pill:hover {
+	.fullWidth {
+		inline-size: 100%;
+	}
+
+	.primary {
+		color: var(--color-text-on-accent);
+		background: var(--color-accent);
+		box-shadow: var(--shadow-xs);
+
+		&:hover {
+			background: var(--color-accent-hover);
+		}
+
+		&:active {
+			background: var(--color-accent-active);
+		}
+
+		&:disabled {
+			color: var(--color-text-disabled);
+			background: var(--color-control-disabled);
+			box-shadow: none;
+		}
+	}
+
+	.secondary {
+		color: var(--color-text-label);
+		background: var(--color-surface-page);
+		border-color: var(--color-border-default);
+		box-shadow: var(--shadow-xs);
+
+		&:hover {
+			background: var(--color-control-hover);
+		}
+
+		&:disabled {
+			color: var(--color-text-disabled);
+		}
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     A ghost has no size: it is a line of text that happens to be a
+	     button, padded just enough for a focus ring and pulled back by as
+	     much so it lines up with the text around it. Unlike primary and
+	     secondary it does not grey out when disabled — as in the mockup's
+	     empty letter panel, "Copy to clipboard" is present but has nothing
+	     to copy yet. The cursor and the disabled state still tell it apart.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.ghost {
+		--_padding: var(--space-1);
+		--icon-size: var(--icon-lg);
+
+		padding-block: var(--space-1);
+		margin: calc(var(--space-1) * -1);
+		color: var(--color-text-secondary);
+		background: none;
+		border-radius: var(--radius-sm);
+
+		&:hover {
+			color: var(--color-text-primary);
+		}
+	}
+
+	.root:is(:disabled, [aria-busy="true"]) {
 		transform: none;
 	}
 }

@@ -1,68 +1,71 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-     `data-reveal` is written by the observer in reveal.tsx: `idle` until it
-     has looked, `shown` when it was already in view, `off` below the fold
-     and `on` once scrolled into view — the only state that animates.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.reveal[data-reveal="off"] {
-	opacity: 0;
-}
+@layer screens {
+	/* ═══════════════════════════════════════════════════════════════════════
+	     `data-reveal` is written by the observer in reveal.tsx: `idle` until
+	     it has looked, `shown` when it was already in view, `off` below the
+	     fold and `on` once scrolled into view — the only state that
+	     animates. A block reveals either itself (`single`) or its children
+	     one after another (`stagger`), never both.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.single {
+		&[data-reveal="off"] {
+			opacity: 0;
+		}
 
-.reveal[data-reveal="on"] {
-	animation: reveal 500ms var(--ease-emphasized) backwards;
-}
-
-.stagger.reveal[data-reveal] {
-	opacity: 1;
-	animation: none;
-}
-
-.stagger[data-reveal="off"] > * {
-	opacity: 0;
-}
-
-.stagger[data-reveal="on"] > * {
-	animation: reveal 650ms var(--ease-emphasized) backwards;
-}
-
-.stagger[data-reveal="on"] > :nth-child(2) {
-	animation-delay: 80ms;
-}
-
-.stagger[data-reveal="on"] > :nth-child(3) {
-	animation-delay: 160ms;
-}
-
-.stagger[data-reveal="on"] > :nth-child(4) {
-	animation-delay: 240ms;
-}
-
-.stagger[data-reveal="on"] > :nth-child(n + 5) {
-	animation-delay: 320ms;
-}
-
-@keyframes reveal {
-	from {
-		opacity: 0;
-		transform: translate3d(0, 0.75rem, 0);
+		&[data-reveal="on"] {
+			animation: reveal 500ms var(--ease-emphasized) backwards;
+		}
 	}
-}
 
-@media (prefers-reduced-motion: reduce) {
-	.reveal[data-reveal],
-	.stagger[data-reveal] > * {
-		opacity: 1;
-		transform: none;
-		animation: none;
+	.stagger {
+		&[data-reveal="off"] > * {
+			opacity: 0;
+		}
+
+		&[data-reveal="on"] > * {
+			animation: reveal 650ms var(--ease-emphasized) backwards;
+
+			&:nth-child(2) {
+				animation-delay: 80ms;
+			}
+
+			&:nth-child(3) {
+				animation-delay: 160ms;
+			}
+
+			&:nth-child(4) {
+				animation-delay: 240ms;
+			}
+
+			&:nth-child(n + 5) {
+				animation-delay: 320ms;
+			}
+		}
 	}
-}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-     Paper has no scroll: whatever the observer left hidden is printed.
-   ═══════════════════════════════════════════════════════════════════════════ */
-@media print {
-	.reveal[data-reveal],
-	.stagger[data-reveal] > * {
-		opacity: 1;
-		animation: none;
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translate3d(0, 0.75rem, 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.single[data-reveal],
+		.stagger[data-reveal] > * {
+			opacity: 1;
+			transform: none;
+			animation: none;
+		}
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     Paper has no scroll: whatever the observer left hidden is printed.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	@media print {
+		.single[data-reveal],
+		.stagger[data-reveal] > * {
+			opacity: 1;
+			animation: none;
+		}
 	}
 }

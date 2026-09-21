@@ -68,7 +68,7 @@ export function ApplicationEditor({
 	const title = applicationTitle(input)
 
 	return (
-		<div className={styles.editor}>
+		<div className={styles.root}>
 			<div className={styles.workspace}>
 				<div className={styles.formColumn}>
 					<PageHeader

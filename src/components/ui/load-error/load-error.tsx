@@ -10,7 +10,7 @@ type LoadErrorProps = {
 
 export function LoadError({ children, onRetry }: LoadErrorProps) {
 	return (
-		<div className={styles.loadError}>
+		<div className={styles.root}>
 			<Alert tone="danger">{children}</Alert>
 			<Button onClick={onRetry} variant="secondary">
 				{m['common.tryAgain']()}

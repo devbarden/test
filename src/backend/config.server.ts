@@ -8,7 +8,6 @@ const optionalSecret = (minLength: number) =>
 const envSchema = z.object({
 	CLERK_SECRET_KEY: z.string().min(1),
 	CLERK_WEBHOOK_SIGNING_SECRET: optionalSecret(1),
-	CRON_SECRET: optionalSecret(32),
 	DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
 	DATABASE_URL: z.url(),
 	GENERATION_API_TOKEN: z.string().min(1),
@@ -54,7 +53,6 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 
 	return {
 		clerk: { webhookSigningSecret: vars.CLERK_WEBHOOK_SIGNING_SECRET },
-		cron: { secret: vars.CRON_SECRET },
 		database: {
 			poolMax: vars.DATABASE_POOL_MAX,
 			statementTimeoutMs: 10_000,
@@ -82,7 +80,6 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 			upstreamRequestsPerMinute: 6,
 		},
 		redis: { url: vars.REDIS_URL },
-		retention: { deletedApplicationsDays: 30 },
 	}
 }
 

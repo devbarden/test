@@ -54,7 +54,7 @@ export function ApplicationForm({
 	}
 
 	return (
-		<form className={styles.form} noValidate onSubmit={handleSubmit}>
+		<form className={styles.root} noValidate onSubmit={handleSubmit}>
 			<div className={styles.row}>
 				<Field label={m['editor.form.jobTitle']()}>
 					<Input

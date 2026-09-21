@@ -1,7 +1,9 @@
-.main {
-	padding-block-end: 7.5rem;
-}
+@layer components {
+	.root {
+		padding-block-end: 7.5rem;
 
-.main:focus {
-	outline: none;
+		&:focus {
+			outline: none;
+		}
+	}
 }

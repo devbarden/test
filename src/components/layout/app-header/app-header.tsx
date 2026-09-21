@@ -21,16 +21,18 @@ type AppHeaderProps = {
 // ═══════════════════════════════════════════════════════════════════════════
 export function AppHeader({ account, status }: AppHeaderProps) {
 	return (
-		<header className={styles.header}>
+		<header className={styles.root}>
 			<HomeLink />
 			<div className={styles.actions}>
 				{status}
-				<LanguageSwitcher compact />
-				<IconButtonLink
-					icon={<HouseIcon />}
-					label={m['header.allApplications']()}
-					to="/applications"
-				/>
+				<div className={styles.controls}>
+					<IconButtonLink
+						icon={<HouseIcon />}
+						label={m['header.allApplications']()}
+						to="/applications"
+					/>
+					<LanguageSwitcher variant="icon" />
+				</div>
 				{account && <div className={styles.account}>{account}</div>}
 			</div>
 		</header>

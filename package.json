@@ -31,7 +31,8 @@
 		"db:studio": "prisma studio",
 		"lint:comments": "node scripts/check-comments.ts",
 		"lint:architecture": "node scripts/check-architecture.ts",
-		"lint": "biome check . && npm run lint:comments && npm run lint:architecture",
+		"lint:styles": "node scripts/check-styles.ts",
+		"lint": "biome check . && npm run lint:comments && npm run lint:architecture && npm run lint:styles",
 		"test:integration": "vitest run --project integration"
 	},
 	"dependencies": {

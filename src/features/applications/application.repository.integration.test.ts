@@ -55,20 +55,13 @@ describe('applicationRepository (Postgres)', () => {
 		expect(secondPage.map((row) => row.letter)).toEqual(['#1', '#0'])
 	})
 
-	it('soft-deletes, restores, and purges only past the cutoff', async () => {
+	it('soft-deletes and restores the same row', async () => {
 		const row = await repository.create('alice', letter)
 
 		expect(await repository.softDelete('alice', row.id)).toBe(true)
 		expect(await repository.countActive('alice')).toBe(0)
 		expect((await repository.restore('alice', row.id))?.id).toBe(row.id)
-		expect(await repository.softDelete('alice', row.id)).toBe(true)
-
-		expect(
-			await repository.purgeDeletedBefore(new Date(Date.now() - 60_000)),
-		).toBe(0)
-		expect(
-			await repository.purgeDeletedBefore(new Date(Date.now() + 60_000)),
-		).toBe(1)
+		expect(await repository.countActive('alice')).toBe(1)
 	})
 
 	it('holds the per-user cap under concurrent inserts', async () => {

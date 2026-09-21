@@ -1,0 +1,32 @@
+@layer reset {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+		margin: 0;
+	}
+
+	html {
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+	}
+
+	img,
+	svg {
+		display: block;
+		flex-shrink: 0;
+	}
+
+	input,
+	button,
+	textarea,
+	select {
+		font: inherit;
+		letter-spacing: inherit;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+}

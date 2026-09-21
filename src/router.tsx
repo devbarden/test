@@ -1,5 +1,6 @@
 import { createRouter } from '@tanstack/react-router'
 import { NotFound, RouteError } from '@/components/fallbacks'
+import { notifyLocaleChange } from '@/lib/i18n/locale'
 import {
 	isLocalizablePath,
 	isUnlocalizedPath,
@@ -28,7 +29,7 @@ function delocalizeInput(url: URL): URL {
 }
 
 export function getRouter() {
-	return createRouter({
+	const router = createRouter({
 		defaultErrorComponent: RouteError,
 		defaultNotFoundComponent: NotFound,
 		defaultPreload: 'intent',
@@ -39,8 +40,19 @@ export function getRouter() {
 				isLocalizablePath(url.pathname) ? localizeUrl(url) : url,
 		},
 		routeTree,
-		scrollRestoration: true,
+		scrollRestoration: ({ location }) => !location.state.keepScroll,
 	})
+
+	// ═══════════════════════════════════════════════════════════════════════
+	//   A navigation between the two locale zones can change the language
+	//   by itself — from `/ru/` to the app, which reads the cookie — so the
+	//   locale is re-read after every one, not only after a switch.
+	// ═══════════════════════════════════════════════════════════════════════
+	if (typeof window !== 'undefined') {
+		router.subscribe('onResolved', notifyLocaleChange)
+	}
+
+	return router
 }
 
 declare module '@tanstack/react-router' {
@@ -49,6 +61,7 @@ declare module '@tanstack/react-router' {
 	}
 
 	interface HistoryState {
+		keepScroll?: boolean
 		letterJustSaved?: boolean
 	}
 }

@@ -1,0 +1,56 @@
+@layer base {
+	html {
+		color-scheme: light;
+	}
+
+	body {
+		min-height: 100dvh;
+		font: var(--type-body-md);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		color: var(--color-text-primary);
+		background: var(--color-surface-page);
+	}
+
+	button {
+		cursor: pointer;
+	}
+
+	:focus-visible {
+		outline: var(--focus-ring);
+		outline-offset: var(--focus-ring-offset);
+	}
+
+	::selection {
+		background: var(--color-accent-subtle);
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     Every Lucide icon takes its size from `--icon-size`, so a component
+	     sizes the icons it holds with one custom property on its own root
+	     instead of reaching into them with `svg { … }`. Unset, an icon keeps
+	     Lucide's own 24px.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	.lucide {
+		inline-size: var(--icon-size, 1.5rem);
+		block-size: var(--icon-size, 1.5rem);
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	     One switch for every animation in the product: components write their
+	     motion freely and this collapses it for people who asked the OS for
+	     less. The streaming caret and the waiting orb still render — they
+	     carry meaning — they just stop moving. `!important` in the earliest
+	     layer that has any wins over every later one.
+	   ═══════════════════════════════════════════════════════════════════════ */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			scroll-behavior: auto !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+}

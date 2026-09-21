@@ -12,7 +12,6 @@
          └─ POST /api/generate ─▶ server.ts ──▶ userApiScopeMiddleware ──▶ генерация (NDJSON)
 
 Clerk (Svix) ─▶ /api/webhooks/clerk ─▶ systemApiScopeMiddleware ─▶ verifier ─▶ account events
-Railway cron ─▶ /api/cron/:job ──────▶ systemApiScopeMiddleware ─▶ job runner ─▶ задачи фич
 
 сервисы ──▶ репозитории ──▶ Prisma (pg) ──▶ Postgres
 сервисы ──▶ rate limiter / lock ─────────▶ Redis
@@ -32,23 +31,20 @@ src/backend/                инфраструктура; фичи не импо
   rate-limit/               тиры (политика), budgets (ключи), лимитер
   gateways/                 внешние API (Generation API + SSE-парсер)
   webhooks/                 проверка подписи Clerk — только транспорт
-  jobs/                     запуск cron-задач: секрет, поиск, лог
-  lifecycle/                health, старт/остановка (Nitro-плагин), сбои процесса
+  lifecycle/                старт/остановка (Nitro-плагин), сбои процесса
   observability/            pino
 src/features/<домен>/
   *.schema.ts               zod-схемы и DTO, общие для клиента и сервера
   *.api.ts                  server functions: guard + validateInput + один вызов
   *.service.server.ts       бизнес-правила
   *.repository.server.ts    Prisma, всё ограничено владельцем
-  *.jobs.server.ts          cron-задачи фичи (имя → функция)
   *.module.server.ts        регистрации DI этой фичи
   *.queries.ts              фабрики TanStack Query для клиента
 src/features/account/       что значат события аккаунта Clerk (удаление, биллинг)
 ```
 
 Зависимости направлены в одну сторону: фичи → инфраструктура. Инфраструктура
-умеет *доставить* событие webhook-а или запустить задачу, но что они значат,
-решает фича. Единственный файл бэкенда, который знает все фичи, —
+умеет *доставить* событие webhook-а, но что оно значит, решает фича. Единственный файл бэкенда, который знает все фичи, —
 `di/container.server.ts`.
 
 ## Путь запроса
@@ -60,8 +56,8 @@ src/features/account/       что значат события аккаунта 
      попадает ни в логи, ни в ответ;
    - тело больше 1 МБ отклоняется с 413: по `Content-Length` сразу, а
      chunked-тело — считающим потоком, как только превысит лимит;
-   - лимит по IP (600 в минуту). Исключены только liveness, webhook и cron,
-     у них свои бюджеты; readiness ходит в базу и потому под лимитом;
+   - лимит по IP (600 в минуту). Исключены только webhook-и, у них свой
+     бюджет;
    - к каждому ответу добавляются заголовки безопасности и `X-Request-Id`;
    - 307 роутера на то же самое написание пути (`/ru` → `/ru/`) становится
      308 (`http/permanent-redirect.server.ts`).
@@ -71,7 +67,7 @@ src/features/account/       что значат события аккаунта 
    - для server functions — `userScopeMiddleware`;
    - для `/api` с cookie — `userApiScopeMiddleware` (он дополнительно
      проверяет CSRF);
-   - для webhook и cron — `systemApiScopeMiddleware`.
+   - для webhook — `systemApiScopeMiddleware`.
 4. **Scope.** Все guards — это `guardUser` / `guardSystem`
    (`middleware/guard.server.ts`); файлы middleware отличаются только тем,
    как уходит отказ (брошенная RPC-ошибка или JSON-ответ). Guard читает
@@ -92,8 +88,7 @@ src/features/account/       что значат события аккаунта 
   `createX({ deps })`.
 - **Модули.** Каждая фича объявляет свои регистрации рядом с кодом
   (`*.module.server.ts`), инфраструктура — в `di/core.module.server.ts`.
-  `container.server.ts` только объединяет модули и собирает `scheduledJobs`
-  из `*.jobs.server.ts` фич. Тип cradle выводится из
+  `container.server.ts` только объединяет модули. Тип cradle выводится из
   регистраций (`CradleOf`), поэтому рукописного интерфейса, который мог бы
   разойтись с фабриками, нет. Новая фича — одна строка в контейнере.
 - **Время жизни:**
@@ -102,7 +97,7 @@ src/features/account/       что значат события аккаунта 
 - **`strict: true`.** Awilix не позволит singleton-у захватить scoped-
   зависимость, например пользователя первого запроса.
 - **`userActor`** регистрируется только в пользовательском scope. Если
-  webhook или cron попробует получить пользовательский сервис, resolve
+  webhook попробует получить пользовательский сервис, resolve
   упадёт, а не выполнится без владельца.
 
 ## Данные
@@ -114,11 +109,11 @@ src/features/account/       что значат события аккаунта 
   ключу (keyset): стоимость страницы не зависит от её номера, и строки не
   «прыгают» между страницами.
 - **Soft delete (`deleted_at`).** Undo восстанавливает ту же строку, а не
-  копию, присланную клиентом. Через 30 дней строку удаляет
-  `/api/cron/purge-deleted-applications`.
+  копию, присланную клиентом. Удалённые строки не вычищаются по расписанию:
+  для тестового задания это лишний сервис. Письма удалённого аккаунта
+  стирает webhook Clerk.
 - **Индексы:**
-  - `(user_id, deleted_at, id DESC)` — дашборд и счётчик;
-  - `(deleted_at)` — задача очистки.
+  - `(user_id, deleted_at, id DESC)` — дашборд и счётчик.
 - **Изоляция.** Каждый метод репозитория сам кладёт `userId` в `WHERE`. Чужая
   строка неотличима от несуществующей, поэтому IDOR невозможен по
   построению.
@@ -199,7 +194,7 @@ POST /api/generate { applicationId?, input }
 | `generationMinute` | пользователь | 4/мин | серии «Try Again» |
 | `generationDay` | пользователь | по плану (10 / 100) | квота плана → `quota_exceeded` |
 | `upstream` | один на деплой | 6/мин | бюджет токена Generation API |
-| `system` | источник + IP | 300/мин | webhook и cron |
+| `system` | источник + IP | 300/мин | webhook Clerk |
 
 - **IP клиента** берётся как самый правый адрес в `X-Forwarded-For`, потому
   что его дописывает edge Railway. Левые адреса клиент может подделать.
@@ -252,14 +247,10 @@ POST /api/generate { applicationId?, input }
 - **CSRF.**
   - server functions: `createCsrfMiddleware` глобально;
   - `/api` с cookie: `isCsrfRequestAllowed` в guard;
-  - webhook: подпись Svix; cron: bearer-секрет со сравнением за постоянное
-    время.
+  - webhook: подпись Svix.
 - **Ввод.** zod на каждом входе, текст очищается от управляющих символов.
   Все тела ограничены 1 МБ (в том числе chunked), `/api/generate` читает
   своё потоком с лимитом 16 КБ, не доверяя `Content-Length`.
-- **Cron.** Без настроенного секрета эндпоинт отвечает 404, без верного
-  секрета — 401, и только потом проверяется имя задачи. Перебором имён
-  список задач не узнать.
 - **Ошибки.** Наружу уходит только код. Стеки, `cause`, ответы провайдеров и
   метаданные Prisma остаются в логе.
 - **Заголовки:**
@@ -276,14 +267,10 @@ POST /api/generate { applicationId?, input }
 
 ## Эксплуатация
 
-- **Health:**
-  - `GET /api/health` — liveness, без зависимостей;
-  - `GET /api/health/ready` — readiness: Postgres (обязателен) и Redis
-    (только отчёт). Railway ждёт readiness перед переключением трафика.
 - **Миграции** `prisma migrate deploy` выполняются в pre-deploy команде
   Railway, до запуска новой версии.
 - **Инфраструктура как код** — `.railway/railway.ts`: Postgres, Redis,
-  приложение и cron-сервис со всеми настройками деплоя. Изменения
+  приложение со всеми настройками деплоя. Изменения
   применяются не push-ем, а через `railway config plan` (предпросмотр) и
   `railway config apply`. Секреты — `preserve()`: они заданы в Railway и в
   репозиторий не попадают. Для работы команд нужен npm-пакет `railway`.
@@ -308,17 +295,10 @@ POST /api/generate { applicationId?, input }
   держать соединение пула.
 - **Логи** в формате JSON, у каждой строки `requestId` и `userId`. Индексируются
   Railway.
-- **Cron.** Отдельный сервис Railway раз в сутки вызывает
-  `POST /api/cron/purge-deleted-applications` с
-  `Authorization: Bearer $CRON_SECRET`. Очистка удаляет строки пакетами по
-  1000, чтобы не держать долгую транзакцию и блокировки.
 - **Конфиг** (`config.server.ts`) разобран по группам: `database`,
-  `generation`, `http`, `rateLimits`, `redis`, `retention` и т. д. Он не
+  `generation`, `http`, `rateLimits`, `redis` и т. д. Он не
   импортирует доменный код: зависимости идут от фич к инфраструктуре, а не
   наоборот.
-- **Cron-задачи** объявляет фича (`application.jobs.server.ts`), корень DI
-  собирает их в `scheduledJobs`, а `jobs/job-runner.server.ts` только
-  проверяет секрет, находит задачу по имени и логирует результат.
 
 ## Масштабирование
 
@@ -337,6 +317,6 @@ POST /api/generate { applicationId?, input }
 
 | Уровень | Где | Что проверяет |
 | --- | --- | --- |
-| unit | `*.test.ts` | сервисы на фейках (`src/test/fakes`, по файлу на зависимость), job runner, события аккаунта, validateInput, HTTP-хелперы, SSE-парсер, gateway, промпт, протокол, автомат генерации |
+| unit | `*.test.ts` | сервисы на фейках (`src/test/fakes`, по файлу на зависимость), события аккаунта, validateInput, HTTP-хелперы, SSE-парсер, gateway, промпт, протокол, автомат генерации |
 | integration | `*.integration.test.ts` | репозиторий, лимитер и лок на настоящих Postgres и Redis (docker) |
 | e2e | `e2e/` | продакшен-сборка против тестовой БД и фейкового Generation API, десктоп и мобильный |

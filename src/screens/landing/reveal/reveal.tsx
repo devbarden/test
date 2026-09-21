@@ -79,7 +79,7 @@ export function Reveal({
 	return createElement(
 		as,
 		{
-			className: clsx(styles.reveal, stagger && styles.stagger, className),
+			className: clsx(stagger ? styles.stagger : styles.single, className),
 			'data-reveal': immediate ? 'on' : 'idle',
 			ref: immediate ? undefined : observe,
 		},

@@ -1,23 +1,25 @@
-.link {
-	border-radius: var(--radius-sm);
-	transition: color var(--duration-fast) var(--ease-out);
-}
+@layer ui {
+	.root {
+		border-radius: var(--radius-sm);
+		transition: color var(--duration-fast) var(--ease-out);
+	}
 
-.accent {
-	font-weight: var(--weight-medium);
-	color: var(--color-accent);
-	text-decoration: underline;
-	text-underline-offset: 0.2em;
-}
+	.accent {
+		font-weight: var(--weight-medium);
+		color: var(--color-accent);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
 
-.accent:hover {
-	color: var(--color-accent-hover);
-}
+		&:hover {
+			color: var(--color-accent-hover);
+		}
+	}
 
-.muted {
-	color: var(--color-text-secondary);
-}
+	.muted {
+		color: var(--color-text-secondary);
 
-.muted:hover {
-	color: var(--color-text-primary);
+		&:hover {
+			color: var(--color-text-primary);
+		}
+	}
 }

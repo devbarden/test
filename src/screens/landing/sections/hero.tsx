@@ -9,7 +9,7 @@ import styles from './hero.module.css'
 
 export function Hero() {
 	return (
-		<section className={styles.hero}>
+		<section className={styles.root}>
 			<Container>
 				<Reveal className={styles.copy} immediate stagger>
 					<Badge icon={<SparklesIcon />}>{m['landing.hero.kicker']()}</Badge>

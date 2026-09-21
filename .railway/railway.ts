@@ -1,7 +1,6 @@
 import {
 	defineRailway,
 	github,
-	image,
 	postgres,
 	preserve,
 	project,
@@ -15,8 +14,7 @@ const REGION = 'europe-west4-drams3a'
 const VOLUME_ALERTS = { usage: { '80': {}, '95': {}, '100': {} } }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   The whole Railway project as code: two stateful services, the app and
-//   the scheduled purge. `railway config plan` previews a change and
+//   The whole Railway project as code: two stateful services and the app. `railway config plan` previews a change and
 //   `railway config apply` makes it; nothing here is applied by a git push.
 //
 //   Values that are not secret live here; secrets are `preserve()` — they
@@ -49,9 +47,8 @@ export default defineRailway(() => {
 	})
 
 	// ═════════════════════════════════════════════════════════════════════════
-	//   Migrations run in pre-deploy, before the new version takes traffic,
-	//   and traffic switches only once readiness (database reachable)
-	//   passes — a release that cannot migrate or connect never goes live.
+	//   Migrations run in pre-deploy, before the new version takes traffic:
+	//   a release that cannot migrate never goes live.
 	//
 	//   The old version is given time to finish what it started: a letter
 	//   may stream for up to 90 s (config.generation.maxDurationMs) and is
@@ -70,7 +67,6 @@ export default defineRailway(() => {
 		env: {
 			CLERK_SECRET_KEY: preserve(),
 			CLERK_WEBHOOK_SIGNING_SECRET: preserve(),
-			CRON_SECRET: preserve(),
 			DATABASE_URL: Postgres.env.DATABASE_URL,
 			GENERATION_API_TOKEN: preserve(),
 			GENERATION_API_URL: 'https://test-assignment-api.variant.net/v1/generate',
@@ -81,32 +77,13 @@ export default defineRailway(() => {
 			VITE_CLERK_PUBLISHABLE_KEY: preserve(),
 			VITE_SITE_URL: preserve(),
 		},
-		healthcheck: '/api/health/ready',
-		healthcheckTimeout: 120,
 		preDeploy: 'npx prisma migrate deploy',
 		replicas: { [REGION]: 1 },
 		source: github('devbarden/test', { checkSuites: false }),
 		start: 'npm run start',
 	})
 
-	// ═════════════════════════════════════════════════════════════════════════
-	//   A one-shot container on a schedule: it calls the app over the private
-	//   network and exits. The job itself lives in the app (/api/cron/:job),
-	//   so it runs with the app's config, pool and logs.
-	// ═════════════════════════════════════════════════════════════════════════
-	const purgeCron = service('purge-cron', {
-		deploy: { cronSchedule: '0 3 * * *', restartPolicyType: 'NEVER' },
-		env: {
-			APP_INTERNAL_URL: preserve(),
-			CRON_SECRET: preserve(),
-		},
-		replicas: { [REGION]: 1 },
-		source: image('curlimages/curl:8.10.1'),
-		start:
-			'sh -c \'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$APP_INTERNAL_URL/api/cron/purge-deleted-applications"\'',
-	})
-
 	return project('resilient-luck', {
-		resources: [Postgres, app, purgeCron, Redis, redisVolume, postgresVolume],
+		resources: [Postgres, app, Redis, redisVolume, postgresVolume],
 	})
 })

@@ -7,8 +7,6 @@ type LetterData = { input: ApplicationInput; letter: string }
 
 type Page = { cursor?: string; take: number }
 
-const PURGE_BATCH_SIZE = 1_000
-
 // ═══════════════════════════════════════════════════════════════════════════
 //   Every method takes the owner's `userId` and puts it in the WHERE clause
 //   itself (`owned`). There is no "find by id" that a service could call
@@ -70,31 +68,6 @@ export function createApplicationRepository({ db }: { db: PrismaClient }) {
 				take,
 				where: { ...active(userId), ...(cursor ? { id: { lt: cursor } } : {}) },
 			})
-		},
-
-		// ═════════════════════════════════════════════════════════════════════
-		//   In batches, oldest first, each its own short statement: one DELETE
-		//   over a month of rows could outrun the statement timeout and hold
-		//   row locks the live tables are waiting on. The (deleted_at) index
-		//   serves the inner SELECT.
-		// ═════════════════════════════════════════════════════════════════════
-		async purgeDeletedBefore(cutoff: Date): Promise<number> {
-			let purged = 0
-
-			for (;;) {
-				const deleted = await db.$executeRaw`
-					DELETE FROM applications
-					WHERE id IN (
-						SELECT id FROM applications
-						WHERE deleted_at < ${cutoff}
-						ORDER BY deleted_at
-						LIMIT ${PURGE_BATCH_SIZE}
-					)`
-
-				purged += deleted
-
-				if (deleted < PURGE_BATCH_SIZE) return purged
-			}
 		},
 
 		async restore(
