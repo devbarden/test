@@ -1,0 +1,27 @@
+.letter {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-6);
+	font-size: var(--text-lg);
+	line-height: var(--text-lg-leading);
+	color: var(--color-text-secondary);
+	overflow-wrap: anywhere;
+	white-space: pre-line;
+}
+
+.caret {
+	display: inline-block;
+	inline-size: 2px;
+	block-size: 1.1em;
+	margin-inline-start: 2px;
+	vertical-align: text-bottom;
+	background: var(--color-accent);
+	border-radius: 1px;
+	animation: blink 1s steps(2, jump-none) infinite;
+}
+
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}

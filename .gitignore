@@ -1,0 +1,19 @@
+node_modules
+.output
+.nitro
+.tanstack
+.vite
+dist
+coverage
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Clerk keyless mode stores a temporary development instance here
+.clerk
+
+# Playwright
+test-results
+playwright-report

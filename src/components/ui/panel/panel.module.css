@@ -1,0 +1,11 @@
+.panel {
+	border-radius: var(--radius-lg);
+}
+
+.muted {
+	background: var(--color-surface-muted);
+}
+
+.success {
+	background: var(--color-surface-success);
+}

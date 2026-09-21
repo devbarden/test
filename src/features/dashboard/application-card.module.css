@@ -1,0 +1,56 @@
+.card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	padding: var(--space-6);
+	transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.card:has(.link:hover) {
+	background: var(--color-border-subtle);
+}
+
+.card:has(.link:focus-visible) {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+.link {
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.link:focus-visible {
+	outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+     Six lines, blank ones included, so the preview shows the salutation and
+     the opening of the letter as in the mockup. The last line fades out
+     instead of being cut: a hard edge reads as a rendering bug.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.preview {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	-webkit-line-clamp: 6;
+	font-size: var(--text-lg);
+	line-height: var(--text-lg-leading);
+	color: var(--color-text-secondary);
+	overflow-wrap: anywhere;
+	white-space: pre-line;
+	mask-image: linear-gradient(
+		to bottom,
+		#000 calc(100% - var(--text-lg-leading)),
+		rgb(0 0 0 / 0.35)
+	);
+}
+
+.actions {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}

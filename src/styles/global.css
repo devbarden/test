@@ -1,0 +1,84 @@
+@import "./fonts.css";
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	color-scheme: light;
+	text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100dvh;
+	font-family: var(--font-text);
+	font-size: var(--text-md);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	line-height: var(--text-md-leading);
+	color: var(--color-text-primary);
+	background: var(--color-surface-page);
+}
+
+img,
+svg {
+	display: block;
+	flex-shrink: 0;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+	letter-spacing: inherit;
+}
+
+button {
+	cursor: pointer;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+::selection {
+	background: var(--color-accent-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+     One switch for every animation in the product: components write their
+     motion freely and this collapses it for people who asked the OS for
+     less. The streaming caret and the waiting orb still render — they carry
+     meaning — they just stop moving.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+.visually-hidden {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	white-space: nowrap;
+	clip-path: inset(50%);
+}

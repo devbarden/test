@@ -1,0 +1,38 @@
+.header {
+	display: flex;
+	gap: var(--space-4);
+	align-items: center;
+	justify-content: space-between;
+	padding-block: var(--space-6);
+}
+
+.brand {
+	border-radius: var(--radius-sm);
+}
+
+.actions {
+	display: flex;
+	gap: var(--space-6);
+	align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+     The account menu renders only once Clerk's script has loaded. The slot
+     keeps its size from the first paint so the counter and the home button
+     do not jump sideways when the avatar appears.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.account {
+	display: flex;
+	inline-size: 1.75rem;
+	block-size: 1.75rem;
+}
+
+@media (max-width: 639px) {
+	.header {
+		padding-block: var(--space-4);
+	}
+
+	.actions {
+		gap: var(--space-3);
+	}
+}

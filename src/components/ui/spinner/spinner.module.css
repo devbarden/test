@@ -1,0 +1,11 @@
+.spinner {
+	inline-size: 1.25em;
+	block-size: 1.25em;
+	animation: spin 0.8s steps(8) infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

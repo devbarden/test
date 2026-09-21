@@ -1,0 +1,110 @@
+.button {
+	display: inline-flex;
+	gap: var(--space-2);
+	align-items: center;
+	justify-content: center;
+	font-weight: var(--weight-medium);
+	white-space: nowrap;
+	user-select: none;
+	border: 1px solid transparent;
+	border-radius: var(--radius-md);
+	transition-timing-function: var(--ease-out);
+	transition-duration: var(--duration-fast);
+	transition-property: background-color, border-color, color, box-shadow;
+}
+
+.label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sm {
+	min-block-size: var(--control-height-sm);
+	padding-inline: var(--space-4);
+	font-size: var(--text-md);
+	line-height: var(--text-md-leading);
+}
+
+.sm svg {
+	inline-size: 1rem;
+	block-size: 1rem;
+}
+
+.lg {
+	min-block-size: var(--control-height-lg);
+	padding-inline: var(--space-6);
+	font-size: var(--text-lg);
+	line-height: var(--text-lg-leading);
+}
+
+.lg svg {
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
+}
+
+.fullWidth {
+	inline-size: 100%;
+}
+
+.primary {
+	color: var(--color-text-on-accent);
+	background: var(--color-accent);
+	box-shadow: var(--shadow-xs);
+}
+
+.primary:hover {
+	background: var(--color-accent-hover);
+}
+
+.primary:active {
+	background: var(--color-accent-active);
+}
+
+.secondary {
+	color: var(--palette-gray-700);
+	background: var(--color-surface-page);
+	border-color: var(--color-border-default);
+	box-shadow: var(--shadow-xs);
+}
+
+.secondary:hover {
+	background: var(--color-control-hover);
+}
+
+.ghost {
+	padding: var(--space-1);
+	margin: calc(var(--space-1) * -1);
+	font-size: var(--text-md);
+	line-height: var(--text-md-leading);
+	color: var(--palette-gray-700);
+	background: none;
+	border-radius: var(--radius-sm);
+}
+
+.ghost svg {
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
+}
+
+.ghost:hover {
+	color: var(--color-text-primary);
+}
+
+.button[aria-busy="true"] {
+	cursor: progress;
+}
+
+.button:disabled {
+	cursor: not-allowed;
+}
+
+.primary:disabled {
+	color: var(--color-text-disabled);
+	background: var(--color-control-disabled);
+	box-shadow: none;
+}
+
+.secondary:disabled,
+.ghost:disabled {
+	color: var(--color-text-disabled);
+}
