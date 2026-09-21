@@ -1,54 +1,81 @@
 import { clerk } from '@clerk/testing/playwright'
 import { test as base, type Page } from '@playwright/test'
-
-export const E2E_USER_EMAIL = 'e2e+clerk_test@example.com'
+import { Redis } from 'ioredis'
+import pg from 'pg'
+import {
+	E2E_DATABASE_URL,
+	E2E_REDIS_URL,
+	e2eUserEmail,
+} from './e2e-environment'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Every test starts signed in with EMPTY storage. Tests run in parallel as
-//   the same Clerk user, but each gets its own browser context and so its
-//   own localStorage — they cannot see each other's letters.
+//   Every test starts signed in as its worker's own user, with that user's
+//   letters and rate-limit counters wiped — and with empty browser storage,
+//   since each test gets a fresh browser context.
 // ═══════════════════════════════════════════════════════════════════════════
 export const test = base.extend<{ page: Page }>({
-	page: async ({ page }, use) => {
-		await page.goto('/sign-in')
-		await clerk.signIn({
-			page,
-			signInParams: { identifier: E2E_USER_EMAIL, strategy: 'email_code' },
-		})
+	page: async ({ page }, use, testInfo) => {
+		await signIn(page, testInfo.parallelIndex)
+		await resetUser(await currentUserId(page))
 		await use(page)
 	},
 })
 
 export { expect } from '@playwright/test'
 
-export const LETTER = [
-	'Dear Apple Team,',
-	'I am writing to express my interest in the Product Manager position.',
-	'Thank you for considering my application.',
-]
-
-// ═══════════════════════════════════════════════════════════════════════════
-//   Answers /api/generate the way the real route does — NDJSON, one event
-//   per line, an explicit `done` — so the UI is exercised end to end without
-//   spending the shared upstream rate limit or depending on what the model
-//   happens to write.
-// ═══════════════════════════════════════════════════════════════════════════
-export async function mockGeneration(page: Page, letter = LETTER.join('\n\n')) {
-	const words = letter.split(/(?<= )/)
-	const body = [
-		...words.map((text) => JSON.stringify({ text, type: 'delta' })),
-		JSON.stringify({ type: 'done' }),
-	].join('\n')
-
-	await page.route('**/api/generate', (route) =>
-		route.fulfill({ body, contentType: 'application/x-ndjson', status: 200 }),
-	)
+export async function signIn(page: Page, workerIndex: number) {
+	await page.goto('/sign-in')
+	await clerk.signIn({
+		page,
+		signInParams: {
+			identifier: e2eUserEmail(workerIndex),
+			strategy: 'email_code',
+		},
+	})
 }
 
-export async function fillApplication(page: Page) {
+async function currentUserId(page: Page): Promise<string> {
+	await page.waitForFunction(() => Boolean(window.Clerk?.user?.id))
+
+	return page.evaluate(() => window.Clerk?.user?.id ?? '')
+}
+
+async function resetUser(userId: string) {
+	const db = new pg.Client({ connectionString: E2E_DATABASE_URL })
+	const redis = new Redis(E2E_REDIS_URL)
+
+	try {
+		await db.connect()
+		await db.query('DELETE FROM applications WHERE user_id = $1', [userId])
+
+		const keys = [
+			...(await redis.keys(`rl:*:${userId}`)),
+			...(await redis.keys('rl:upstream:*')),
+			`lock:generation:${userId}`,
+		]
+
+		await redis.del(...keys)
+	} finally {
+		await db.end()
+		redis.disconnect()
+	}
+}
+
+export const LETTER_LINE =
+	'I am writing to express my interest in the Product manager position.'
+
+export async function fillApplication(
+	page: Page,
+	skills = 'HTML, CSS and doing things in time',
+) {
 	await page.getByLabel('Job title').fill('Product manager')
 	await page.getByLabel('Company').fill('Apple')
-	await page
-		.getByLabel('I am good at...')
-		.fill('HTML, CSS and doing things in time')
+	await page.getByLabel('I am good at...').fill(skills)
+}
+
+export async function generateLetter(page: Page) {
+	await page.goto('/applications/new')
+	await fillApplication(page)
+	await page.getByRole('button', { name: 'Generate Now' }).click()
+	await page.waitForURL(/\/applications\/[0-9a-f-]{36}$/)
 }

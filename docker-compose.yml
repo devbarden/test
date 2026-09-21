@@ -1,0 +1,55 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#   Local infrastructure: the same two stateful services the app runs with
+#   on Railway. Ports are shifted off the defaults so the stack can run next
+#   to other projects' Postgres and Redis on the same machine.
+#
+#   `db-test` backs the integration tests. It has no volume — tmpfs is faster
+#   to re-initialise, and a test database that cannot reach development data
+#   cannot destroy it.
+# ═══════════════════════════════════════════════════════════════════════════
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: alt_shift
+      POSTGRES_PASSWORD: alt_shift
+      POSTGRES_USER: alt_shift
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U alt_shift -d alt_shift']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - '5435:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  db-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: alt_shift_test
+      POSTGRES_PASSWORD: alt_shift
+      POSTGRES_USER: alt_shift
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U alt_shift -d alt_shift_test']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - '5436:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - '6380:6379'
+
+volumes:
+  postgres-data:

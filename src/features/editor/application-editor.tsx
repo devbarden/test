@@ -1,20 +1,21 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { PageHeader } from '@/components/layout/page'
 import {
-	type Application,
+	type ApplicationDto,
 	type ApplicationInput,
+	applicationKeys,
 	applicationTitle,
 	EMPTY_APPLICATION_INPUT,
-	useApplication,
-	useApplicationStore,
+	putApplicationInCache,
 } from '@/features/applications'
 import {
 	type GenerationState,
-	generationErrorMessage,
 	useLetterGeneration,
 } from '@/features/generation'
 import { GoalBanner } from '@/features/goal'
+import { apiErrorMessage } from '@/lib/api-error-message'
 import styles from './application-editor.module.css'
 import { ApplicationForm } from './application-form'
 import {
@@ -25,28 +26,27 @@ import {
 import { scrollIntoViewIfStacked } from './scroll-into-view-if-stacked'
 
 type ApplicationEditorProps = {
-	application?: Application
+	application?: ApplicationDto
 	onSaved?: (applicationId: string) => void
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One editor for both "new" and "existing". The id is fixed on mount — a
-//   fresh one for a new application — so every generation from this screen,
-//   "Try Again" included, writes to the same record instead of adding a
-//   letter per click. What the form holds is a draft: it is saved together
-//   with the letter it produced, never on its own, so the stored inputs
-//   always describe the stored letter.
+//   One editor for both "new" and "existing". A new application gets its id
+//   from the server when its first letter is saved; from then on every
+//   generation here, "Try Again" included, names that id and rewrites the
+//   same record instead of adding a letter per click. What the form holds
+//   is a draft: the server saves it together with the letter it produced,
+//   never on its own, so the stored inputs always describe the stored
+//   letter.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationEditor({
-	application,
+	application: saved,
 	onSaved,
 }: ApplicationEditorProps) {
-	const [applicationId] = useState(() => application?.id ?? crypto.randomUUID())
 	const [input, setInput] = useState<ApplicationInput>(
-		() => application?.input ?? EMPTY_APPLICATION_INPUT,
+		() => saved?.input ?? EMPTY_APPLICATION_INPUT,
 	)
-	const saved = useApplication(applicationId)
-	const store = useApplicationStore()
+	const queryClient = useQueryClient()
 	const generation = useLetterGeneration()
 	const panelRef = useRef<HTMLElement>(null)
 
@@ -62,21 +62,22 @@ export function ApplicationEditor({
 	const handleSubmit = async (validInput: ApplicationInput) => {
 		scrollIntoViewIfStacked(panelRef.current)
 
-		const outcome = await generation.generate(validInput, {
-			onComplete: (letter) => {
-				const now = Date.now()
+		let savedId: string | undefined
 
-				store.save({
-					createdAt: saved?.createdAt ?? now,
-					id: applicationId,
-					input: validInput,
-					letter,
-					updatedAt: now,
-				})
+		const outcome = await generation.generate(
+			{ applicationId: saved?.id, input: validInput },
+			{
+				onComplete: (application) => {
+					savedId = application.id
+					putApplicationInCache(queryClient, application, { isNew: !saved })
+					void queryClient.invalidateQueries({
+						queryKey: applicationKeys.all,
+					})
+				},
 			},
-		})
+		)
 
-		if (outcome === 'completed') onSaved?.(applicationId)
+		if (outcome === 'completed' && savedId) onSaved?.(savedId)
 	}
 
 	const title = applicationTitle(input)
@@ -119,7 +120,7 @@ export function ApplicationEditor({
 // ═══════════════════════════════════════════════════════════════════════════
 function letterContent(
 	state: GenerationState,
-	saved: Application | undefined,
+	saved: ApplicationDto | undefined,
 ): LetterContent {
 	switch (state.status) {
 		case 'waiting':
@@ -127,18 +128,12 @@ function letterContent(
 		case 'streaming':
 			return { kind: 'streaming', text: state.text }
 		case 'failed':
-			if (state.error.code === 'not_saved') {
+			if (state.error.code === 'save_failed') {
 				return { kind: 'letter', text: state.text }
 			}
-			if (saved) return { kind: 'letter', text: saved.letter }
-			return state.text.trim()
-				? { kind: 'letter', text: state.text }
-				: { kind: 'placeholder' }
+			return savedOrPartial(saved, state.text)
 		case 'stopped':
-			if (saved) return { kind: 'letter', text: saved.letter }
-			return state.text.trim()
-				? { kind: 'letter', text: state.text }
-				: { kind: 'placeholder' }
+			return savedOrPartial(saved, state.text)
 		case 'idle':
 			return saved
 				? { kind: 'letter', text: saved.letter }
@@ -146,12 +141,23 @@ function letterContent(
 	}
 }
 
+function savedOrPartial(
+	saved: ApplicationDto | undefined,
+	partial: string,
+): LetterContent {
+	if (saved) return { kind: 'letter', text: saved.letter }
+
+	return partial.trim()
+		? { kind: 'letter', text: partial }
+		: { kind: 'placeholder' }
+}
+
 function letterNotice(
 	state: GenerationState,
-	saved: Application | undefined,
+	saved: ApplicationDto | undefined,
 ): LetterNotice | undefined {
 	if (state.status === 'failed') {
-		return { message: generationErrorMessage(state.error), tone: 'danger' }
+		return { message: apiErrorMessage(state.error), tone: 'danger' }
 	}
 
 	if (state.status === 'stopped') {

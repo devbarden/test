@@ -11,10 +11,10 @@ import { useGoalProgress } from './goal-progress'
 //   banner's, so no screen that renders it can forget to apply it.
 // ═══════════════════════════════════════════════════════════════════════════
 export function GoalBanner() {
-	const { count, goal, isReached } = useGoalProgress()
+	const { count, goal, isKnown, isReached } = useGoalProgress()
 	const titleId = useId()
 
-	if (isReached) return null
+	if (!isKnown || isReached) return null
 
 	return (
 		<Panel

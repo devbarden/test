@@ -23,7 +23,8 @@
 			"!**/package.json",
 			"!**/package-lock.json",
 			"!**/routeTree.gen.ts",
-			"!public/fonts"
+			"!public/fonts",
+			"!src/generated"
 		]
 	},
 	"javascript": {

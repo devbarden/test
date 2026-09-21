@@ -3,12 +3,12 @@ import { Trash2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Panel } from '@/components/ui/panel'
-import { type Application, applicationTitle } from '@/features/applications'
+import { type ApplicationDto, applicationTitle } from '@/features/applications'
 import styles from './application-card.module.css'
 
 type ApplicationCardProps = {
-	application: Application
-	onDelete: (application: Application) => void
+	application: ApplicationDto
+	onDelete: (application: ApplicationDto) => void
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

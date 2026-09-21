@@ -19,3 +19,15 @@
 		gap: var(--space-4);
 	}
 }
+
+.error {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	align-items: flex-start;
+}
+
+.more {
+	align-self: center;
+	margin-block-start: calc(var(--space-6) * -1);
+}

@@ -14,6 +14,9 @@ import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiGenerateRouteImport } from './routes/api/generate'
+import { Route as ApiWebhooksClerkRouteImport } from './routes/api/webhooks/clerk'
+import { Route as ApiHealthReadyRouteImport } from './routes/api/health.ready'
+import { Route as ApiCronJobRouteImport } from './routes/api/cron.$job'
 import { Route as AuthedApplicationsNewRouteImport } from './routes/_authed/applications/new'
 import { Route as AuthedApplicationsApplicationIdRouteImport } from './routes/_authed/applications/$applicationId'
 
@@ -41,6 +44,21 @@ const ApiGenerateRoute = ApiGenerateRouteImport.update({
   path: '/api/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksClerkRoute = ApiWebhooksClerkRouteImport.update({
+  id: '/api/webhooks/clerk',
+  path: '/api/webhooks/clerk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthReadyRoute = ApiHealthReadyRouteImport.update({
+  id: '/ready',
+  path: '/ready',
+  getParentRoute: () => ApiHealthRoute,
+} as any)
+const ApiCronJobRoute = ApiCronJobRouteImport.update({
+  id: '/api/cron/$job',
+  path: '/api/cron/$job',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedApplicationsNewRoute = AuthedApplicationsNewRouteImport.update({
   id: '/applications/new',
   path: '/applications/new',
@@ -56,28 +74,37 @@ const AuthedApplicationsApplicationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/api/generate': typeof ApiGenerateRoute
-  '/api/health': typeof ApiHealthRoute
+  '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
   '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
   '/applications/new': typeof AuthedApplicationsNewRoute
+  '/api/cron/$job': typeof ApiCronJobRoute
+  '/api/health/ready': typeof ApiHealthReadyRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesByTo {
   '/api/generate': typeof ApiGenerateRoute
-  '/api/health': typeof ApiHealthRoute
+  '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
   '/': typeof AuthedIndexRoute
   '/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
   '/applications/new': typeof AuthedApplicationsNewRoute
+  '/api/cron/$job': typeof ApiCronJobRoute
+  '/api/health/ready': typeof ApiHealthReadyRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
-  '/api/health': typeof ApiHealthRoute
+  '/api/health': typeof ApiHealthRouteWithChildren
   '/sign-in/$': typeof SignInSplatRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/applications/$applicationId': typeof AuthedApplicationsApplicationIdRoute
   '/_authed/applications/new': typeof AuthedApplicationsNewRoute
+  '/api/cron/$job': typeof ApiCronJobRoute
+  '/api/health/ready': typeof ApiHealthReadyRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,6 +115,9 @@ export interface FileRouteTypes {
     | '/sign-in/$'
     | '/applications/$applicationId'
     | '/applications/new'
+    | '/api/cron/$job'
+    | '/api/health/ready'
+    | '/api/webhooks/clerk'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/api/generate'
@@ -96,6 +126,9 @@ export interface FileRouteTypes {
     | '/'
     | '/applications/$applicationId'
     | '/applications/new'
+    | '/api/cron/$job'
+    | '/api/health/ready'
+    | '/api/webhooks/clerk'
   id:
     | '__root__'
     | '/_authed'
@@ -105,13 +138,18 @@ export interface FileRouteTypes {
     | '/_authed/'
     | '/_authed/applications/$applicationId'
     | '/_authed/applications/new'
+    | '/api/cron/$job'
+    | '/api/health/ready'
+    | '/api/webhooks/clerk'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   ApiGenerateRoute: typeof ApiGenerateRoute
-  ApiHealthRoute: typeof ApiHealthRoute
+  ApiHealthRoute: typeof ApiHealthRouteWithChildren
   SignInSplatRoute: typeof SignInSplatRoute
+  ApiCronJobRoute: typeof ApiCronJobRoute
+  ApiWebhooksClerkRoute: typeof ApiWebhooksClerkRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,6 +189,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/clerk': {
+      id: '/api/webhooks/clerk'
+      path: '/api/webhooks/clerk'
+      fullPath: '/api/webhooks/clerk'
+      preLoaderRoute: typeof ApiWebhooksClerkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health/ready': {
+      id: '/api/health/ready'
+      path: '/ready'
+      fullPath: '/api/health/ready'
+      preLoaderRoute: typeof ApiHealthReadyRouteImport
+      parentRoute: typeof ApiHealthRoute
+    }
+    '/api/cron/$job': {
+      id: '/api/cron/$job'
+      path: '/api/cron/$job'
+      fullPath: '/api/cron/$job'
+      preLoaderRoute: typeof ApiCronJobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/applications/new': {
       id: '/_authed/applications/new'
       path: '/applications/new'
@@ -183,11 +242,25 @@ const AuthedRouteChildren: AuthedRouteChildren = {
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
+interface ApiHealthRouteChildren {
+  ApiHealthReadyRoute: typeof ApiHealthReadyRoute
+}
+
+const ApiHealthRouteChildren: ApiHealthRouteChildren = {
+  ApiHealthReadyRoute: ApiHealthReadyRoute,
+}
+
+const ApiHealthRouteWithChildren = ApiHealthRoute._addFileChildren(
+  ApiHealthRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   ApiGenerateRoute: ApiGenerateRoute,
-  ApiHealthRoute: ApiHealthRoute,
+  ApiHealthRoute: ApiHealthRouteWithChildren,
   SignInSplatRoute: SignInSplatRoute,
+  ApiCronJobRoute: ApiCronJobRoute,
+  ApiWebhooksClerkRoute: ApiWebhooksClerkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

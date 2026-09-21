@@ -1,5 +1,6 @@
 import { UserButton, useAuth } from '@clerk/tanstack-react-start'
 import { auth } from '@clerk/tanstack-react-start/server'
+import { QueryClientProvider } from '@tanstack/react-query'
 import {
 	createFileRoute,
 	Navigate,
@@ -11,8 +12,9 @@ import type { ReactNode } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Container } from '@/components/layout/page'
 import { ToastProvider } from '@/components/ui/toast'
-import { ApplicationsProvider } from '@/features/applications'
 import { GoalIndicator } from '@/features/goal'
+import { useClearCacheOnSignOut } from '@/hooks/use-clear-cache-on-sign-out'
+import { getUserQueryClient } from '@/lib/user-query-client'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Two guards for two moments:
@@ -34,9 +36,9 @@ const requireSignedIn = createIsomorphicFn()
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   `data-only`: the guard above still runs on the server, but the pages
-//   render in the browser only. They are built entirely from localStorage,
-//   which a server cannot see — rendering them there would produce an empty
-//   dashboard and then swap it for the real one on hydration.
+//   render in the browser only. They are first painted from the query cache
+//   persisted in localStorage — which a server cannot see — and then
+//   revalidated against the API.
 // ═══════════════════════════════════════════════════════════════════════════
 export const Route = createFileRoute('/_authed')({
 	beforeLoad: () => requireSignedIn(),
@@ -48,19 +50,32 @@ export const Route = createFileRoute('/_authed')({
 function AuthedLayout() {
 	const { isLoaded, userId } = useAuth()
 
+	useClearCacheOnSignOut()
+
 	if (!isLoaded) return <ShellFallback />
 
 	if (!userId)
 		return <Navigate params={{ _splat: '' }} replace to="/sign-in/$" />
 
+	return <UserWorkspace key={userId} userId={userId} />
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   The client arrives with the user's letters already restored from browser
+//   storage, so the first paint is the cached state, not a spinner. See
+//   getUserQueryClient for why it is not created here.
+// ═══════════════════════════════════════════════════════════════════════════
+function UserWorkspace({ userId }: { userId: string }) {
+	const queryClient = getUserQueryClient(userId)
+
 	return (
-		<ApplicationsProvider userId={userId}>
+		<QueryClientProvider client={queryClient}>
 			<ToastProvider>
 				<Shell account={<UserButton />} status={<GoalIndicator />}>
 					<Outlet />
 				</Shell>
 			</ToastProvider>
-		</ApplicationsProvider>
+		</QueryClientProvider>
 	)
 }
 

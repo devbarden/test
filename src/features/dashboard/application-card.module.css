@@ -54,3 +54,32 @@
 	align-items: center;
 	justify-content: space-between;
 }
+
+.skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-block-size: 11.5rem;
+	padding-block: var(--space-1);
+}
+
+.skeletonLine {
+	block-size: 0.875rem;
+	background: var(--color-border-subtle);
+	border-radius: var(--radius-full);
+	animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeletonLine:first-child {
+	inline-size: 40%;
+}
+
+.skeletonLine:last-child {
+	inline-size: 70%;
+}
+
+@keyframes pulse {
+	50% {
+		opacity: 0.5;
+	}
+}

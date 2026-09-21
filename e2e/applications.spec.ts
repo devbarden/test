@@ -1,8 +1,10 @@
+import { BREAK_MIDSTREAM } from './e2e-environment'
 import {
 	expect,
 	fillApplication,
-	LETTER,
-	mockGeneration,
+	generateLetter,
+	LETTER_LINE,
+	signIn,
 	test,
 } from './fixtures'
 
@@ -19,10 +21,9 @@ test('an empty dashboard invites the user to create the first letter', async ({
 	).toBeVisible()
 })
 
-test('generates a letter, saves it and restores it after a reload', async ({
+test('streams a letter, saves it on the server and opens it by its own URL', async ({
 	page,
 }) => {
-	await mockGeneration(page)
 	await page.goto('/applications/new')
 
 	await expect(
@@ -39,15 +40,49 @@ test('generates a letter, saves it and restores it after a reload', async ({
 	await page.getByRole('button', { name: 'Generate Now' }).click()
 
 	await expect(page).toHaveURL(/\/applications\/[0-9a-f-]{36}$/)
-	await expect(page.getByText(LETTER[1] ?? '')).toBeVisible()
+	await expect(page.getByText(LETTER_LINE)).toBeVisible()
 	await expect(page.getByRole('button', { name: 'Try Again' })).toBeVisible()
 
 	await page.reload()
-	await expect(page.getByText(LETTER[1] ?? '')).toBeVisible()
+	await expect(page.getByText(LETTER_LINE)).toBeVisible()
+})
 
+test('shows the letter in another browser, from the server', async ({
+	browser,
+	page,
+}, testInfo) => {
+	await generateLetter(page)
+
+	const otherBrowser = await browser.newContext()
+	const otherPage = await otherBrowser.newPage()
+
+	await signIn(otherPage, testInfo.parallelIndex)
+	await otherPage.goto('/')
+
+	await expect(otherPage.getByRole('listitem')).toHaveCount(1)
+	await expect(otherPage.getByText('1/5')).toBeVisible()
+
+	await otherBrowser.close()
+})
+
+test('restores letters from browser storage when the API cannot be reached', async ({
+	page,
+}) => {
+	await generateLetter(page)
 	await page.goto('/')
 	await expect(page.getByRole('listitem')).toHaveCount(1)
-	await expect(page.getByText('1/5')).toBeVisible()
+	await page.waitForFunction(() =>
+		Object.entries(localStorage).some(
+			([key, value]) =>
+				key.startsWith('alt-shift:cache:') && value.includes('"list"'),
+		),
+	)
+
+	await page.route('**/_serverFn/**', (route) => route.abort())
+	await page.reload()
+
+	await expect(page.getByRole('listitem')).toHaveCount(1)
+	await expect(page.getByText('Dear Apple Team,')).toBeVisible()
 })
 
 test('keeps Generate Now disabled while the details are over the limit', async ({
@@ -68,9 +103,23 @@ test('keeps Generate Now disabled while the details are over the limit', async (
 	).toBeDisabled()
 })
 
-test('shows why a generation was refused and saves nothing', async ({
+test('saves nothing when the letter breaks off mid-stream', async ({
 	page,
 }) => {
+	await page.goto('/applications/new')
+	await fillApplication(page, `HTML ${BREAK_MIDSTREAM}`)
+	await page.getByRole('button', { name: 'Generate Now' }).click()
+
+	await expect(page.getByRole('alert')).toContainText('connection dropped')
+	await expect(page).toHaveURL(/\/applications\/new$/)
+
+	await page.goto('/')
+	await expect(
+		page.getByRole('heading', { name: 'No applications yet' }),
+	).toBeVisible()
+})
+
+test('explains a refused generation with its retry time', async ({ page }) => {
 	await page.route('**/api/generate', (route) =>
 		route.fulfill({
 			json: { error: { code: 'rate_limited', retryAfterSeconds: 14 } },
@@ -83,22 +132,22 @@ test('shows why a generation was refused and saves nothing', async ({
 
 	await expect(page.getByRole('alert')).toContainText('Try again in 14 seconds')
 	await expect(page).toHaveURL(/\/applications\/new$/)
-	await expect(page.getByText('0/5')).toBeVisible()
 })
 
-test('deletes a letter and brings it back with Undo', async ({ page }) => {
-	await mockGeneration(page)
-	await page.goto('/applications/new')
-	await fillApplication(page)
-	await page.getByRole('button', { name: 'Generate Now' }).click()
-	await expect(page).toHaveURL(/\/applications\/[0-9a-f-]{36}$/)
-
+test('deletes a letter and brings it back with Undo, on the server too', async ({
+	page,
+}) => {
+	await generateLetter(page)
 	await page.goto('/')
+
 	await page.getByRole('button', { name: 'Delete' }).click()
 	await expect(
 		page.getByRole('heading', { name: 'No applications yet' }),
 	).toBeVisible()
 
 	await page.getByRole('button', { name: 'Undo' }).click()
+	await expect(page.getByRole('listitem')).toHaveCount(1)
+
+	await page.reload()
 	await expect(page.getByRole('listitem')).toHaveCount(1)
 })

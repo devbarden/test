@@ -1,0 +1,43 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// A cover letter together with the form input that produced it. The two are
+/// only ever written together — by the generation service, when a letter has
+/// streamed to completion — so the stored input always describes the stored
+/// letter.
+///
+/// `id` is a UUIDv7: time-ordered, so `ORDER BY id DESC` is creation order and
+/// the dashboard paginates on the primary key alone, with no tie-breaker.
+///
+/// `userId` is the Clerk user id. There is no users table: Clerk owns
+/// identity, and this service only needs the id to scope every query.
+///
+/// Deletion is soft (`deletedAt`) so "Undo" can restore the exact row instead
+/// of trusting a copy sent back by the client. Deleted rows are purged after a
+/// retention period by the purge job.
+model Application {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id")
+  jobTitle  String    @map("job_title") @db.VarChar(100)
+  company   String    @db.VarChar(100)
+  skills    String    @db.VarChar(300)
+  details   String    @db.VarChar(1200)
+  letter    String
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  /// Serves both hot paths: the dashboard page (user, not deleted, newest
+  /// first by id) and the goal counter (user, not deleted).
+  @@index([userId, deletedAt, id(sort: Desc)])
+  /// Serves the purge job, which scans only soft-deleted rows by age.
+  @@index([deletedAt])
+  @@map("applications")
+}

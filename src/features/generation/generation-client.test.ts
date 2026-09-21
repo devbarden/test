@@ -1,11 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LetterGenerationFailure, requestLetter } from './generation-client'
 
-const input = {
-	company: 'Apple',
-	details: '',
-	jobTitle: 'Product manager',
-	skills: 'HTML',
+const command = {
+	input: {
+		company: 'Apple',
+		details: '',
+		jobTitle: 'Product manager',
+		skills: 'HTML',
+	},
+}
+
+const application = {
+	createdAt: '2026-09-21T10:00:00.000Z',
+	id: '0199b0b0-0000-7000-8000-000000000001',
+	input: command.input,
+	letter: 'Dear Apple',
+	updatedAt: '2026-09-21T10:00:00.000Z',
 }
 
 function ndjson(lines: string[]): Response {
@@ -18,7 +28,7 @@ async function collect(): Promise<string> {
 	let text = ''
 
 	for await (const fragment of requestLetter(
-		input,
+		command,
 		new AbortController().signal,
 	)) {
 		text += fragment
@@ -48,16 +58,26 @@ describe('requestLetter', () => {
 		fetchMock.mockReset()
 	})
 
-	it('yields deltas until the done event', async () => {
+	it('yields deltas and returns the saved application from done', async () => {
 		fetchMock.mockResolvedValue(
 			ndjson([
 				'{"type":"delta","text":"Dear "}\n',
 				'{"type":"delta","text":"Apple"}\n',
-				'{"type":"done"}\n',
+				`${JSON.stringify({ application, type: 'done' })}\n`,
 			]),
 		)
 
-		expect(await collect()).toBe('Dear Apple')
+		const stream = requestLetter(command, new AbortController().signal)
+		const fragments: string[] = []
+		let result = await stream.next()
+
+		while (!result.done) {
+			fragments.push(result.value)
+			result = await stream.next()
+		}
+
+		expect(fragments.join('')).toBe('Dear Apple')
+		expect(result.value).toEqual(application)
 	})
 
 	it('treats a stream that ends without done as interrupted', async () => {

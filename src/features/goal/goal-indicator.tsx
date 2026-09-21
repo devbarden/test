@@ -4,8 +4,10 @@ import styles from './goal-indicator.module.css'
 import { useGoalProgress } from './goal-progress'
 
 export function GoalIndicator() {
-	const { count, goal, isReached } = useGoalProgress()
+	const { count, goal, isKnown, isReached } = useGoalProgress()
 	const label = `${count}/${goal} applications generated`
+
+	if (!isKnown) return <div aria-hidden="true" className={styles.indicator} />
 
 	return (
 		<div className={styles.indicator}>

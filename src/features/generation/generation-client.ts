@@ -1,26 +1,16 @@
-import type { ApplicationInput } from '@/features/applications'
+import type { ApplicationDto } from '@/features/applications/application.schema'
+import { type ApiError, apiErrorBodySchema } from '@/lib/api-error'
 import { createLineSplitter } from './line-splitter'
 import {
 	GENERATION_ENDPOINT,
-	type GenerationError,
-	generationErrorBodySchema,
+	type GenerateCommand,
 	generationEventSchema,
 } from './protocol'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Two failures only the browser can see are added to the server's codes:
-//   `network` (the request never reached us — offline, DNS, a dropped
-//   Wi-Fi) and `not_saved` (the letter arrived but storage refused it).
-// ═══════════════════════════════════════════════════════════════════════════
-export type LetterGenerationError =
-	| GenerationError
-	| { code: 'network' }
-	| { code: 'not_saved' }
-
 export class LetterGenerationFailure extends Error {
-	readonly error: LetterGenerationError
+	readonly error: ApiError
 
-	constructor(error: LetterGenerationError) {
+	constructor(error: ApiError) {
 		super(`Letter generation failed: ${error.code}`)
 		this.name = 'LetterGenerationFailure'
 		this.error = error
@@ -28,16 +18,15 @@ export class LetterGenerationFailure extends Error {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Yields the letter fragment by fragment and returns only after the
-//   server's explicit `done`. A body that ends without it is a failure, not
-//   a short letter: that is the guarantee the caller relies on before it
-//   saves anything.
+//   Yields the letter fragment by fragment and RETURNS the saved application
+//   from the server's terminal `done` event. A body that ends without it is
+//   a failure, never a short letter.
 // ═══════════════════════════════════════════════════════════════════════════
 export async function* requestLetter(
-	input: ApplicationInput,
+	command: GenerateCommand,
 	signal: AbortSignal,
-): AsyncGenerator<string> {
-	const response = await postGenerationRequest(input, signal)
+): AsyncGenerator<string, ApplicationDto> {
+	const response = await postCommand(command, signal)
 
 	if (!response.ok || !response.body) throw await failureFromResponse(response)
 
@@ -51,7 +40,7 @@ export async function* requestLetter(
 
 			if (event.type === 'delta') yield event.text
 			if (event.type === 'error') throw new LetterGenerationFailure(event.error)
-			if (event.type === 'done') return
+			if (event.type === 'done') return event.application
 		}
 	} catch (cause) {
 		if (cause instanceof LetterGenerationFailure || signal.aborted) throw cause
@@ -62,13 +51,13 @@ export async function* requestLetter(
 	throw new LetterGenerationFailure({ code: 'interrupted' })
 }
 
-async function postGenerationRequest(
-	input: ApplicationInput,
+async function postCommand(
+	command: GenerateCommand,
 	signal: AbortSignal,
 ): Promise<Response> {
 	try {
 		return await fetch(GENERATION_ENDPOINT, {
-			body: JSON.stringify(input),
+			body: JSON.stringify(command),
 			headers: { 'Content-Type': 'application/json' },
 			method: 'POST',
 			signal,
@@ -83,7 +72,7 @@ async function postGenerationRequest(
 async function failureFromResponse(
 	response: Response,
 ): Promise<LetterGenerationFailure> {
-	const body = generationErrorBodySchema.safeParse(
+	const body = apiErrorBodySchema.safeParse(
 		await response.json().catch(() => null),
 	)
 

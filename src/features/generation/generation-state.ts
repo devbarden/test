@@ -1,4 +1,4 @@
-import type { LetterGenerationError } from './generation-client'
+import type { ApiError } from '@/lib/api-error'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   `waiting` and `streaming` are separate on purpose: the first is the
@@ -10,14 +10,14 @@ export type GenerationState =
 	| { status: 'idle' }
 	| { status: 'waiting' }
 	| { status: 'streaming'; text: string }
-	| { error: LetterGenerationError; status: 'failed'; text: string }
+	| { error: ApiError; status: 'failed'; text: string }
 	| { status: 'stopped'; text: string }
 
 export type GenerationAction =
 	| { type: 'start' }
 	| { text: string; type: 'delta' }
 	| { type: 'complete' }
-	| { error: LetterGenerationError; type: 'fail' }
+	| { error: ApiError; type: 'fail' }
 	| { type: 'stop' }
 
 export const IDLE_GENERATION: GenerationState = { status: 'idle' }
