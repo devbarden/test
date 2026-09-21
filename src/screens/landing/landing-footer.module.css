@@ -11,7 +11,7 @@
 		gap: var(--space-10);
 
 		@media (width >= 48rem) {
-			grid-template-columns: 2fr 1fr 1fr;
+			grid-template-columns: 2fr 1fr;
 		}
 	}
 
@@ -37,13 +37,5 @@
 		color: var(--color-text-primary);
 		text-transform: uppercase;
 		letter-spacing: var(--tracking-eyebrow);
-	}
-
-	.language {
-		color: var(--color-text-secondary);
-
-		&:hover {
-			color: var(--color-text-primary);
-		}
 	}
 }

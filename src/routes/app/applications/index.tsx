@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { SEARCH_MAX_LENGTH } from '@/features/applications/model/application-search'
-import { pageTitle } from '@/lib/site'
-import { m } from '@/paraglide/messages'
+import { SEARCH_MAX_LENGTH } from '@/domain/applications/application-search'
+import { pageTitle } from '@/lib/document/brand'
 import { DashboardScreen } from '@/screens/dashboard/dashboard-screen'
 
 const dashboardSearchSchema = z.object({
@@ -12,7 +11,7 @@ const dashboardSearchSchema = z.object({
 export const Route = createFileRoute('/app/applications/')({
 	component: DashboardPage,
 	head: () => ({
-		meta: [{ title: pageTitle(m['meta.applications.title']()) }],
+		meta: [{ title: pageTitle('Applications') }],
 	}),
 	validateSearch: dashboardSearchSchema,
 })

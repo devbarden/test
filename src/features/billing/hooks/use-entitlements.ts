@@ -3,7 +3,7 @@ import {
 	FREE_ENTITLEMENTS,
 	type Subscription,
 	subscriptionFrom,
-} from '../model/billing.catalog'
+} from '@/domain/billing/billing.catalog'
 
 type ClientEntitlements = Subscription & { isLoaded: boolean }
 

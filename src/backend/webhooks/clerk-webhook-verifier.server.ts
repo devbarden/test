@@ -26,5 +26,3 @@ export function createClerkWebhookVerifier({ config }: { config: AppConfig }) {
 		},
 	}
 }
-
-export type ClerkWebhookVerifier = ReturnType<typeof createClerkWebhookVerifier>

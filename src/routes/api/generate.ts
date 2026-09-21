@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ndjsonResponse } from '@/backend/http/ndjson.server'
 import { readJsonBody } from '@/backend/http/request-body.server'
 import { userApiScopeMiddleware } from '@/backend/middleware/api-scope.middleware'
-import { generateCommandSchema } from '@/features/generation/model/protocol'
+import { generateCommandSchema } from '@/domain/generation/protocol'
 
 const MAX_BODY_BYTES = 16 * 1024
 

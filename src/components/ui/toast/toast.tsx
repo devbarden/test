@@ -1,34 +1,45 @@
 import { XIcon } from 'lucide-react'
-import { type FocusEvent, useEffect, useState } from 'react'
-import { m } from '@/paraglide/messages'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import styles from './toast.module.css'
 import type { ToastOptions } from './toast-provider'
 
+const TOAST_DURATION_MS = 6000
+
+const HELD_RECHECK_MS = 250
+
 type ToastProps = ToastOptions & {
 	onDismiss: () => void
-	onPauseChange: (isPaused: boolean) => void
+	onExpire: () => void
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Hover and focus pause the timer independently, so moving the pointer
-//   away never dismisses a toast the keyboard is inside.
+//   Never expires under the pointer or focus: it waits while `:hover` or
+//   `:focus-within` matches, then gets its full time again.
 // ═══════════════════════════════════════════════════════════════════════════
-export function Toast({
-	action,
-	message,
-	onDismiss,
-	onPauseChange,
-}: ToastProps) {
-	const [isHovered, setIsHovered] = useState(false)
-	const [hasFocus, setHasFocus] = useState(false)
+export function Toast({ action, message, onDismiss, onExpire }: ToastProps) {
+	const root = useRef<HTMLDivElement>(null)
+	const expire = useEffectEvent(onExpire)
 
 	useEffect(() => {
-		onPauseChange(isHovered || hasFocus)
-	}, [isHovered, hasFocus, onPauseChange])
+		let timer: ReturnType<typeof setTimeout>
 
-	const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-		if (!event.currentTarget.contains(event.relatedTarget)) setHasFocus(false)
-	}
+		const isHeld = () => root.current?.matches(':hover, :focus-within') ?? false
+
+		const waitForRelease = () => {
+			timer = isHeld()
+				? setTimeout(waitForRelease, HELD_RECHECK_MS)
+				: setTimeout(timeUp, TOAST_DURATION_MS)
+		}
+
+		const timeUp = () => {
+			if (isHeld()) waitForRelease()
+			else expire()
+		}
+
+		timer = setTimeout(timeUp, TOAST_DURATION_MS)
+
+		return () => clearTimeout(timer)
+	}, [])
 
 	const handleAction = () => {
 		action?.onClick()
@@ -36,14 +47,7 @@ export function Toast({
 	}
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: hover and focus only pause the dismiss timer; focus bubbles up from the buttons inside
-		<div
-			className={styles.root}
-			onBlur={handleBlur}
-			onFocus={() => setHasFocus(true)}
-			onPointerEnter={() => setIsHovered(true)}
-			onPointerLeave={() => setIsHovered(false)}
-		>
+		<div className={styles.root} ref={root}>
 			<span className={styles.message}>{message}</span>
 			{action && (
 				<button className={styles.action} onClick={handleAction} type="button">
@@ -51,7 +55,7 @@ export function Toast({
 				</button>
 			)}
 			<button
-				aria-label={m['toast.dismiss']()}
+				aria-label="Dismiss"
 				className={styles.dismiss}
 				onClick={onDismiss}
 				type="button"

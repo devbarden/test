@@ -1,7 +1,7 @@
 import { asFunction, asValue } from 'awilix'
 import { createAppConfig } from '../config.server'
 import { createPrismaClient } from '../database/prisma.server'
-import { createGenerationApiGateway } from '../gateways/generation-api/generation-api.gateway.server'
+import { createGenerationApiGateway } from '../gateways/generation-api.gateway.server'
 import { createRootLogger } from '../observability/logger.server'
 import { createRateLimiter } from '../rate-limit/rate-limiter.server'
 import { createLockService } from '../redis/lock.server'

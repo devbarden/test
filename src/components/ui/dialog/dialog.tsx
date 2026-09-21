@@ -33,15 +33,29 @@ export function Dialog({
 		else if (!dialog.open) dialog.showModal()
 	}, [closing])
 
+	// ═════════════════════════════════════════════════════════════════════════
+	//   The panel fills the box, so a click on the <dialog> itself is the
+	//   backdrop; Esc is its keyboard equivalent.
+	// ═════════════════════════════════════════════════════════════════════════
+	useEffect(() => {
+		const dialog = ref.current
+
+		if (!dialog) return
+
+		const closeOnBackdrop = (event: MouseEvent) => {
+			if (event.target === dialog) dialog.close()
+		}
+
+		dialog.addEventListener('click', closeOnBackdrop)
+
+		return () => dialog.removeEventListener('click', closeOnBackdrop)
+	}, [])
+
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: the click only catches the backdrop; Esc already closes a modal dialog natively
 		<dialog
 			aria-describedby={description ? descriptionId : undefined}
 			aria-labelledby={titleId}
 			className={styles.root}
-			onClick={(event) => {
-				if (event.target === event.currentTarget) event.currentTarget.close()
-			}}
 			onClose={() => {
 				if (!closing) onDismiss()
 			}}

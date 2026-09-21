@@ -5,35 +5,6 @@
 		gap: var(--space-6);
 	}
 
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--space-6) var(--space-4);
-		padding: 0;
-		margin-block-end: var(--space-6);
-		list-style: none;
-
-		@media (width < 48rem) {
-			grid-template-columns: minmax(0, 1fr);
-			gap: var(--space-4);
-		}
-
-		&:empty {
-			display: none;
-		}
-	}
-
-	.search {
-		display: block;
-		flex: 0 1 20rem;
-		min-inline-size: 10rem;
-	}
-
-	.stale {
-		opacity: 0.6;
-		transition: opacity var(--duration-base) var(--ease-out);
-	}
-
 	.sentinel {
 		block-size: 1px;
 		margin-block-start: calc(var(--space-6) * -1 - 1px);

@@ -9,29 +9,16 @@
 		inline-size: var(--control-height-sm);
 		block-size: var(--control-height-sm);
 		color: var(--color-text-label);
+		background: var(--color-surface-page);
+		border: 1px solid var(--color-border-default);
 		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-xs);
 		transition:
 			background-color var(--duration-fast) var(--ease-out),
 			color var(--duration-fast) var(--ease-out);
-	}
-
-	.outline {
-		background: var(--color-surface-page);
-		border: 1px solid var(--color-border-default);
-		box-shadow: var(--shadow-xs);
 
 		&:hover {
 			background: var(--color-control-hover);
-		}
-	}
-
-	.ghost {
-		background: none;
-		border: 0;
-
-		&:hover {
-			color: var(--color-text-primary);
-			background: var(--color-surface-muted);
 		}
 	}
 }

@@ -1,12 +1,11 @@
-import type { ApplicationDto } from '@/features/applications/model/application.schema'
-import { type ApiError, apiErrorBodySchema } from '@/lib/api/api-error'
-import { createLineSplitter } from '@/lib/streams/line-splitter'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
 import {
 	GENERATION_ENDPOINT,
 	type GenerateCommand,
 	type GenerationEvent,
 	generationEventSchema,
-} from '../model/protocol'
+} from '@/domain/generation/protocol'
+import { type ApiError, apiErrorBodySchema } from '@/lib/api/api-error'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Longer than any server silence: only a dead socket (a phone switching
@@ -24,10 +23,7 @@ export class LetterGenerationFailure extends Error {
 	}
 }
 
-export type LetterStreamEvent = Extract<
-	GenerationEvent,
-	{ type: 'delta' | 'saving' }
->
+type LetterStreamEvent = Extract<GenerationEvent, { type: 'delta' | 'saving' }>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   A body that ends without `done` is a failure, never a short letter.
@@ -45,11 +41,7 @@ export async function* requestLetter(
 			throw await failureFromResponse(response)
 		}
 
-		const lines = response.body
-			.pipeThrough(new TextDecoderStream())
-			.pipeThrough(createLineSplitter())
-
-		for await (const line of readAll(lines)) {
+		for await (const line of readLines(response.body)) {
 			connection.reset()
 
 			const event = generationEventSchema.parse(JSON.parse(line))
@@ -141,18 +133,26 @@ async function failureFromResponse(
 // ═══════════════════════════════════════════════════════════════════════════
 //   A reader loop: Safari got async iteration of streams late.
 // ═══════════════════════════════════════════════════════════════════════════
-async function* readAll<T>(stream: ReadableStream<T>): AsyncGenerator<T> {
-	const reader = stream.getReader()
+async function* readLines(
+	body: NonNullable<Response['body']>,
+): AsyncGenerator<string> {
+	const reader = body.pipeThrough(new TextDecoderStream()).getReader()
+	let buffer = ''
 
 	try {
 		for (;;) {
 			const { done, value } = await reader.read()
 
-			if (done) return
+			if (done) break
 
-			yield value
+			const lines = `${buffer}${value}`.split('\n')
+
+			buffer = lines.pop() ?? ''
+			yield* lines.filter((line) => line.trim())
 		}
 	} finally {
 		reader.releaseLock()
 	}
+
+	if (buffer.trim()) yield buffer
 }

@@ -1,26 +1,17 @@
 import { createRouter } from '@tanstack/react-router'
 import { NotFound, RouteError } from '@/components/fallbacks'
-import { notifyLocaleChange } from '@/lib/i18n/locale'
-import { localeRewrite } from '@/lib/i18n/locale-rewrite'
-import { pageTransitionTypes } from '@/lib/page-transition'
+import { pageTransitionTypes } from '@/lib/document/page-transition'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-	const router = createRouter({
+	return createRouter({
 		defaultErrorComponent: RouteError,
 		defaultNotFoundComponent: NotFound,
 		defaultPreload: 'intent',
 		defaultViewTransition: { types: pageTransitionTypes },
-		rewrite: localeRewrite,
 		routeTree,
-		scrollRestoration: ({ location }) => !location.state.keepScroll,
+		scrollRestoration: true,
 	})
-
-	if (typeof window !== 'undefined') {
-		router.subscribe('onResolved', notifyLocaleChange)
-	}
-
-	return router
 }
 
 declare module '@tanstack/react-router' {
@@ -29,7 +20,6 @@ declare module '@tanstack/react-router' {
 	}
 
 	interface HistoryState {
-		keepScroll?: boolean
 		letterJustSaved?: boolean
 	}
 }

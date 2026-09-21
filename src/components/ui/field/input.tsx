@@ -3,7 +3,9 @@ import type { ComponentProps } from 'react'
 import styles from './field.module.css'
 import { useFieldControlProps } from './field-context'
 
-export function Input({ className, ...props }: ComponentProps<'input'>) {
+type InputProps = ComponentProps<'input'>
+
+export function Input({ className, ...props }: InputProps) {
 	const controlProps = useFieldControlProps()
 
 	return (

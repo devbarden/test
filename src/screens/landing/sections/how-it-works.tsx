@@ -1,6 +1,5 @@
-import { PRODUCT_STEPS } from '@/features/marketing/model/product-content'
+import { PRODUCT_STEPS } from '@/features/marketing/ui/product-content'
 import { PRODUCT_STEP_ICONS } from '@/features/marketing/ui/product-icons'
-import { m } from '@/paraglide/messages'
 import { LANDING_SECTIONS } from '../landing-sections'
 import styles from './how-it-works.module.css'
 import { Section } from './section'
@@ -10,10 +9,9 @@ import { SectionCards } from './section-cards'
 export function HowItWorks() {
 	return (
 		<Section
-			id={LANDING_SECTIONS.howItWorks.id}
-			kicker={m['landing.steps.kicker']()}
-			lead={m['landing.steps.lead']()}
-			title={m['landing.steps.title']()}
+			lead="No templates and no blank page. You describe the job; Alt+Shift does the writing."
+			section={LANDING_SECTIONS.howItWorks}
+			title="From a job post to a sent letter in three steps"
 			tone="ink"
 		>
 			<SectionCards as="ol">
@@ -22,7 +20,7 @@ export function HowItWorks() {
 
 					return (
 						<SectionCard
-							body={step.body()}
+							body={step.body}
 							icon={<Icon />}
 							key={step.id}
 							marker={
@@ -30,7 +28,7 @@ export function HowItWorks() {
 									{String(index + 1).padStart(2, '0')}
 								</span>
 							}
-							title={step.title()}
+							title={step.title}
 						/>
 					)
 				})}

@@ -27,10 +27,7 @@
 	}
 
 	.option {
-		--icon-size: var(--icon-sm);
-
 		display: inline-flex;
-		gap: var(--space-1);
 		align-items: center;
 		justify-content: center;
 		block-size: var(--control-height-xs);
@@ -63,15 +60,5 @@
 				outline-offset: -2px;
 			}
 		}
-
-		&:has(input:disabled) {
-			color: var(--color-text-disabled);
-			cursor: not-allowed;
-		}
-	}
-
-	.description {
-		font: var(--type-body-sm);
-		color: var(--color-text-secondary);
 	}
 }

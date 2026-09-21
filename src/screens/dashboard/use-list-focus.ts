@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { ApplicationDto } from '@/features/applications/model/application.schema'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
 import { cardLinkSelector } from './application-card'
 
 type FocusRequest = {

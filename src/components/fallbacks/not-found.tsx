@@ -1,17 +1,16 @@
 import { StatusPage } from '@/components/layout/status-page'
 import { ButtonLink } from '@/components/ui/button'
-import { m } from '@/paraglide/messages'
 
 export function NotFound() {
 	return (
 		<StatusPage
 			action={
 				<ButtonLink to="/" variant="secondary">
-					{m['fallbacks.notFound.action']()}
+					Go to the home page
 				</ButtonLink>
 			}
-			description={m['fallbacks.notFound.description']()}
-			title={m['fallbacks.notFound.title']()}
+			description="The page you are looking for does not exist or was moved."
+			title="Page not found"
 		/>
 	)
 }

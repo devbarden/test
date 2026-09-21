@@ -1,11 +1,10 @@
 import { createFileRoute, useLocation } from '@tanstack/react-router'
-import { pageTitle } from '@/lib/site'
-import { m } from '@/paraglide/messages'
+import { pageTitle } from '@/lib/document/brand'
 import { ApplicationScreen } from '@/screens/application/application-screen'
 
 export const Route = createFileRoute('/app/applications/$applicationId')({
 	component: ApplicationRoute,
-	head: () => ({ meta: [{ title: pageTitle(m['meta.application.title']()) }] }),
+	head: () => ({ meta: [{ title: pageTitle('Application') }] }),
 })
 
 function ApplicationRoute() {

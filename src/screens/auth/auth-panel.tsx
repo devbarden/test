@@ -2,9 +2,8 @@ import { useId } from 'react'
 import { HomeLink } from '@/components/brand'
 import { Eyebrow } from '@/components/ui/eyebrow'
 import { Heading } from '@/components/ui/heading'
-import { PRODUCT_STEPS } from '@/features/marketing/model/product-content'
+import { PRODUCT_STEPS } from '@/features/marketing/ui/product-content'
 import { PRODUCT_STEP_ICONS } from '@/features/marketing/ui/product-icons'
-import { m } from '@/paraglide/messages'
 import styles from './auth-panel.module.css'
 
 export function AuthPanel() {
@@ -15,11 +14,14 @@ export function AuthPanel() {
 			<HomeLink className={styles.brand} />
 			<div className={styles.copy}>
 				<div className={styles.intro}>
-					<Heading size="sm">{m['auth.title']()}</Heading>
-					<p className={styles.description}>{m['auth.description']()}</p>
+					<Heading size="sm">Your next cover letter is a minute away</Heading>
+					<p className={styles.description}>
+						Sign in or create an account with the same form — Alt+Shift writes a
+						personal cover letter for every job you apply to.
+					</p>
 				</div>
 				<div className={styles.steps}>
-					<Eyebrow id={stepsLabelId}>{m['landing.steps.kicker']()}</Eyebrow>
+					<Eyebrow id={stepsLabelId}>How it works</Eyebrow>
 					<ol aria-labelledby={stepsLabelId} className={styles.timeline}>
 						{PRODUCT_STEPS.map((step) => {
 							const Icon = PRODUCT_STEP_ICONS[step.id]
@@ -30,8 +32,8 @@ export function AuthPanel() {
 										<Icon />
 									</span>
 									<div className={styles.stepCopy}>
-										<h3 className={styles.stepTitle}>{step.title()}</h3>
-										<p className={styles.stepBody}>{step.body()}</p>
+										<h3 className={styles.stepTitle}>{step.title}</h3>
+										<p className={styles.stepBody}>{step.body}</p>
 									</div>
 								</li>
 							)

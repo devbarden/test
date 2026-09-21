@@ -1,7 +1,6 @@
 @layer tokens {
 	:root {
 		--palette-white: #ffffff;
-		--palette-black: #000000;
 		--palette-gray-50: #f9fafb;
 		--palette-gray-100: #f2f4f7;
 		--palette-gray-200: #eaecf0;
@@ -16,14 +15,11 @@
 		--palette-green-200: #aaf0c4;
 		--palette-green-300: #73e2a3;
 		--palette-green-400: #3ccb7f;
-		--palette-green-500: #16b364;
 		--palette-green-600: #099250;
 		--palette-green-700: #087443;
 		--palette-green-800: #095c37;
 		--palette-green-900: #084c2e;
 		--palette-green-950: #052e1c;
-		--palette-success-100: #d1fadf;
-		--palette-success-500: #12b76a;
 		--palette-red-50: #fef3f2;
 		--palette-red-100: #fee4e2;
 		--palette-red-300: #fda29b;
@@ -67,8 +63,6 @@
 		--color-progress-todo: rgb(16 24 40 / 0.24);
 		--color-meter-fill: var(--palette-green-700);
 		--color-meter-spent: var(--palette-red-500);
-		--color-success-subtle: var(--palette-success-100);
-		--color-success-graphic: var(--palette-success-500);
 
 		--color-decoration: var(--palette-gray-200);
 		--color-illustration-accent: var(--palette-green-200);

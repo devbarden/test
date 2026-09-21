@@ -4,7 +4,7 @@ import { validateInput } from '@/backend/middleware/validate-input'
 import {
 	applicationIdSchema,
 	listApplicationsSchema,
-} from '../model/application.schema'
+} from '@/domain/applications/application.schema'
 
 export const listApplications = createServerFn({ method: 'GET' })
 	.middleware([userScopeMiddleware])

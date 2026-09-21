@@ -1,6 +1,5 @@
 import { Heading } from '@/components/ui/heading'
 import { Panel } from '@/components/ui/panel'
-import { m } from '@/paraglide/messages'
 import styles from './empty-state.module.css'
 
 const GHOST_CARDS = ['first', 'second'] as const
@@ -20,9 +19,12 @@ export function EmptyState() {
 				))}
 			</div>
 			<Heading className={styles.title} size="sm">
-				{m['dashboard.empty.title']()}
+				No applications yet
 			</Heading>
-			<p className={styles.description}>{m['dashboard.empty.description']()}</p>
+			<p className={styles.description}>
+				Tell us about the role and what you are good at — the first draft of
+				your cover letter will be ready in seconds.
+			</p>
 		</Panel>
 	)
 }

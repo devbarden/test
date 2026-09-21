@@ -7,7 +7,7 @@ import {
 	SparklesIcon,
 	TargetIcon,
 } from 'lucide-react'
-import type { ProductBenefitId, ProductStepId } from '../model/product-content'
+import type { ProductBenefitId, ProductStepId } from './product-content'
 
 export const PRODUCT_STEP_ICONS: Record<ProductStepId, LucideIcon> = {
 	one: PenLineIcon,

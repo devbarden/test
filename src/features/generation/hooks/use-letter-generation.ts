@@ -1,18 +1,18 @@
 import { type ActionDispatch, useEffect, useReducer, useRef } from 'react'
-import type { ApplicationDto } from '@/features/applications/model/application.schema'
-import type { ApiError } from '@/lib/api/api-error'
-import {
-	LetterGenerationFailure,
-	requestLetter,
-} from '../api/generation-client'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
 import {
 	type GenerationAction,
 	generationReducer,
 	IDLE_GENERATION,
 	isGenerating,
 	isStoppable,
-} from '../model/generation-state'
-import type { GenerateCommand } from '../model/protocol'
+} from '@/domain/generation/generation-state'
+import type { GenerateCommand } from '@/domain/generation/protocol'
+import type { ApiError } from '@/lib/api/api-error'
+import {
+	LetterGenerationFailure,
+	requestLetter,
+} from '../api/generation-client'
 
 type GenerateOptions = {
 	onComplete: (application: ApplicationDto) => void

@@ -3,12 +3,14 @@ import {
 	keepPreviousData,
 	queryOptions,
 } from '@tanstack/react-query'
-import type { ApplicationPage } from '../model/application.schema'
+import type { ApplicationPage } from '@/domain/applications/application.schema'
 import {
 	getApplication,
 	getApplicationStats,
 	listApplications,
 } from './application.api'
+
+const FIRST_PAGE: string | undefined = undefined
 
 export const applicationKeys = {
 	all: ['applications'] as const,
@@ -29,7 +31,7 @@ export const applicationQueries = {
 		infiniteQueryOptions({
 			getNextPageParam: (lastPage: ApplicationPage) =>
 				lastPage.nextCursor ?? undefined,
-			initialPageParam: undefined as string | undefined,
+			initialPageParam: FIRST_PAGE,
 			placeholderData: keepPreviousData,
 			queryFn: ({ pageParam }) =>
 				listApplications({

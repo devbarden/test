@@ -4,8 +4,10 @@ import { type AppContainer, getAppContainer } from '../di/container.server'
 import { createSystemScope, createUserScope } from '../di/request-scope.server'
 import type { AppError } from '../errors/app-error.server'
 import { logAndNormalizeError } from '../errors/log-error.server'
-import { UNKNOWN_CLIENT_IP } from '../http/client-ip.server'
-import { getRequestContext } from '../http/request-context.server'
+import {
+	getRequestContext,
+	UNKNOWN_CLIENT_IP,
+} from '../http/request-context.server'
 import { budgets } from '../rate-limit/budgets'
 
 type Handle<T> = (scope: AppContainer) => T | Promise<T>

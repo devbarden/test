@@ -1,14 +1,5 @@
-import {
-	createContext,
-	type ReactNode,
-	use,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
+import { createContext, type ReactNode, use, useRef, useState } from 'react'
 import { Toast } from './toast'
-
-const TOAST_DURATION_MS = 6000
 
 export type ToastOptions = {
 	action?: { label: string; onClick: () => void }
@@ -19,35 +10,28 @@ type ActiveToast = ToastOptions & { id: number }
 
 const ToastContext = createContext<((toast: ToastOptions) => void) | null>(null)
 
+type ToastProviderProps = {
+	children: ReactNode
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //   One toast at a time: an Undo for an older action still on screen would
 //   be a trap. Focus returns to where it was when the toast closes.
 // ═══════════════════════════════════════════════════════════════════════════
-export function ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children }: ToastProviderProps) {
 	const [toast, setToast] = useState<ActiveToast | null>(null)
-	const [isPaused, setIsPaused] = useState(false)
 	const nextId = useRef(0)
 	const returnFocusTo = useRef<HTMLElement | null>(null)
-
-	useEffect(() => {
-		if (!toast || isPaused) return
-
-		const timer = setTimeout(() => setToast(null), TOAST_DURATION_MS)
-
-		return () => clearTimeout(timer)
-	}, [toast, isPaused])
 
 	const show = (options: ToastOptions) => {
 		const active = document.activeElement
 		returnFocusTo.current = active instanceof HTMLElement ? active : null
-		setIsPaused(false)
 		nextId.current += 1
 		setToast({ ...options, id: nextId.current })
 	}
 
 	const dismiss = () => {
 		setToast(null)
-		setIsPaused(false)
 
 		const target = returnFocusTo.current
 		const fallback = document.querySelector<HTMLElement>('main')
@@ -66,7 +50,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 						key={toast.id}
 						message={toast.message}
 						onDismiss={dismiss}
-						onPauseChange={setIsPaused}
+						onExpire={() => setToast(null)}
 					/>
 				)}
 			</div>

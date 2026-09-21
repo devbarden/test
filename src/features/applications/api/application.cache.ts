@@ -1,11 +1,11 @@
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
-import type { PersistedQueries } from '@/lib/query/query-persistence'
 import type {
 	ApplicationDto,
 	ApplicationPage,
 	ApplicationStats,
-} from '../model/application.schema'
-import { matchesSearch } from '../model/application-search'
+} from '@/domain/applications/application.schema'
+import { matchesSearch } from '@/domain/applications/application-search'
+import type { PersistedQueries } from '@/lib/query/user-query-client'
 import { applicationKeys } from './application.queries'
 
 type ApplicationList = InfiniteData<ApplicationPage, string | undefined>
@@ -80,15 +80,17 @@ export function removeApplication(queryClient: QueryClient, id: string): void {
 	adjustTotal(queryClient, -1)
 }
 
+function cachedLists(queryClient: QueryClient) {
+	return queryClient.getQueriesData<ApplicationList>({
+		queryKey: applicationKeys.lists(),
+	})
+}
+
 function updateLists(
 	queryClient: QueryClient,
 	update: (pages: ApplicationPage[], search: string) => ApplicationPage[],
 ): void {
-	const lists = queryClient.getQueriesData<ApplicationList>({
-		queryKey: applicationKeys.lists(),
-	})
-
-	for (const [queryKey, list] of lists) {
+	for (const [queryKey, list] of cachedLists(queryClient)) {
 		if (!list) continue
 
 		const search = String(queryKey[2] ?? '')
@@ -123,11 +125,7 @@ export function applicationFromList(
 	queryClient: QueryClient,
 	id: string,
 ): { data: ApplicationDto; updatedAt: number | undefined } | undefined {
-	const lists = queryClient.getQueriesData<ApplicationList>({
-		queryKey: applicationKeys.lists(),
-	})
-
-	for (const [queryKey, list] of lists) {
+	for (const [queryKey, list] of cachedLists(queryClient)) {
 		const data = list?.pages
 			.flatMap((page) => page.items)
 			.find((item) => item.id === id)

@@ -1,12 +1,11 @@
-import type { PlanId } from '@/features/billing/model/billing.catalog'
-import { m } from '@/paraglide/messages'
+import type { PlanId } from '@/domain/billing/billing.catalog'
 
-export const PLAN_NAMES: Record<PlanId, () => string> = {
-	free: () => m['billing.plan.free'](),
-	pro: () => m['billing.plan.pro'](),
+export const PLAN_NAMES: Record<PlanId, string> = {
+	free: 'Free',
+	pro: 'Pro',
 }
 
-export const PLAN_DESCRIPTIONS: Record<PlanId, () => string> = {
-	free: () => m['billing.plans.freeDescription'](),
-	pro: () => m['billing.plans.proDescription'](),
+export const PLAN_DESCRIPTIONS: Record<PlanId, string> = {
+	free: 'For trying it out and the occasional application.',
+	pro: 'For an active job search: more letters, a longer history and your own voice.',
 }

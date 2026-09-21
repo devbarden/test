@@ -1,9 +1,7 @@
 import { HouseIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { HomeLink } from '@/components/brand'
-import { LanguageSwitcher } from '@/components/locale/language-switcher'
 import { IconButtonLink } from '@/components/ui/icon-button'
-import { m } from '@/paraglide/messages'
 import styles from './app-header.module.css'
 
 type AppHeaderProps = {
@@ -20,10 +18,9 @@ export function AppHeader({ account, status }: AppHeaderProps) {
 				<div className={styles.controls}>
 					<IconButtonLink
 						icon={<HouseIcon />}
-						label={m['header.allApplications']()}
+						label="All applications"
 						to="/app/applications"
 					/>
-					<LanguageSwitcher variant="icon" />
 					{account && <div className={styles.account}>{account}</div>}
 				</div>
 			</div>

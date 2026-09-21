@@ -4,11 +4,11 @@ import { logAndNormalizeError } from '../errors/log-error.server'
 import type { Logger } from '../observability/logger.server'
 import { budgets } from '../rate-limit/budgets'
 import type { RateLimiter } from '../rate-limit/rate-limiter.server'
-import { getClientIp } from './client-ip.server'
 import { withBodyLimit } from './request-body.server'
-import { runWithRequestContext } from './request-context.server'
-import { requestIdFrom } from './request-id.server'
-import { robotsHeader } from './robots-header.server'
+import {
+	requestContextFrom,
+	runWithRequestContext,
+} from './request-context.server'
 import { withSecurityHeaders } from './security-headers.server'
 
 type Deps = {
@@ -17,7 +17,7 @@ type Deps = {
 	rootLogger: Logger
 }
 
-async function guard(
+async function admit(
 	incoming: Request,
 	clientIp: string,
 	{ config, rateLimiter }: Deps,
@@ -37,14 +37,14 @@ async function guard(
 export function serveRequest(
 	request: Request,
 	deps: Deps,
-	handle: (request: Request) => Promise<Response>,
+	handle: (request: Request) => Response | Promise<Response>,
 ): Promise<Response> {
-	const requestId = requestIdFrom(request.headers)
-	const clientIp = getClientIp(request.headers)
-	const logger = deps.rootLogger.child({ clientIp, requestId })
+	const context = requestContextFrom(request.headers)
+	const { clientIp, requestId } = context
+	const logger = deps.rootLogger.child(context)
 
-	return runWithRequestContext({ clientIp, requestId }, async () => {
-		const response = await guard(request, clientIp, deps)
+	return runWithRequestContext(context, async () => {
+		const response = await admit(request, clientIp, deps)
 			.then(handle)
 			.catch((error: unknown) =>
 				errorResponse(logAndNormalizeError(error, logger)),
@@ -53,7 +53,6 @@ export function serveRequest(
 		return withSecurityHeaders(response, {
 			isProduction: deps.config.isProduction,
 			requestId,
-			robots: robotsHeader(request, response),
 		})
 	})
 }

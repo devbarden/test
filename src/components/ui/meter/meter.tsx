@@ -5,10 +5,10 @@ type MeterProps = {
 	label: string
 	max: number
 	value: number
-	valueText: string
 }
 
-export function Meter({ label, max, value, valueText }: MeterProps) {
+export function Meter({ label, max, value }: MeterProps) {
+	const valueText = `${value} of ${max}`
 	const ratio = max > 0 ? Math.min(value / max, 1) : 0
 
 	return (

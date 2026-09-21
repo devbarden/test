@@ -1,22 +1,17 @@
-import { useBlocker } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
-import { ConfirmDialog } from '@/components/dialogs/confirm-dialog'
+import { useStore } from '@tanstack/react-form'
+import { useEffect, useRef } from 'react'
 import { PageHeader } from '@/components/layout/page-header'
-import {
-	type ApplicationDto,
-	type ApplicationInput,
-	EMPTY_APPLICATION_INPUT,
-} from '@/features/applications/model/application.schema'
-import { applicationTitle } from '@/features/applications/model/application-title'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
+import { applicationTitle } from '@/domain/applications/application-title'
 import { GoalBanner } from '@/features/applications/ui/goal-banner'
-import { usePlanLimits } from '@/features/billing/hooks/use-plan-limits'
-import { m } from '@/paraglide/messages'
 import { LetterPanel } from '../letter/letter-panel'
 import { letterContent, letterNotice } from '../letter/letter-view'
 import styles from './application-editor.module.css'
 import { ApplicationForm } from './application-form'
 import { scrollIntoViewIfStacked } from './scroll-into-view-if-stacked'
+import { useApplicationForm } from './use-application-form'
 import { useGenerateApplication } from './use-generate-application'
+import { useLeaveGuard } from './use-leave-guard'
 
 type ApplicationEditorProps = {
 	justSaved?: boolean
@@ -33,52 +28,23 @@ export function ApplicationEditor({
 	onSaved,
 	saved,
 }: ApplicationEditorProps) {
-	const [input, setInput] = useState<ApplicationInput>(
-		() => saved?.input ?? EMPTY_APPLICATION_INPUT,
-	)
-	const generation = useGenerateApplication(saved)
-	const planLimits = usePlanLimits()
 	const panelRef = useRef<HTMLElement>(null)
+	const generation = useGenerateApplication(saved, {
+		onStart: () => scrollIntoViewIfStacked(panelRef.current),
+	})
 
 	useEffect(() => {
 		if (justSaved) panelRef.current?.focus({ preventScroll: true })
 	}, [justSaved])
 
-	useBlocker({
-		disabled: !generation.isGenerating,
-		enableBeforeUnload: () => generation.isGenerating,
-		shouldBlockFn: async () =>
-			!(await ConfirmDialog.call({
-				cancelLabel: m['editor.leaveDialog.stay'](),
-				confirmLabel: m['editor.leaveDialog.leave'](),
-				message: m['editor.leaveDialog.description'](),
-				title: m['editor.leaveDialog.title'](),
-				tone: 'danger',
-			})),
-	})
+	useLeaveGuard(generation.isGenerating)
 
-	const handleSubmit = async (validInput: ApplicationInput) => {
-		const limit = planLimits.reached({ creates: !saved })
-
-		if (limit) {
-			planLimits.explain(limit)
-			return
-		}
-
-		scrollIntoViewIfStacked(panelRef.current)
-
-		const { application, error } = await generation.generate(validInput)
-
-		if (error?.code === 'quota_exceeded') {
-			planLimits.explain('daily', error.retryAfterSeconds)
-		} else if (error?.code === 'application_limit_reached') {
-			planLimits.explain('saved')
-		}
+	const form = useApplicationForm(saved, async (input) => {
+		const application = await generation.generate(input)
 
 		if (application) onSaved?.(application)
-	}
-
-	const title = applicationTitle(input)
+	})
+	const title = useStore(form.store, (state) => applicationTitle(state.values))
 
 	return (
 		<div className={styles.root}>
@@ -86,15 +52,13 @@ export function ApplicationEditor({
 				<div className={styles.formColumn}>
 					<PageHeader
 						size="md"
-						title={title ?? m['editor.newApplication']()}
+						title={title ?? 'New application'}
 						tone={title ? 'default' : 'muted'}
 					/>
 					<ApplicationForm
+						form={form}
 						hasLetter={Boolean(saved)}
 						isGenerating={generation.isGenerating}
-						onChange={setInput}
-						onSubmit={handleSubmit}
-						value={input}
 					/>
 				</div>
 				<LetterPanel

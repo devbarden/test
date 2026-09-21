@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
 import { useToast } from '@/components/ui/toast'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
 import { readApiError } from '@/lib/api/api-error'
 import { errorMessage } from '@/lib/api/api-error-message'
-import { m } from '@/paraglide/messages'
 import { deleteApplication, restoreApplication } from '../api/application.api'
 import { insertApplication, removeApplication } from '../api/application.cache'
 import { applicationKeys } from '../api/application.queries'
-import type { ApplicationDto } from '../model/application.schema'
 
 type DeleteOptions = {
 	onRestored?: (application: ApplicationDto) => void
@@ -65,10 +64,10 @@ export function useDeleteApplication({
 		onSuccess: (_result, application) =>
 			showToast({
 				action: {
-					label: m['dashboard.undo'](),
+					label: 'Undo',
 					onClick: () => restore.mutate(application.id),
 				},
-				message: m['dashboard.deleted'](),
+				message: 'Application deleted',
 			}),
 	})
 

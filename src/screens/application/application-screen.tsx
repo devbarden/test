@@ -1,11 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { StatusPage } from '@/components/layout/status-page'
-import { Button, ButtonLink } from '@/components/ui/button'
 import { applicationFromList } from '@/features/applications/api/application.cache'
 import { applicationQueries } from '@/features/applications/api/application.queries'
-import { readApiError } from '@/lib/api/api-error'
-import { apiErrorMessage } from '@/lib/api/api-error-message'
-import { m } from '@/paraglide/messages'
+import { ApplicationUnavailable } from './application-unavailable'
 import { ApplicationEditor } from './editor/application-editor'
 
 type ApplicationScreenProps = {
@@ -13,6 +9,10 @@ type ApplicationScreenProps = {
 	justSaved: boolean
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   Opens from the list's copy of the letter when there is one, so a click
+//   on a card shows it at once while the letter itself revalidates.
+// ═══════════════════════════════════════════════════════════════════════════
 export function ApplicationScreen({
 	applicationId,
 	justSaved,
@@ -36,34 +36,17 @@ export function ApplicationScreen({
 	}
 
 	if (application.isError) {
-		const error = readApiError(application.error)
-
-		return error.code === 'not_found' || error.code === 'invalid_request' ? (
-			<StatusPage
-				action={
-					<ButtonLink to="/app/applications" variant="secondary">
-						{m['application.backToList']()}
-					</ButtonLink>
-				}
-				description={m['application.notFoundDescription']()}
-				title={m['application.notFoundTitle']()}
-			/>
-		) : (
-			<StatusPage
-				action={
-					<Button onClick={() => application.refetch()} variant="secondary">
-						{m['common.tryAgain']()}
-					</Button>
-				}
-				description={apiErrorMessage(error)}
-				title={m['application.openFailedTitle']()}
+		return (
+			<ApplicationUnavailable
+				error={application.error}
+				onRetry={() => application.refetch()}
 			/>
 		)
 	}
 
 	return (
 		<p className="visually-hidden" role="status">
-			{m['application.loading']()}
+			Loading…
 		</p>
 	)
 }

@@ -1,6 +1,5 @@
 import { RefreshCwIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { m } from '@/paraglide/messages'
 
 type SubmitButtonProps = {
 	disabled: boolean
@@ -25,7 +24,7 @@ export function SubmitButton({
 			type="submit"
 			variant={isRetry ? 'secondary' : 'primary'}
 		>
-			{hasLetter ? m['editor.form.tryAgain']() : m['editor.form.generate']()}
+			{hasLetter ? 'Try Again' : 'Generate Now'}
 		</Button>
 	)
 }

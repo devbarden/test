@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react'
 import { Container } from '../container'
 
-export function StandalonePage({ children }: { children: ReactNode }) {
+type StandalonePageProps = {
+	children: ReactNode
+}
+
+export function StandalonePage({ children }: StandalonePageProps) {
 	return (
 		<Container>
 			<main>{children}</main>

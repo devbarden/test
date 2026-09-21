@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { HeaderStatus } from '@/components/layout/header-status'
 import { ProgressRing } from '@/components/ui/progress-ring'
-import { m } from '@/paraglide/messages'
 import { billingQueries } from '../api/billing.queries'
 
 export function DailyLetters() {
@@ -17,13 +16,13 @@ export function DailyLetters() {
 			hideOnPhone
 			indicator={
 				<ProgressRing
-					label={m['billing.lettersToday']()}
+					label="Letters today"
 					max={limit}
 					value={used}
-					valueText={m['billing.usageValue']({ limit, used })}
+					valueText={`${used} of ${limit}`}
 				/>
 			}
-			suffix={m['billing.daily.suffix']()}
+			suffix="letters today"
 			value={`${used}/${limit}`}
 		/>
 	)

@@ -4,21 +4,19 @@ import {
 	Outlet,
 	Scripts,
 } from '@tanstack/react-router'
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { NotFound, RouteError } from '@/components/fallbacks'
 import { StandalonePage } from '@/components/layout/standalone-page'
-import { OgLocaleAlternates } from '@/components/seo/og-locale-alternates'
-import { useLocale } from '@/lib/i18n/use-locale'
-import { rootHead } from '@/lib/seo/root-head'
+import { documentHead } from '@/lib/document/document-head'
 
 export const Route = createRootRoute({
-	component: LocalizedOutlet,
+	component: Outlet,
 	errorComponent: (props) => (
 		<StandalonePage>
 			<RouteError {...props} />
 		</StandalonePage>
 	),
-	head: rootHead,
+	head: documentHead,
 	notFoundComponent: () => (
 		<StandalonePage>
 			<NotFound />
@@ -27,33 +25,20 @@ export const Route = createRootRoute({
 	shellComponent: RootDocument,
 })
 
-function RootDocument({ children }: { children: ReactNode }) {
-	const locale = useLocale()
+type RootDocumentProps = {
+	children: ReactNode
+}
 
+function RootDocument({ children }: RootDocumentProps) {
 	return (
-		<html lang={locale}>
+		<html lang="en">
 			<head>
 				<HeadContent />
-				<OgLocaleAlternates />
 			</head>
 			<body>
 				{children}
 				<Scripts />
 			</body>
 		</html>
-	)
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//   Keyed by locale so a language switch drops text the React Compiler
-//   memoized in the old language.
-// ═══════════════════════════════════════════════════════════════════════════
-function LocalizedOutlet() {
-	const locale = useLocale()
-
-	return (
-		<Fragment key={locale}>
-			<Outlet />
-		</Fragment>
 	)
 }

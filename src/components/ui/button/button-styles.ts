@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import styles from './button.module.css'
 
-export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
+type ButtonSize = 'sm' | 'md' | 'lg'
 
-export type ButtonShape = 'rounded' | 'pill'
+type ButtonShape = 'rounded' | 'pill'
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
 
@@ -11,7 +11,6 @@ const SIZE_CLASS = {
 	lg: styles.lg,
 	md: styles.md,
 	sm: styles.sm,
-	xs: styles.xs,
 } satisfies Record<ButtonSize, string | undefined>
 
 const VARIANT_CLASS = {

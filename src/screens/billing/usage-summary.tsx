@@ -1,51 +1,46 @@
+import { useQuery } from '@tanstack/react-query'
 import { Heading } from '@/components/ui/heading'
+import { LoadError } from '@/components/ui/load-error'
 import { Meter } from '@/components/ui/meter'
 import { Panel } from '@/components/ui/panel'
-import type { BillingOverview } from '@/features/billing/model/billing-overview'
-import { m } from '@/paraglide/messages'
+import { Skeleton } from '@/components/ui/skeleton'
+import { hoursUntilReset } from '@/domain/billing/usage-reset'
+import { billingQueries } from '@/features/billing/api/billing.queries'
 import { PLAN_NAMES } from './plan-copy'
 import styles from './usage-summary.module.css'
 
-const SECONDS_PER_HOUR = 3600
+export function UsageSummary() {
+	const overview = useQuery(billingQueries.overview())
 
-type UsageSummaryProps = {
-	overview: BillingOverview
-}
+	if (!overview.data) {
+		return overview.isError ? (
+			<LoadError onRetry={() => overview.refetch()}>
+				Could not load your usage.
+			</LoadError>
+		) : (
+			<Skeleton className={styles.skeleton} shape="block" />
+		)
+	}
 
-export function UsageSummary({ overview }: UsageSummaryProps) {
-	const { entitlements, plan, usage } = overview
-	const resetInHours = Math.max(
-		1,
-		Math.ceil(usage.generationsResetInSeconds / SECONDS_PER_HOUR),
-	)
+	const { entitlements, plan, usage } = overview.data
 
 	return (
 		<Panel className={styles.root}>
-			<Heading size="sm">
-				{m['billing.currentPlan']({ plan: PLAN_NAMES[plan]() })}
-			</Heading>
+			<Heading size="sm">{`You are on the ${PLAN_NAMES[plan]} plan`}</Heading>
 			<Meter
-				label={m['billing.lettersToday']()}
+				label="Letters today"
 				max={entitlements.dailyGenerations}
 				value={usage.generationsToday}
-				valueText={m['billing.usageValue']({
-					limit: entitlements.dailyGenerations,
-					used: usage.generationsToday,
-				})}
 			/>
 			{usage.generationsToday > 0 && (
 				<p className={styles.reset}>
-					{m['billing.resetsIn']({ hours: resetInHours })}
+					{`Limit resets in ${hoursUntilReset(usage.generationsResetInSeconds)} h`}
 				</p>
 			)}
 			<Meter
-				label={m['billing.savedApplications']()}
+				label="Saved applications"
 				max={entitlements.maxApplications}
 				value={usage.applications}
-				valueText={m['billing.usageValue']({
-					limit: entitlements.maxApplications,
-					used: usage.applications,
-				})}
 			/>
 		</Panel>
 	)

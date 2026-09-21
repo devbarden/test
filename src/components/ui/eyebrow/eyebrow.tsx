@@ -2,6 +2,8 @@ import clsx from 'clsx'
 import type { ComponentProps } from 'react'
 import styles from './eyebrow.module.css'
 
-export function Eyebrow({ className, ...props }: ComponentProps<'p'>) {
+type EyebrowProps = ComponentProps<'p'>
+
+export function Eyebrow({ className, ...props }: EyebrowProps) {
 	return <p {...props} className={clsx(styles.root, className)} />
 }

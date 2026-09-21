@@ -2,7 +2,6 @@ import { SquareIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Spinner } from '@/components/ui/spinner'
-import { m } from '@/paraglide/messages'
 import styles from './letter-panel.module.css'
 import type { LetterContent } from './letter-view'
 
@@ -26,13 +25,11 @@ export function LetterFooter({ canStop, content, onStop }: LetterFooterProps) {
 				<div className={styles.footer}>
 					<span className={styles.progress}>
 						<Spinner />
-						{content.kind === 'saving'
-							? m['editor.panel.saving']()
-							: m['editor.panel.writing']()}
+						{content.kind === 'saving' ? 'Saving…' : 'Writing…'}
 					</span>
 					{canStop && (
 						<Button iconEnd={<SquareIcon />} onClick={onStop} variant="ghost">
-							{m['editor.panel.stop']()}
+							Stop
 						</Button>
 					)}
 				</div>

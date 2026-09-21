@@ -9,8 +9,8 @@ type LetterTextProps = {
 }
 
 export function LetterText({ streaming = false, text }: LetterTextProps) {
-	const paragraphs = text.trim().split(/\n\s*\n/)
-	const lastIndex = paragraphs.length - 1
+	const paragraphs = paragraphsOf(text)
+	const last = paragraphs.at(-1)
 	const following = useRef(true)
 
 	// ═════════════════════════════════════════════════════════════════════════
@@ -44,11 +44,10 @@ export function LetterText({ streaming = false, text }: LetterTextProps) {
 			ref={track}
 		>
 			<div className={styles.content}>
-				{paragraphs.map((paragraph, index) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: paragraphs only ever grow at the end while streaming
-					<p key={index}>
-						{paragraph}
-						{streaming && index === lastIndex && (
+				{paragraphs.map((paragraph) => (
+					<p key={paragraph.start}>
+						{paragraph.text}
+						{streaming && paragraph === last && (
 							<span aria-hidden="true" className={styles.caret} />
 						)}
 					</p>
@@ -65,4 +64,24 @@ function measure(scroller: HTMLElement): number {
 	scroller.toggleAttribute('data-more', remaining > END_SLACK_PX)
 
 	return remaining
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Each paragraph is keyed by the offset it starts at. The letter only ever
+//   grows at its end, so a paragraph keeps its key — and its DOM node —
+//   while the words after it stream in.
+// ═══════════════════════════════════════════════════════════════════════════
+function paragraphsOf(text: string): { start: number; text: string }[] {
+	const body = text.trim()
+	const paragraphs: { start: number; text: string }[] = []
+	let start = 0
+
+	for (const separator of body.matchAll(/\n\s*\n/g)) {
+		paragraphs.push({ start, text: body.slice(start, separator.index) })
+		start = separator.index + separator[0].length
+	}
+
+	paragraphs.push({ start, text: body.slice(start) })
+
+	return paragraphs
 }

@@ -1,34 +1,34 @@
-import {
-	CheckoutButton,
-	SubscriptionDetailsButton,
-} from '@clerk/tanstack-react-start/experimental'
+import { useQuery } from '@tanstack/react-query'
 import { useId, useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
 import { LoadError } from '@/components/ui/load-error'
-import { SegmentedControl } from '@/components/ui/segmented-control'
+import {
+	SegmentedControl,
+	type SegmentedOption,
+} from '@/components/ui/segmented-control'
 import { Skeleton } from '@/components/ui/skeleton'
+import { billingQueries } from '@/features/billing/api/billing.queries'
 import {
 	type BillingPeriod,
-	type PlanOffer,
 	usePlanOffers,
 } from '@/features/billing/hooks/use-plan-offers'
-import type { PlanId } from '@/features/billing/model/billing.catalog'
-import { m } from '@/paraglide/messages'
+import { PlanAction } from './plan-action'
 import { PlanCard } from './plan-card'
 import styles from './plan-picker.module.css'
 
 const SKELETON_KEYS = ['first', 'second'] as const
 
-type PlanPickerProps = {
-	currentPlan: PlanId | undefined
-}
+const PERIOD_OPTIONS: SegmentedOption<BillingPeriod>[] = [
+	{ label: 'Monthly', value: 'month' },
+	{ label: 'Annually', value: 'annual' },
+]
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Actions wait for the current plan so a card never offers the plan the
 //   user already has.
 // ═══════════════════════════════════════════════════════════════════════════
-export function PlanPicker({ currentPlan }: PlanPickerProps) {
+export function PlanPicker() {
+	const currentPlan = useQuery(billingQueries.overview()).data?.plan
 	const { isError, isLoading, offers, retry } = usePlanOffers()
 	const [period, setPeriod] = useState<BillingPeriod>('month')
 	const titleId = useId()
@@ -38,25 +38,22 @@ export function PlanPicker({ currentPlan }: PlanPickerProps) {
 		<section aria-labelledby={titleId} className={styles.root}>
 			<div className={styles.header}>
 				<Heading id={titleId} size="sm">
-					{m['billing.plansTitle']()}
+					Choose your plan
 				</Heading>
 				{hasAnnualPrices && (
 					<div className={styles.period}>
 						<SegmentedControl
 							hideLabel
-							label={m['billing.plans.period']()}
+							label="Billing period"
 							onChange={setPeriod}
-							options={[
-								{ label: m['billing.plans.monthly'](), value: 'month' },
-								{ label: m['billing.plans.annual'](), value: 'annual' },
-							]}
+							options={PERIOD_OPTIONS}
 							value={period}
 						/>
 					</div>
 				)}
 			</div>
 			{isError ? (
-				<LoadError onRetry={retry}>{m['billing.plans.loadFailed']()}</LoadError>
+				<LoadError onRetry={retry}>Could not load the plans.</LoadError>
 			) : isLoading ? (
 				<div aria-hidden="true" className={styles.grid}>
 					{SKELETON_KEYS.map((key) => (
@@ -68,7 +65,15 @@ export function PlanPicker({ currentPlan }: PlanPickerProps) {
 					{offers.map((offer) => (
 						<li key={offer.id}>
 							<PlanCard
-								action={planAction(offer, currentPlan, period)}
+								action={
+									currentPlan && (
+										<PlanAction
+											currentPlan={currentPlan}
+											offer={offer}
+											period={period}
+										/>
+									)
+								}
 								isCurrent={offer.id === currentPlan}
 								offer={offer}
 								period={period}
@@ -78,37 +83,5 @@ export function PlanPicker({ currentPlan }: PlanPickerProps) {
 				</ul>
 			)}
 		</section>
-	)
-}
-
-function planAction(
-	offer: PlanOffer,
-	currentPlan: PlanId | undefined,
-	period: BillingPeriod,
-) {
-	if (!currentPlan || offer.fee.amount === 0) return null
-
-	if (offer.id === currentPlan) {
-		return (
-			<SubscriptionDetailsButton>
-				<Button fullWidth size="md" variant="secondary">
-					{m['billing.manage']()}
-				</Button>
-			</SubscriptionDetailsButton>
-		)
-	}
-
-	return (
-		<CheckoutButton
-			newSubscriptionRedirectUrl="/app/billing"
-			planId={offer.clerkPlanId}
-			planPeriod={offer.annualMonthlyFee ? period : 'month'}
-		>
-			<Button fullWidth size="md">
-				{offer.trialDays !== null
-					? m['billing.plans.trial']({ days: offer.trialDays })
-					: m['billing.plans.upgrade']()}
-			</Button>
-		</CheckoutButton>
 	)
 }

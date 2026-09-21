@@ -1,9 +1,12 @@
 import { Alert } from '@/components/ui/alert'
 import { apiErrorMessage } from '@/lib/api/api-error-message'
-import { m } from '@/paraglide/messages'
 import type { LetterNotice } from './letter-view'
 
-export function LetterNoticeAlert({ notice }: { notice: LetterNotice }) {
+type LetterNoticeAlertProps = {
+	notice: LetterNotice
+}
+
+export function LetterNoticeAlert({ notice }: LetterNoticeAlertProps) {
 	if (notice.kind === 'failed') {
 		return <Alert tone="danger">{apiErrorMessage(notice.error)}</Alert>
 	}
@@ -11,8 +14,8 @@ export function LetterNoticeAlert({ notice }: { notice: LetterNotice }) {
 	return (
 		<Alert tone="info">
 			{notice.savedLetterKept
-				? m['editor.stoppedSaved']()
-				: m['editor.stoppedUnsaved']()}
+				? 'Stopped. Your previous letter is unchanged.'
+				: 'Stopped before the letter was finished, so it was not saved.'}
 		</Alert>
 	)
 }

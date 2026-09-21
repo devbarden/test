@@ -12,7 +12,11 @@ import { PlanLimitDialog } from '@/features/billing/ui/plan-limit-dialog'
 import { getUserQueryClient } from '@/lib/query/user-query-client'
 import { WorkspaceStatus } from './workspace-status'
 
-export function WorkspaceShell({ userId }: { userId: string }) {
+type WorkspaceShellProps = {
+	userId: string
+}
+
+export function WorkspaceShell({ userId }: WorkspaceShellProps) {
 	const queryClient = getUserQueryClient(userId, PERSISTED_APPLICATIONS)
 
 	useSyncPlanChanges(() => {

@@ -2,7 +2,6 @@ import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { StatusPage } from '@/components/layout/status-page'
 import { Button } from '@/components/ui/button'
-import { m } from '@/paraglide/messages'
 
 export function RouteError({ error, reset }: ErrorComponentProps) {
 	useEffect(() => {
@@ -13,11 +12,11 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
 		<StatusPage
 			action={
 				<Button onClick={reset} variant="secondary">
-					{m['common.tryAgain']()}
+					Try again
 				</Button>
 			}
-			description={m['fallbacks.error.description']()}
-			title={m['fallbacks.error.title']()}
+			description="Something went wrong on our side. Your letters are safe."
+			title="Something went wrong"
 		/>
 	)
 }

@@ -55,13 +55,6 @@
 		text-overflow: ellipsis;
 	}
 
-	.xs {
-		--_height: var(--control-height-xs);
-		--_padding: var(--space-3);
-		--_font: var(--type-body-sm);
-		--icon-size: var(--icon-md);
-	}
-
 	.sm {
 		--_height: var(--control-height-sm);
 		--_padding: var(--space-4);
@@ -88,11 +81,6 @@
 		border-radius: var(--radius-full);
 		transition-property:
 			background-color, border-color, color, box-shadow, transform;
-
-		&.xs,
-		&.sm {
-			--_padding: var(--space-5);
-		}
 
 		@media (hover: hover) {
 			&:hover {

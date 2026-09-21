@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
-const emptyAsUndefined = (value: unknown) => (value === '' ? undefined : value)
-
-const optionalSecret = (minLength: number) =>
-	z.preprocess(emptyAsUndefined, z.string().min(minLength).optional())
+const optionalSecret = z.preprocess(
+	(value) => (value === '' ? undefined : value),
+	z.string().min(1).optional(),
+)
 
 const envSchema = z.object({
 	CLERK_SECRET_KEY: z.string().min(1),
-	CLERK_WEBHOOK_SIGNING_SECRET: optionalSecret(1),
+	CLERK_WEBHOOK_SIGNING_SECRET: optionalSecret,
 	DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
 	DATABASE_URL: z.url(),
 	GENERATION_API_TOKEN: z.string().min(1),
@@ -45,8 +45,6 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 		generation: {
 			apiToken: vars.GENERATION_API_TOKEN,
 			apiUrl: vars.GENERATION_API_URL,
-			firstByteTimeoutMs: 30_000,
-			idleTimeoutMs: 20_000,
 			lockTtlMs: 120_000,
 			maxDurationMs: 90_000,
 			maxLetterCharacters: 20_000,
@@ -54,14 +52,6 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env) {
 		},
 		http: { maxRequestBodyBytes: 1024 * 1024 },
 		isProduction: vars.NODE_ENV === 'production',
-		nodeEnv: vars.NODE_ENV,
-		rateLimits: {
-			generationsPerMinute: 4,
-			requestsPerMinutePerIp: 600,
-			requestsPerMinutePerUser: 300,
-			systemRequestsPerMinute: 300,
-			upstreamRequestsPerMinute: 6,
-		},
 		redis: { url: vars.REDIS_URL },
 	}
 }

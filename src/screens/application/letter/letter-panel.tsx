@@ -1,6 +1,5 @@
 import type { Ref } from 'react'
 import { Panel } from '@/components/ui/panel'
-import { m } from '@/paraglide/messages'
 import { LetterBody } from './letter-body'
 import { LetterFooter } from './letter-footer'
 import { LetterNoticeAlert } from './letter-notice-alert'
@@ -26,7 +25,7 @@ export function LetterPanel({
 }: LetterPanelProps) {
 	return (
 		<Panel
-			aria-label={m['editor.panel.label']()}
+			aria-label="Cover letter"
 			as="section"
 			className={styles.root}
 			ref={ref}
@@ -45,11 +44,11 @@ export function LetterPanel({
 function announcement(content: LetterContent, isFreshlyWritten: boolean) {
 	switch (content.kind) {
 		case 'waiting':
-			return m['editor.panel.thinking']()
+			return 'Writing your letter…'
 		case 'saving':
-			return m['editor.panel.saving']()
+			return 'Saving…'
 		case 'letter':
-			return isFreshlyWritten ? m['editor.panel.ready']() : ''
+			return isFreshlyWritten ? 'Your letter is ready' : ''
 		case 'placeholder':
 		case 'streaming':
 			return ''

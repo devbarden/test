@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//   Nitro plugins run in their own bundle; a registry symbol reaches the
-//   app's one container.
+//   Nitro plugins run in their own bundle; a global reaches the app's one
+//   container from there.
 // ═══════════════════════════════════════════════════════════════════════════
-const CLOSE_CONNECTIONS = Symbol.for('alt-shift.close-connections')
-
-type Holder = { [CLOSE_CONNECTIONS]?: () => Promise<void> }
+declare global {
+	var __altShiftCloseConnections: (() => Promise<void>) | undefined
+}
 
 export function publishCloseConnections(close: () => Promise<void>): void {
-	;(globalThis as Holder)[CLOSE_CONNECTIONS] = close
+	globalThis.__altShiftCloseConnections = close
 }
 
 export async function closePublishedConnections(): Promise<void> {
-	await (globalThis as Holder)[CLOSE_CONNECTIONS]?.()
+	await globalThis.__altShiftCloseConnections?.()
 }

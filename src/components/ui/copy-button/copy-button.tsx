@@ -1,22 +1,17 @@
 import { CheckIcon, CopyIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
-import { m } from '@/paraglide/messages'
 import { Button } from '../button'
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Functions: a message read at module scope keeps the first request's
-//   locale forever.
-// ═══════════════════════════════════════════════════════════════════════════
 const LABELS = {
-	copied: () => m['copyButton.copied'](),
-	failed: () => m['copyButton.failed'](),
-	idle: () => m['copyButton.idle'](),
+	copied: 'Copied',
+	failed: 'Copy failed',
+	idle: 'Copy to clipboard',
 } as const
 
 const ANNOUNCEMENTS = {
-	copied: () => m['copyButton.announceCopied'](),
-	failed: () => m['copyButton.announceFailed'](),
-	idle: () => '',
+	copied: 'Letter copied to clipboard',
+	failed: 'Could not copy the letter. Select the text and copy it manually.',
+	idle: '',
 } as const
 
 const ICONS = {
@@ -41,11 +36,11 @@ export function CopyButton({ subject, text }: CopyButtonProps) {
 				onClick={() => text && copy(text)}
 				variant="ghost"
 			>
-				{LABELS[status]()}
+				{LABELS[status]}
 				{subject && <span className="visually-hidden">{`: ${subject}`}</span>}
 			</Button>
 			<span aria-live="polite" className="visually-hidden">
-				{ANNOUNCEMENTS[status]()}
+				{ANNOUNCEMENTS[status]}
 			</span>
 		</>
 	)

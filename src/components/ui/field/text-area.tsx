@@ -3,7 +3,9 @@ import type { ComponentProps } from 'react'
 import styles from './field.module.css'
 import { useFieldControlProps } from './field-context'
 
-export function TextArea({ className, ...props }: ComponentProps<'textarea'>) {
+type TextAreaProps = ComponentProps<'textarea'>
+
+export function TextArea({ className, ...props }: TextAreaProps) {
 	const controlProps = useFieldControlProps()
 
 	return (

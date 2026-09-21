@@ -1,7 +1,3 @@
-# ═══════════════════════════════════════════════════════════════════════════
-#   Local Postgres and Redis on non-default ports, so they run beside other
-#   projects' databases.
-# ═══════════════════════════════════════════════════════════════════════════
 services:
   db:
     image: postgres:17-alpine

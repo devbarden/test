@@ -29,8 +29,7 @@ npm run dev             # поднимет Postgres и Redis в Docker, прим
 
 - **React 19.3 + TypeScript**, React Compiler, `<ViewTransition>`
 - **Vite 8** (Rolldown), React Compiler через `@rolldown/plugin-babel`
-- **Paraglide JS** — английский и русский: лендинг по URL (`/`, `/ru/`), приложение по cookie
-- **SEO/LLMO** — canonical и hreflang, JSON-LD, `robots.txt`, `sitemap.xml`, `llms.txt` и `llms-full.txt` генерируются кодом
+- **Только английский интерфейс** — без i18n-слоя, тексты прямо в компонентах
 - **TanStack Start** (роутинг, серверные роуты, SSR на Nitro)
 - **Clerk** — аутентификация
 - **CSS Modules + дизайн-токены** — без Tailwind и без UI-китов
@@ -44,30 +43,37 @@ npm run dev             # поднимет Postgres и Redis в Docker, прим
 src/
   routes/            тонкие роуты: URL, guard, head() → экран
                      /  лендинг · /sign-in · /app/applications[/create|/<id>]
-                     · /app/billing; старые /applications/* → 301
+                     · /app/billing
   screens/           страницы — собирают фичи и держат свой UI
-    landing/         лендинг: секции, scroll-reveal, head с JSON-LD
+    landing/         лендинг: секции, scroll-reveal
     auth/            общая страница входа/регистрации (Clerk withSignUp)
     workspace/       оболочка приложения: Clerk, кэш пользователя, шапка
     dashboard/       список писем: карточки, пустое состояние, фокус
     application/     редактор: форма, панель письма, генерация
     billing/         тариф и использование
-  features/          домены, по сегментам model / api / hooks / ui
-    applications/    схема и API писем, кэш, удаление с Undo, цель
-    billing/         тарифы и права, usage, меню аккаунта
-    generation/      протокол потока, клиент, конечный автомат
-    marketing/       история продукта для лендинга, входа и llms.txt
-  components/        дизайн-система (ui/), layout, brand, locale, seo
+  features/          работа браузера с доменом: api / hooks / ui
+    applications/    API писем, кэш, удаление с Undo, цель
+    billing/         права, usage, меню аккаунта
+    generation/      клиент потока
+    marketing/       история продукта для лендинга и входа
+  domain/            общий чистый код сервера и браузера: схемы, типы, логика
+    applications/    схема письма, тоны, поиск
+    billing/         каталог тарифов, деньги, usage
+    generation/      протокол потока, конечный автомат
+  components/        дизайн-система (ui/), layout, brand
   hooks/             общие хуки
-  lib/               инфраструктура: api/ i18n/ query/ seo/ clerk/
+  lib/               инфраструктура по зонам: api/ document/ query/ text/
   styles/            токены (палитра → семантические роли), шрифты, reset
-  backend/           серверная часть (см. docs/architecture.md)
-messages/            каталоги строк en/ru для Paraglide
+  backend/           только сервер
+    modules/         доменная логика: репозитории, сервисы, DI-модули
+                     (applications, billing, generation, account)
+                     остальное — инфраструктура: http, auth, БД, Redis, лимиты
 ```
 
-Зависимости идут в одну сторону: `routes → screens → features →
-components · hooks · lib`. Фичи не импортируют друг друга, их собирают
-экраны; это проверяет Biome (`noRestrictedImports` в `biome.json`).
+Зависимости идут в одну сторону: `routes → screens → features → domain ·
+components · hooks · lib`, а `backend → domain · lib`. Фичи не импортируют
+друг друга, их собирают экраны; это проверяет Biome (`noRestrictedImports`
+в `biome.json`).
 
 ### Интеграция с Generation API
 
@@ -81,8 +87,8 @@ components · hooks · lib`. Фичи не импортируют друг др�
   окажется в бандле. Сервер принимает только четыре поля формы и сам
   собирает промпт, поэтому эндпоинт не превращается в открытый прокси к
   платной модели.
-- **SSE → NDJSON с явным `done`.** Сервер разбирает SSE своим парсером
-  (`sse-parser.ts`, покрыт тестами) и отдаёт браузеру по одному
+- **SSE → NDJSON с явным `done`.** Сервер разбирает SSE (`eventsource-parser`)
+  и отдаёт браузеру по одному
   JSON-событию на строку. Главное здесь в явном терминальном событии:
   письмо сохраняется **только** после `done`. Поток, который просто
   оборвался, — это не короткое письмо, и засчитывать его в цель нельзя.
@@ -137,7 +143,6 @@ guard авторизации выполняется на сервере, а са
 CSS Modules разложены по каскадным слоям (`reset → tokens → base → ui →
 components → features → screens → utilities`), так что переопределение
 через `className` всегда выигрывает у собственных стилей компонента.
-Правила — в [`docs/styles.md`](docs/styles.md).
 
 Закономерности, найденные в макетах:
 

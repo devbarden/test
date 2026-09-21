@@ -1,6 +1,6 @@
 import { Eyebrow } from '@/components/ui/eyebrow'
 import { Heading } from '@/components/ui/heading'
-import { Reveal } from '../reveal/reveal'
+import { Reveal } from '../reveal'
 import styles from './section.module.css'
 
 type SectionHeadingProps = {

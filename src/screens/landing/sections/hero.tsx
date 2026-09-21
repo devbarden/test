@@ -3,8 +3,7 @@ import { Container } from '@/components/layout/container'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
-import { m } from '@/paraglide/messages'
-import { Reveal } from '../reveal/reveal'
+import { Reveal } from '../reveal'
 import styles from './hero.module.css'
 
 export function Hero() {
@@ -12,17 +11,21 @@ export function Hero() {
 		<section className={styles.root}>
 			<Container>
 				<Reveal className={styles.copy} immediate stagger>
-					<Badge icon={<SparklesIcon />}>{m['landing.hero.kicker']()}</Badge>
+					<Badge icon={<SparklesIcon />}>Cover letters, written for you</Badge>
 					<Heading as="h1" className={styles.title} size="xl">
-						{m['landing.hero.title']()}
+						A personal cover letter for every job, in seconds
 					</Heading>
-					<p className={styles.lead}>{m['landing.hero.lead']()}</p>
+					<p className={styles.lead}>
+						Tell Alt+Shift the role, the company and what you are good at. It
+						writes the letter while you watch — from your facts only, ready to
+						copy and send.
+					</p>
 					<div className={styles.actions}>
 						<ButtonLink shape="pill" size="lg" to="/app/applications">
-							{m['landing.cta.primary']()}
+							Write my first letter
 						</ButtonLink>
 					</div>
-					<p className={styles.note}>{m['landing.hero.note']()}</p>
+					<p className={styles.note}>Free to start. No templates to fill in.</p>
 				</Reveal>
 			</Container>
 		</section>

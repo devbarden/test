@@ -9,8 +9,8 @@ import {
 	PLAN_IDS,
 	PLAN_SLUGS,
 	type PlanId,
-} from '../model/billing.catalog'
-import type { Money } from '../model/money'
+} from '@/domain/billing/billing.catalog'
+import type { Money } from '@/domain/billing/money'
 
 type ClerkPlan = ReturnType<typeof usePlans>['data'][number]
 

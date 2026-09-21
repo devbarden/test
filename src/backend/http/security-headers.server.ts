@@ -17,11 +17,7 @@ const HSTS = 'max-age=31536000; includeSubDomains'
 
 export function withSecurityHeaders(
 	response: Response,
-	{
-		isProduction,
-		requestId,
-		robots,
-	}: { isProduction: boolean; requestId: string; robots?: string },
+	{ isProduction, requestId }: { isProduction: boolean; requestId: string },
 ): Response {
 	const headers = new Headers(response.headers)
 
@@ -30,8 +26,6 @@ export function withSecurityHeaders(
 	}
 
 	if (isProduction) headers.set('Strict-Transport-Security', HSTS)
-
-	if (robots) headers.set('X-Robots-Tag', robots)
 
 	headers.set('X-Request-Id', requestId)
 	headers.delete('X-Powered-By')

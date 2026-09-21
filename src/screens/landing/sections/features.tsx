@@ -1,6 +1,5 @@
-import { PRODUCT_BENEFITS } from '@/features/marketing/model/product-content'
+import { PRODUCT_BENEFITS } from '@/features/marketing/ui/product-content'
 import { PRODUCT_BENEFIT_ICONS } from '@/features/marketing/ui/product-icons'
-import { m } from '@/paraglide/messages'
 import { LANDING_SECTIONS } from '../landing-sections'
 import { Section } from './section'
 import { SectionCard } from './section-card'
@@ -9,9 +8,8 @@ import { SectionCards } from './section-cards'
 export function Features() {
 	return (
 		<Section
-			id={LANDING_SECTIONS.features.id}
-			kicker={m['landing.features.kicker']()}
-			title={m['landing.features.title']()}
+			section={LANDING_SECTIONS.features}
+			title="Built for the whole job hunt, not a single letter"
 		>
 			<SectionCards as="ul">
 				{PRODUCT_BENEFITS.map((feature) => {
@@ -19,11 +17,11 @@ export function Features() {
 
 					return (
 						<SectionCard
-							body={feature.body()}
+							body={feature.body}
 							icon={<Icon />}
 							key={feature.id}
 							spacious
-							title={feature.title()}
+							title={feature.title}
 						/>
 					)
 				})}

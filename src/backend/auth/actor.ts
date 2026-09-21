@@ -1,7 +1,4 @@
-import type {
-	Entitlements,
-	PlanId,
-} from '@/features/billing/model/billing.catalog'
+import type { Entitlements, PlanId } from '@/domain/billing/billing.catalog'
 
 export type UserActor = {
 	entitlements: Entitlements

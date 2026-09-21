@@ -1,11 +1,10 @@
 import { createCallable } from 'react-call'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
-import { m } from '@/paraglide/messages'
 
 export type PlanLimit = 'daily' | 'saved'
 
-export type PlanLimitDialogProps = {
+type PlanLimitDialogProps = {
 	hoursUntilReset: number
 	limit: number
 	reason: PlanLimit
@@ -23,15 +22,15 @@ export const PlanLimitDialog = createCallable<PlanLimitDialogProps, void>(
 				actions={
 					upgradeLimit === undefined ? (
 						<Button autoFocus onClick={close} size="md">
-							{m['billing.limitDialog.gotIt']()}
+							Got it
 						</Button>
 					) : (
 						<>
 							<Button onClick={close} size="md" variant="secondary">
-								{m['billing.limitDialog.notNow']()}
+								Not now
 							</Button>
 							<ButtonLink autoFocus onClick={close} size="md" to="/app/billing">
-								{m['billing.limitDialog.seePlans']()}
+								See plans
 							</ButtonLink>
 						</>
 					)
@@ -46,8 +45,8 @@ export const PlanLimitDialog = createCallable<PlanLimitDialogProps, void>(
 				onDismiss={close}
 				title={
 					reason === 'daily'
-						? m['billing.limitDialog.dailyTitle']()
-						: m['billing.limitDialog.savedTitle']()
+						? 'Today’s letters are used up'
+						: 'No room for another application'
 				}
 			/>
 		)
@@ -63,15 +62,11 @@ function description({
 }: PlanLimitDialogProps): string {
 	if (reason === 'daily') {
 		return upgradeLimit === undefined
-			? m['billing.limitDialog.dailyWait']({ hours: hoursUntilReset, limit })
-			: m['billing.limitDialog.dailyUpgrade']({
-					hours: hoursUntilReset,
-					limit,
-					upgradeLimit,
-				})
+			? `Your plan includes ${limit} letters a day. New ones arrive in ${hoursUntilReset} h.`
+			: `The Free plan includes ${limit} letters a day. New ones arrive in ${hoursUntilReset} h — or move to Pro for ${upgradeLimit} a day.`
 	}
 
 	return upgradeLimit === undefined
-		? m['billing.limitDialog.savedWait']({ limit })
-		: m['billing.limitDialog.savedUpgrade']({ limit, upgradeLimit })
+		? `Your plan keeps up to ${limit} applications. Delete one you no longer need to make room.`
+		: `The Free plan keeps up to ${limit} applications. Delete one you no longer need, or move to Pro to keep up to ${upgradeLimit}.`
 }

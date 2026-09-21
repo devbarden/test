@@ -1,14 +1,19 @@
-import { m } from '@/paraglide/messages'
 import styles from './letter-panel.module.css'
 import { LetterText } from './letter-text'
 import type { LetterContent } from './letter-view'
 import { ThinkingOrb } from './thinking-orb'
 
-export function LetterBody({ content }: { content: LetterContent }) {
+type LetterBodyProps = {
+	content: LetterContent
+}
+
+export function LetterBody({ content }: LetterBodyProps) {
 	switch (content.kind) {
 		case 'placeholder':
 			return (
-				<p className={styles.placeholder}>{m['editor.panel.placeholder']()}</p>
+				<p className={styles.placeholder}>
+					Your personalized job application will appear here…
+				</p>
 			)
 		case 'waiting':
 			return <ThinkingOrb />

@@ -1,15 +1,12 @@
-import { type ReactNode, useId } from 'react'
+import { useId } from 'react'
 import styles from './segmented-control.module.css'
 
 export type SegmentedOption<Value extends string> = {
-	disabled?: boolean
-	icon?: ReactNode
 	label: string
 	value: Value
 }
 
 type SegmentedControlProps<Value extends string> = {
-	description?: ReactNode
 	hideLabel?: boolean
 	label: string
 	onChange: (value: Value) => void
@@ -22,7 +19,6 @@ type SegmentedControlProps<Value extends string> = {
 //   screen readers still treat it as one choice.
 // ═══════════════════════════════════════════════════════════════════════════
 export function SegmentedControl<Value extends string>({
-	description,
 	hideLabel = false,
 	label,
 	onChange,
@@ -30,13 +26,9 @@ export function SegmentedControl<Value extends string>({
 	value,
 }: SegmentedControlProps<Value>) {
 	const name = useId()
-	const descriptionId = `${name}-description`
 
 	return (
-		<fieldset
-			aria-describedby={description ? descriptionId : undefined}
-			className={styles.root}
-		>
+		<fieldset className={styles.root}>
 			<legend className={hideLabel ? 'visually-hidden' : styles.legend}>
 				{label}
 			</legend>
@@ -46,22 +38,15 @@ export function SegmentedControl<Value extends string>({
 						<input
 							checked={option.value === value}
 							className="visually-hidden"
-							disabled={option.disabled}
 							name={name}
 							onChange={() => onChange(option.value)}
 							type="radio"
 							value={option.value}
 						/>
-						{option.icon}
 						{option.label}
 					</label>
 				))}
 			</div>
-			{description && (
-				<div className={styles.description} id={descriptionId}>
-					{description}
-				</div>
-			)}
 		</fieldset>
 	)
 }

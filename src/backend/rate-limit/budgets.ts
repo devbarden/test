@@ -1,34 +1,52 @@
 import type { SystemActor } from '../auth/actor'
-import type { FixedTier, PlanTier } from './rate-limit-tiers'
 
-export type Budget =
-	| { key: string; tier: FixedTier }
-	| { key: string; limit: number; tier: PlanTier }
+export type Budget = {
+	durationSeconds: number
+	exceededCode: 'rate_limited' | 'quota_exceeded'
+	key: string
+	name: string
+	points: number
+}
+
+const MINUTE = 60
+const DAY = 24 * 60 * MINUTE
+
+function perMinute(name: string, points: number, key: string): Budget {
+	return {
+		durationSeconds: MINUTE,
+		exceededCode: 'rate_limited',
+		key,
+		name,
+		points,
+	}
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   The only place a key is spelled, so charging and reporting use one
 //   counter.
 // ═══════════════════════════════════════════════════════════════════════════
 export const budgets = {
-	clientIp: (clientIp: string): Budget => ({ key: clientIp, tier: 'ip' }),
+	clientIp: (clientIp: string) => perMinute('ip', 600, clientIp),
 
 	dailyGenerations: (userId: string, limit: number): Budget => ({
+		durationSeconds: DAY,
+		exceededCode: 'quota_exceeded',
 		key: userId,
-		limit,
-		tier: 'generationDay',
+		name: 'generationDay',
+		points: limit,
 	}),
 
-	generationApi: (): Budget => ({ key: 'generation-api', tier: 'upstream' }),
+	// ═════════════════════════════════════════════════════════════════════════
+	//   One bucket for the whole deployment: the provider allows 6/min per
+	//   token.
+	// ═════════════════════════════════════════════════════════════════════════
+	generationApi: () => perMinute('upstream', 6, 'generation-api'),
 
-	generationsPerMinute: (userId: string): Budget => ({
-		key: userId,
-		tier: 'generationMinute',
-	}),
+	generationsPerMinute: (userId: string) =>
+		perMinute('generationMinute', 4, userId),
 
-	system: (source: SystemActor['source'], clientIp: string): Budget => ({
-		key: `${source}:${clientIp}`,
-		tier: 'system',
-	}),
+	system: (source: SystemActor['source'], clientIp: string) =>
+		perMinute('system', 300, `${source}:${clientIp}`),
 
-	user: (userId: string): Budget => ({ key: userId, tier: 'user' }),
+	user: (userId: string) => perMinute('user', 300, userId),
 }

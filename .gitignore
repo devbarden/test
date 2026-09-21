@@ -11,4 +11,3 @@ dist
 *.log
 .clerk
 src/generated
-src/paraglide

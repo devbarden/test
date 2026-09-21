@@ -1,5 +1,5 @@
-import type { ApplicationDto } from '@/features/applications/model/application.schema'
-import type { GenerationState } from '@/features/generation/model/generation-state'
+import type { ApplicationDto } from '@/domain/applications/application.schema'
+import type { GenerationState } from '@/domain/generation/generation-state'
 import type { ApiError, ApiErrorCode } from '@/lib/api/api-error'
 
 export type LetterContent =

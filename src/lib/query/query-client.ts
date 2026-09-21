@@ -11,8 +11,6 @@ const MAX_RETRIES = 2
 
 const STALE_TIME_MS = 30_000
 
-export const CACHE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
-
 export function redirectToSignIn(): void {
 	window.location.assign('/sign-in')
 }

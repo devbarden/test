@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { APPLICATION_GOAL } from '@/domain/applications/application.schema'
 import { applicationQueries } from '../api/application.queries'
-import { APPLICATION_GOAL } from '../model/application.schema'
 
 export function useGoalProgress() {
 	const { data } = useQuery(applicationQueries.stats())

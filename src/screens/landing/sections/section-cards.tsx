@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Reveal } from '../reveal/reveal'
+import { Reveal } from '../reveal'
 import styles from './section.module.css'
 
 type SectionCardsProps = {

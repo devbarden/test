@@ -6,13 +6,11 @@
 		"node": ">=24"
 	},
 	"scripts": {
-		"predev": "npm run db:up && prisma migrate deploy && npm run i18n:generate",
+		"predev": "npm run db:up && prisma migrate deploy",
 		"dev": "vite dev --port 3000",
 		"build": "prisma generate && vite build",
 		"start": "node --enable-source-maps .output/server/index.mjs",
-		"pretypecheck": "npm run i18n:generate",
 		"typecheck": "tsc --noEmit",
-		"i18n:generate": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy url cookie preferredLanguage baseLocale",
 		"postinstall": "prisma generate",
 		"db:up": "docker compose up -d --wait",
 		"db:down": "docker compose down",
@@ -23,17 +21,16 @@
 		"lint:fix": "biome check --write ."
 	},
 	"dependencies": {
-		"@clerk/localizations": "^4.17.1",
 		"@clerk/tanstack-react-start": "^1.0.8",
 		"@prisma/adapter-pg": "^7.10.0",
 		"@prisma/client": "^7.10.0",
-		"@tanstack/query-sync-storage-persister": "^5.103.2",
+		"@tanstack/react-form": "^1.33.5",
 		"@tanstack/react-query": "^5.103.2",
-		"@tanstack/react-query-persist-client": "^5.103.2",
 		"@tanstack/react-router": "1.170.15",
 		"@tanstack/react-start": "1.168.25",
 		"awilix": "^13.0.5",
 		"clsx": "^2.1.1",
+		"eventsource-parser": "^4.1.1",
 		"ioredis": "^6.0.0",
 		"lucide-react": "^0.545.0",
 		"nitro": "^3.0.260903-beta",
@@ -47,7 +44,6 @@
 	"devDependencies": {
 		"@babel/core": "^7.29.0",
 		"@biomejs/biome": "2.4.16",
-		"@inlang/paraglide-js": "^2.25.4",
 		"@rolldown/plugin-babel": "^0.2.4",
 		"@types/node": "^22.19.19",
 		"@types/react": "^19.3.0",

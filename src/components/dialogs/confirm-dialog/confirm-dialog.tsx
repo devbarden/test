@@ -1,9 +1,8 @@
 import { createCallable } from 'react-call'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
-import { m } from '@/paraglide/messages'
 
-export type ConfirmDialogProps = {
+type ConfirmDialogProps = {
 	cancelLabel?: string
 	confirmLabel: string
 	message?: string
@@ -28,7 +27,7 @@ export const ConfirmDialog = createCallable<ConfirmDialogProps, boolean>(
 						size="md"
 						variant="secondary"
 					>
-						{cancelLabel ?? m['common.cancel']()}
+						{cancelLabel ?? 'Cancel'}
 					</Button>
 					<Button
 						onClick={() => call.end(true)}

@@ -9,8 +9,7 @@ letters and an editor that streams a new letter from the Generation API.
 The product goal is to get a job seeker to five letters.
 
 TanStack Start (React 19, Nitro) + Clerk + Prisma/Postgres + Redis, deployed
-to Railway. `docs/architecture.md` explains the backend in depth — read it
-before changing anything under `src/backend` or a `*.server.ts` file.
+to Railway.
 
 ## Commands
 
@@ -54,8 +53,7 @@ does.
   rules are shortened to keep the same right edge.
 - CSS has no comments.
 - YAML, `.gitignore` and `.env*` use the same shape with `#`.
-- Prisma schema has no comments; the rationale for the model lives in
-  `docs/architecture.md`.
+- Prisma schema has no comments.
 - Not allowed: a plain `// comment`, a trailing `code // comment`, a
   `/* block */` in TypeScript, a comment that restates the code.
 - The only exceptions: `// biome-ignore <rule>: <reason>`,
@@ -74,51 +72,78 @@ does.
 - Services, repositories and gateways are factories `createXxx({ deps })`
   returning a plain object, typed as `ReturnType<typeof createXxx>`. No
   classes except errors.
-- No barrel files in `features/` or `screens/`: import the module itself
+- No barrel files in `domain/`, `features/` or `screens/`: import the module itself
   (`@/features/billing/hooks/use-entitlements`). A barrel there mixes
   server functions, hooks and styled UI, and importing one name drags in
   the rest — it once put the whole landing into every page's entry chunk.
   Each component folder in `components/` has a one-line `index.ts`
   (`export * from './button'`) and nothing else does.
 - Files and folders are kebab-case; components are one per file.
-- Imports inside one feature, one screen or one `lib/` group are relative
-  (`../model/application.schema`); anything outside it goes through `@/`.
+- A component's props are a named type declared above it —
+  `type ButtonProps = { … }`, or `type InputProps = ComponentProps<'input'>`
+  — never an inline `({ children }: { children: ReactNode })`.
+- Imports inside one domain, one feature, one backend module, one screen
+  or one `lib/` group are relative (`./application-tone`); anything outside
+  it goes through `@/`.
 
 ## Architecture
 
 ```
-src/backend/        infrastructure — config, auth, errors, DI, middleware,
-                    http, database, Redis, rate limiting, gateways,
-                    lifecycle. Never imports a feature's services: only the
-                    composition root (di/container.server.ts) knows them
+src/domain/<x>/     pure code shared by server and browser, one domain
+                    each (applications, billing, generation): zod
+                    schemas, types, constants, pure logic. No React, no
+                    Node, no I/O
+src/backend/        everything that runs only on the server
+                      modules/<x>/  a domain's server side: repository,
+                                    service, mapper, its DI module
+                                    (applications, billing, generation,
+                                    account — the Clerk webhook events)
+                      the rest      infrastructure — config, auth, errors,
+                                    DI, middleware, http, database, Redis,
+                                    rate limiting, gateways, lifecycle
 src/routes/         thin route files: URL, guards and head() → a screen.
                     `/` landing, `/sign-in`, and the signed-in workspace
                     under `/app` (app/route.tsx is its guard and shell):
                     /app/applications, …/create, …/$applicationId and
-                    /app/billing beside them. Old /applications/* paths
-                    301 to these (backend/http/legacy-app-paths.server.ts)
+                    /app/billing beside them.
 src/screens/<x>/    one page each (landing, auth, workspace, dashboard,
                     application, billing): composes features, owns the
                     page-only UI
-src/features/<x>/   one domain each (applications, billing, generation,
-                    marketing), in segments:
-                      model/  schemas, types, pure domain logic
+src/features/<x>/   how the browser works with a domain (applications,
+                    billing, generation, marketing), in segments:
                       api/    server functions, query keys/factories, cache
                       hooks/  client hooks
                       ui/     the domain's reusable components
-                    plus its server side at the slice root (*.server.ts)
-src/components/     design system (ui/), layout, brand, locale, seo,
-                    fallbacks, clerk-boundary — know nothing of features
+src/components/     design system (ui/), layout, brand, fallbacks,
+                    clerk-boundary (with Clerk's appearance) — know
+                    nothing of domains or features
 src/hooks/          generic React hooks
-src/lib/            infrastructure safe on both sides, by concern:
-                    api/ i18n/ query/ seo/ clerk/ and small helpers
+src/lib/            infrastructure safe on both sides, one folder per
+                    concern and nothing loose at its root:
+                      api/       the error contract with our server
+                      document/  brand and page titles, <head>, page
+                                 transitions
+                      query/     the per-user query client, persisted
+                      text/      pure string helpers
+                    A module with a single consumer lives beside it
+                    instead (Clerk config in clerk-boundary/, the
+                    breakpoints in styles/ next to tokens.css)
 ```
 
-Frontend imports flow one way — `routes → screens → features → components ·
-hooks · lib` — and Biome's `noRestrictedImports` (per-folder `overrides` in
-`biome.json`) fails any import that goes back up, between two screens, or
-between two features (an allowed feature dependency is simply left out of
-that feature's list, e.g. `generation → applications`).
+Where a file goes: runs only on the server → `backend/`; pure and needed
+by both sides → `domain/`; React or browser data access → `features/`.
+
+Imports flow one way, and Biome's `noRestrictedImports` (per-folder
+`overrides` in `biome.json`) fails any import against it:
+
+```
+routes → screens → features → domain · components · hooks · lib
+backend → domain · lib
+```
+
+A feature reaches the backend only through its server functions'
+middleware (`@/backend/middleware/*`); screens and shared code never
+import the backend, and `domain/` imports nothing but `lib/`.
 Features are combined in the screen that needs them, never inside each
 other: a feature that must react to another one takes a callback
 (`useDeleteApplication({ onSettled })`, `useSyncPlanChanges(onChange)`).
@@ -145,34 +170,34 @@ repository (Prisma, every query scoped by owner) → Postgres.
 - **Configuration is parsed once at boot** in `config.server.ts`. A new
   environment variable is added to its schema and to `.env.example` in the
   same change. Product limits are code in the config, not env.
-- **Anything that costs money or a shared budget is rate limited** with a
-  tier in `rate-limit/rate-limit-tiers.ts`, charged through a constructor
-  in `rate-limit/budgets.ts` — never a hand-built key, so the code that
-  charges a budget and the code that reports it hit the same counter.
+- **Anything that costs money or a shared budget is rate limited** through
+  a constructor in `rate-limit/budgets.ts` (key, limit and window in one
+  place) — never a hand-built key, so the code that charges a budget and
+  the code that reports it hit the same counter.
 - **Server function inputs go through `validateInput(schema)`**
   (`backend/middleware/validate-input.ts`), never the bare schema: TanStack
   reports a bare schema's failure as a plain `Error`, which surfaces as
   `internal` instead of `invalid_request`.
 - **Features own what an event means; the backend only transports it.** A
-  Clerk event is handled in `features/account`
+  Clerk event is handled in `backend/modules/account`
   (`account-events.service.server.ts`) after `clerkWebhookVerifier` proves
   it.
 
 ### Adding a server feature
 
 1. Model in `prisma/schema.prisma`, then `npm run db:migrate:create`.
-2. `x.repository.server.ts` — Prisma only, owner-scoped.
-3. `x.service.server.ts` — rules, errors, logging.
-4. Register both in the feature's `x.module.server.ts` (`.scoped()`) and add
-   the module to `src/backend/di/container.server.ts`.
-5. `x.api.ts` — `createServerFn` + `userScopeMiddleware` +
+2. `domain/x/x.schema.ts` — the zod schemas and types both sides share.
+3. `backend/modules/x/x.repository.server.ts` — Prisma only, owner-scoped.
+4. `backend/modules/x/x.service.server.ts` — rules, errors, logging.
+5. Register both in `backend/modules/x/x.module.server.ts` (`.scoped()`)
+   and add the module to `src/backend/di/container.server.ts`.
+6. `features/x/api/x.api.ts` — `createServerFn` + `userScopeMiddleware` +
    `.validator(validateInput(schema))` + one service call.
-6. `x.queries.ts` — key and query factories for the client.
+7. `features/x/api/x.queries.ts` — key and query factories for the client.
 
 ### Frontend rules
 
-- Styles are CSS Modules — read `docs/styles.md` before writing one.
-  In short:
+- Styles are CSS Modules:
   - each module is one `@layer` block named after its folder (`ui`,
     `components`, `features`, `screens`), so a `className` passed down
     always beats the component's own rules;
@@ -197,26 +222,19 @@ repository (Prisma, every query scoped by owner) → Postgres.
   `<dialog>`), add its `.Root` to `components/dialogs/dialog-roots`, and
   `await XDialog.call({…})` wherever it is needed. No open/close state in
   the caller.
+- Forms are TanStack Form, as in our other projects: `useAppForm` /
+  `withForm` from `components/form`, one zod schema from `domain/` as both
+  `onMount` and `onChange` validator (so submit starts disabled), and
+  `onSubmit` parses the values with that schema before using them. Fields
+  are `form.AppField` + a field component (`TextField`, `TextAreaField`,
+  `SegmentedField`); a new kind of control becomes a field component there,
+  not local state. The hook that builds a form lives beside it
+  (`use-application-form.ts`), the markup is a `withForm` component.
 
-### Translations and public pages
+### Copy
 
-- Every user-visible string goes through Paraglide: `m['dotted.key']()`,
-  with the key in BOTH `messages/en.json` and `messages/ru.json`. Biome's
-  `noJsxLiterals` fails a raw string in JSX; `typecheck` fails a key
-  missing from either locale (`src/lib/i18n/messages-parity.ts`).
-- Always a full, static key — never one built from a template string: a
-  computed key keeps every message of every locale in the bundle.
-- Nothing message-backed at module scope: a `const` holding `m[...]()`
-  captures the first request's locale forever. Use functions.
-- Two locale zones (see `src/lib/i18n/localized-routes.ts`): public pages carry
-  the locale in the URL (`/ru/`); `/app`, `/sign-in` and `/api` read the
-  `PARAGLIDE_LOCALE` cookie and never get a prefix.
-- A new public page goes into `LOCALIZED_PATHS` in `src/lib/seo/robots-and-sitemap.ts` (the
-  sitemap) and gets canonical + hreflang via `src/lib/seo/seo-links.ts`;
-  anything private gets `noindex` and a robots `Disallow`. `llms.txt` is
-  built from the same messages (`features/marketing/llms.server.ts`).
-- `SITE_URL` (`src/lib/site.ts`) is the public origin, a constant: change
-  it there when the domain changes. Only a production build is indexable.
+- The interface is English only. Text is written where it is shown, in
+  the component, with no message catalogue or translation layer.
 
 ## Commits
 

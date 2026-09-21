@@ -7,11 +7,10 @@ export type { PrismaClient }
 
 export type DbClient = PrismaClient | Prisma.TransactionClient
 
-const globalCache = globalThis as { __altShiftPrisma?: PrismaClient }
+declare global {
+	var __altShiftPrisma: PrismaClient | undefined
+}
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Cached per process: without it every dev reload opens a new pool.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createPrismaClient({
 	config,
 	rootLogger,
@@ -19,7 +18,7 @@ export function createPrismaClient({
 	config: AppConfig
 	rootLogger: Logger
 }): PrismaClient {
-	if (globalCache.__altShiftPrisma) return globalCache.__altShiftPrisma
+	if (globalThis.__altShiftPrisma) return globalThis.__altShiftPrisma
 
 	const { poolMax, statementTimeoutMs, url } = config.database
 	const client = new PrismaClient({
@@ -40,7 +39,7 @@ export function createPrismaClient({
 	client.$on('warn', (event) => rootLogger.warn({ prisma: event }, 'Prisma'))
 	client.$on('error', (event) => rootLogger.error({ prisma: event }, 'Prisma'))
 
-	if (!config.isProduction) globalCache.__altShiftPrisma = client
+	if (!config.isProduction) globalThis.__altShiftPrisma = client
 
 	return client
 }

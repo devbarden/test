@@ -1,11 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
+import { FULL_ENTITLEMENTS } from '@/domain/billing/billing.catalog'
+import { hoursUntilReset } from '@/domain/billing/usage-reset'
 import { billingQueries } from '../api/billing.queries'
-import { FULL_ENTITLEMENTS } from '../model/billing.catalog'
 import { type PlanLimit, PlanLimitDialog } from '../ui/plan-limit-dialog'
 import { useEntitlements } from './use-entitlements'
 
-const SECONDS_PER_HOUR = 3600
 const DAY_IN_HOURS = 24
+
+const LIMITED_ENTITLEMENT = {
+	daily: 'dailyGenerations',
+	saved: 'maxApplications',
+} as const satisfies Record<PlanLimit, string>
 
 export function usePlanLimits() {
 	const { data } = useQuery(billingQueries.overview())
@@ -33,23 +38,16 @@ export function usePlanLimits() {
 	const explain = (reason: PlanLimit, retryAfterSeconds?: number) => {
 		const resetSeconds =
 			retryAfterSeconds ?? data?.usage.generationsResetInSeconds
-		const hoursUntilReset =
-			resetSeconds === undefined
-				? DAY_IN_HOURS
-				: Math.max(1, Math.ceil(resetSeconds / SECONDS_PER_HOUR))
+		const entitlement = LIMITED_ENTITLEMENT[reason]
 
 		void PlanLimitDialog.call({
-			hoursUntilReset,
-			limit:
-				reason === 'daily'
-					? entitlements.dailyGenerations
-					: entitlements.maxApplications,
+			hoursUntilReset:
+				resetSeconds === undefined
+					? DAY_IN_HOURS
+					: hoursUntilReset(resetSeconds),
+			limit: entitlements[entitlement],
 			reason,
-			upgradeLimit: isFree
-				? reason === 'daily'
-					? FULL_ENTITLEMENTS.dailyGenerations
-					: FULL_ENTITLEMENTS.maxApplications
-				: undefined,
+			upgradeLimit: isFree ? FULL_ENTITLEMENTS[entitlement] : undefined,
 		})
 	}
 

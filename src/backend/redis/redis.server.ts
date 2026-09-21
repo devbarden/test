@@ -4,12 +4,10 @@ import type { Logger } from '../observability/logger.server'
 
 export type { Redis }
 
-const globalCache = globalThis as { __altShiftRedis?: Redis }
+declare global {
+	var __altShiftRedis: Redis | undefined
+}
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Fails fast (no offline queue) so callers degrade; `family: 0` because
-//   Railway's private network is IPv6-only.
-// ═══════════════════════════════════════════════════════════════════════════
 export function createRedisClient({
 	config,
 	rootLogger,
@@ -17,26 +15,26 @@ export function createRedisClient({
 	config: AppConfig
 	rootLogger: Logger
 }): Redis {
-	if (globalCache.__altShiftRedis) return globalCache.__altShiftRedis
+	globalThis.__altShiftRedis ??= connect(config.redis.url, rootLogger)
 
-	const client = new Redis(config.redis.url, {
+	return globalThis.__altShiftRedis
+}
+
+function connect(url: string, logger: Logger): Redis {
+	const client = new Redis(url, {
 		connectTimeout: 2_000,
+		// ═════════════════════════════════════════════════════════════════════
+		//   Fail fast instead of queueing, so callers can degrade without Redis.
+		// ═════════════════════════════════════════════════════════════════════
 		enableOfflineQueue: false,
+		// ═════════════════════════════════════════════════════════════════════
+		//   Railway's private network is IPv6-only.
+		// ═════════════════════════════════════════════════════════════════════
 		family: 0,
 		maxRetriesPerRequest: 1,
-		retryStrategy: (attempt) => Math.min(attempt * 250, 5_000),
 	})
 
-	let lastErrorLoggedAt = 0
-
-	client.on('error', (error) => {
-		if (Date.now() - lastErrorLoggedAt < 30_000) return
-
-		lastErrorLoggedAt = Date.now()
-		rootLogger.warn({ err: error }, 'Redis connection error')
-	})
-
-	if (!config.isProduction) globalCache.__altShiftRedis = client
+	client.on('error', (err) => logger.warn({ err }, 'Redis connection error'))
 
 	return client
 }

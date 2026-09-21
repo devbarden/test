@@ -1,6 +1,5 @@
 import { UserButton } from '@clerk/tanstack-react-start'
 import { WalletIcon } from 'lucide-react'
-import { m } from '@/paraglide/messages'
 import styles from './account-menu.module.css'
 
 const TRIGGER_APPEARANCE = {
@@ -26,7 +25,7 @@ export function AccountMenu() {
 			<UserButton.MenuItems>
 				<UserButton.Link
 					href="/app/billing"
-					label={m['billing.title']()}
+					label="Plan & billing"
 					labelIcon={<WalletIcon className={styles.itemIcon} />}
 				/>
 			</UserButton.MenuItems>

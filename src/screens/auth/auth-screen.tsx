@@ -1,7 +1,6 @@
 import { SignIn } from '@clerk/tanstack-react-start'
 import { HomeLink } from '@/components/brand'
 import { ClerkBoundary } from '@/components/clerk-boundary'
-import { LanguageSwitcher } from '@/components/locale/language-switcher'
 import { AuthPanel } from './auth-panel'
 import styles from './auth-screen.module.css'
 import { MeshBackground } from './mesh-background'
@@ -14,7 +13,6 @@ export function AuthScreen() {
 					<MeshBackground />
 					<div className={styles.topBar}>
 						<HomeLink className={styles.mobileBrand} tone="inverse" />
-						<LanguageSwitcher />
 					</div>
 					<div className={styles.form}>
 						<SignIn

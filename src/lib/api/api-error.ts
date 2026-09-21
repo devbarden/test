@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const apiErrorCodeSchema = z.enum([
+const apiErrorCodeSchema = z.enum([
 	'unauthorized',
 	'forbidden',
 	'not_found',
