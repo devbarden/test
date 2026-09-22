@@ -2,8 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { ApplicationEditor } from '../editor/application-editor'
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   Replaces /new in history and keeps scroll, skipping the transition and
-//   leave-guard: for the user the page did not change.
+//   Replaces /new in history and keeps scroll, skipping the leave-guard: for
+//   the user the page did not change. The remount is hidden by a crossfade.
 // ═══════════════════════════════════════════════════════════════════════════
 export function NewApplicationScreen() {
 	const navigate = useNavigate()
@@ -18,7 +18,7 @@ export function NewApplicationScreen() {
 					resetScroll: false,
 					state: { letterJustSaved: true },
 					to: '/app/applications/$applicationId',
-					viewTransition: false,
+					viewTransition: { types: ['letter-saved'] },
 				})
 			}
 		/>

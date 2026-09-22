@@ -5,6 +5,7 @@ import styles from './letter-text.module.css'
 const END_SLACK_PX = 8
 
 type LetterTextProps = {
+	startAtEnd?: boolean
 	streaming?: boolean
 	text: string
 }
@@ -14,7 +15,7 @@ type LetterTextProps = {
 //   end, so a paragraph keeps its key — and its DOM node — while the words
 //   after it stream in.
 // ═══════════════════════════════════════════════════════════════════════════
-export function LetterText({ streaming = false, text }: LetterTextProps) {
+export function LetterText({ startAtEnd = false, streaming = false, text }: LetterTextProps) {
 	const paragraphs = splitParagraphs(text)
 	const last = paragraphs.at(-1)
 	const following = useRef(true)
@@ -24,6 +25,11 @@ export function LetterText({ streaming = false, text }: LetterTextProps) {
 	// ═════════════════════════════════════════════════════════════════════════
 	const track = (scroller: HTMLDivElement | null) => {
 		if (!scroller) return
+
+		// ═════════════════════════════════════════════════════════════════════
+		//   A just-saved letter remounts where streaming left it: at the end.
+		// ═════════════════════════════════════════════════════════════════════
+		if (startAtEnd) scroller.scrollTop = scroller.scrollHeight
 
 		const observer = new ResizeObserver(() => {
 			const isStreaming = scroller.getAttribute('aria-busy') === 'true'

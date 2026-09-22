@@ -59,6 +59,7 @@ export function ApplicationEditor({ justSaved = false, onSaved, saved }: Applica
 					notice={letterNotice(generation.state, saved)}
 					onStop={generation.stop}
 					ref={panelRef}
+					startAtEnd={justSaved}
 				/>
 			</div>
 			{saved && <GoalBanner />}

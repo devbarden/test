@@ -5,9 +5,10 @@ import styles from './letter-body.module.css'
 
 type LetterBodyProps = {
 	content: LetterContent
+	startAtEnd?: boolean
 }
 
-export function LetterBody({ content }: LetterBodyProps) {
+export function LetterBody({ content, startAtEnd }: LetterBodyProps) {
 	switch (content.kind) {
 		case 'placeholder':
 			return <p className={styles.placeholder}>Your personalized job application will appear here…</p>
@@ -17,6 +18,6 @@ export function LetterBody({ content }: LetterBodyProps) {
 			return <LetterText streaming text={content.text} />
 		case 'saving':
 		case 'letter':
-			return <LetterText text={content.text} />
+			return <LetterText startAtEnd={startAtEnd} text={content.text} />
 	}
 }

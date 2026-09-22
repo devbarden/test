@@ -9,6 +9,10 @@
 		@media (width < 40rem) {
 			padding: var(--space-10) var(--space-5);
 		}
+
+		:global(:root:active-view-transition-type(letter-saved)) & {
+			view-transition-name: goal-banner;
+		}
 	}
 
 	.title {

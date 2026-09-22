@@ -61,6 +61,17 @@
 		}
 	}
 
+	::view-transition-new(goal-banner):only-child {
+		animation: rise-in var(--duration-slow) var(--ease-emphasized) 150ms both;
+	}
+
+	@keyframes rise-in {
+		from {
+			opacity: 0;
+			transform: translateY(1.5rem);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		::view-transition-group(*),
 		::view-transition-old(*),

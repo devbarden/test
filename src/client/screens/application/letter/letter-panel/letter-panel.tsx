@@ -13,13 +13,14 @@ type LetterPanelProps = {
 	notice?: LetterNotice
 	onStop: () => void
 	ref?: Ref<HTMLElement>
+	startAtEnd?: boolean
 }
 
-export function LetterPanel({ canStop, content, isFreshlyWritten, notice, onStop, ref }: LetterPanelProps) {
+export function LetterPanel({ canStop, content, isFreshlyWritten, notice, onStop, ref, startAtEnd }: LetterPanelProps) {
 	return (
 		<Panel aria-label="Cover letter" as="section" className={styles.root} ref={ref} tabIndex={-1}>
 			{notice && <LetterNoticeAlert notice={notice} />}
-			<LetterBody content={content} />
+			<LetterBody content={content} startAtEnd={startAtEnd} />
 			<LetterFooter canStop={canStop} content={content} onStop={onStop} />
 			<span className="visually-hidden" role="status">
 				{announcement(content, isFreshlyWritten)}
