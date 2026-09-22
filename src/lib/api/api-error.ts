@@ -27,9 +27,21 @@ export const apiErrorSchema = z.object({
 
 export type ApiError = z.infer<typeof apiErrorSchema>
 
-export const apiErrorBodySchema = z.object({ error: apiErrorSchema })
+const apiErrorBodySchema = z.object({ error: apiErrorSchema })
 
 const INTERNAL: ApiError = { code: 'internal' }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   A failed response from our own server carries its error as JSON; one
+//   that does not (a proxy page, an empty 401) is read from its status.
+// ═══════════════════════════════════════════════════════════════════════════
+export async function readApiErrorResponse(response: Response): Promise<ApiError> {
+	const body = apiErrorBodySchema.safeParse(await response.json().catch(() => null))
+
+	if (body.success) return body.data.error
+
+	return { code: response.status === 401 ? 'unauthorized' : 'unavailable' }
+}
 
 export function readApiError(error: unknown): ApiError {
 	if (error instanceof TypeError) return { code: 'network' }

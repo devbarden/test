@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { systemApiScopeMiddleware } from '@/backend/middleware/api-scope.middleware'
+import { systemApiScopeMiddleware } from '@/server/middleware/api-scope.middleware'
 
 export const Route = createFileRoute('/api/webhooks/clerk')({
 	server: {

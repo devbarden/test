@@ -1,6 +1,7 @@
 import { createRouter } from '@tanstack/react-router'
-import { NotFound, RouteError } from '@/components/fallbacks'
-import { pageTransitionTypes } from '@/lib/document/page-transition'
+import { NotFound } from '@/client/components/not-found'
+import { RouteError } from '@/client/components/route-error'
+import { pageTransitionTypes } from '@/client/lib/document/page-transition'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {

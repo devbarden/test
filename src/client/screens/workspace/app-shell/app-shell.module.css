@@ -1,0 +1,9 @@
+@layer screens {
+	.root {
+		padding-block-end: 7.5rem;
+
+		&:focus {
+			outline: none;
+		}
+	}
+}

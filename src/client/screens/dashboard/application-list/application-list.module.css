@@ -1,0 +1,9 @@
+@layer screens {
+	.more {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		align-items: center;
+		margin-block-start: calc(var(--space-6) * -1);
+	}
+}

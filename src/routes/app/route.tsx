@@ -1,8 +1,8 @@
 import { auth } from '@clerk/tanstack-react-start/server'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createIsomorphicFn } from '@tanstack/react-start'
-import { RouteColdStart } from '@/components/fallbacks'
-import { WorkspaceScreen } from '@/screens/workspace/workspace-screen'
+import { RouteColdStart } from '@/client/components/route-cold-start'
+import { WorkspaceScreen } from '@/client/screens/workspace/workspace-screen'
 
 const requireSignedIn = createIsomorphicFn()
 	.server(async () => {

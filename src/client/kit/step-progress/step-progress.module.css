@@ -1,0 +1,41 @@
+@layer kit {
+	.root {
+		display: flex;
+		align-items: center;
+	}
+
+	.dots {
+		--_step-width: 0.5rem;
+
+		gap: var(--space-1);
+	}
+
+	.bars {
+		--_step-width: 2rem;
+
+		gap: var(--space-2);
+	}
+
+	.step {
+		inline-size: var(--_step-width);
+		block-size: 0.5rem;
+		background: var(--color-progress-todo);
+		border-radius: var(--radius-full);
+		transition: background-color var(--duration-slow) var(--ease-out);
+
+		&.done {
+			background: var(--color-progress-done);
+		}
+
+		@media (forced-colors: active) {
+			outline: 1px solid CanvasText;
+			outline-offset: -1px;
+			forced-color-adjust: none;
+			background: Canvas;
+
+			&.done {
+				background: CanvasText;
+			}
+		}
+	}
+}

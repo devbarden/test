@@ -55,7 +55,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/styles/base.css", "src/styles/view-transitions.css"],
+			"includes": ["src/client/styles/base.css", "src/client/styles/view-transitions.css"],
 			"linter": {
 				"rules": {
 					"complexity": {
@@ -81,7 +81,14 @@
 			}
 		},
 		{
-			"includes": ["src/domain/**", "src/features/**", "src/screens/**"],
+			"includes": [
+				"src/domain/**",
+				"src/client/features/**",
+				"src/client/screens/**",
+				"!src/client/features/*/ui/*/index.ts",
+				"!src/client/screens/*/*/index.ts",
+				"!src/client/screens/*/*/*/index.ts"
+			],
 			"linter": {
 				"rules": {
 					"performance": {
@@ -92,7 +99,7 @@
 			}
 		},
 		{
-			"includes": ["src/components/**", "src/hooks/**", "src/lib/**"],
+			"includes": ["src/lib/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -101,8 +108,8 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/backend/**", "@/domain/**", "@/features/**", "@/routes/**", "@/screens/**"],
-										"message": "Shared code knows no domain, feature, screen or backend (see Architecture in CLAUDE.md)."
+										"group": ["@/server/**", "@/client/**", "@/domain/**", "@/routes/**"],
+										"message": "lib/ is infrastructure for both sides: it knows no server, client or domain (see docs/architecture.md)."
 									}
 								]
 							}
@@ -121,15 +128,8 @@
 							"options": {
 								"patterns": [
 									{
-										"group": [
-											"@/backend/**",
-											"@/components/**",
-											"@/features/**",
-											"@/hooks/**",
-											"@/routes/**",
-											"@/screens/**"
-										],
-										"message": "Domain code is pure and imports nothing but lib/ (see Architecture in CLAUDE.md)."
+										"group": ["@/server/**", "@/client/**", "@/routes/**"],
+										"message": "Domain code is pure and imports nothing but lib/ (see docs/architecture.md)."
 									}
 								]
 							}
@@ -139,7 +139,7 @@
 			}
 		},
 		{
-			"includes": ["src/backend/**"],
+			"includes": ["src/server/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -148,8 +148,8 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/components/**", "@/features/**", "@/hooks/**", "@/routes/**", "@/screens/**"],
-										"message": "The backend knows no UI: it imports only domain/ and lib/ (see Architecture in CLAUDE.md)."
+										"group": ["@/client/**", "@/routes/**"],
+										"message": "The server knows no UI: it imports only domain/ and lib/ (see docs/architecture.md)."
 									}
 								]
 							}
@@ -159,7 +159,7 @@
 			}
 		},
 		{
-			"includes": ["src/features/**"],
+			"includes": ["src/client/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -168,16 +168,84 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/routes/**", "@/screens/**"],
-										"message": "A feature never reaches up into a screen or a route."
+										"group": ["@/server/**", "!@/server/middleware/**"],
+										"message": "Client code reaches the server only through a server function and its middleware."
 									},
 									{
-										"group": ["@/features/**"],
+										"group": ["**/*.server", "**/*.server.ts"],
+										"message": "A .server module never enters the client bundle: import the middleware that wraps it."
+									},
+									{
+										"group": ["@/routes/**"],
+										"message": "Nothing imports a route: routes are entry points, not modules."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/client/components/**", "src/client/kit/**", "src/client/lib/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@/server/**", "!@/server/middleware/**"],
+										"message": "Client code reaches the server only through a server function and its middleware."
+									},
+									{
+										"group": ["**/*.server", "**/*.server.ts"],
+										"message": "A .server module never enters the client bundle: import the middleware that wraps it."
+									},
+									{
+										"group": ["@/routes/**"],
+										"message": "Nothing imports a route: routes are entry points, not modules."
+									},
+									{
+										"group": ["@/domain/**", "@/client/features/**", "@/client/screens/**"],
+										"message": "Shared client code knows no domain, feature or screen (see docs/architecture.md)."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/client/features/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@/server/**", "!@/server/middleware/**"],
+										"message": "Client code reaches the server only through a server function and its middleware."
+									},
+									{
+										"group": ["**/*.server", "**/*.server.ts"],
+										"message": "A .server module never enters the client bundle: import the middleware that wraps it."
+									},
+									{
+										"group": ["@/routes/**"],
+										"message": "Nothing imports a route: routes are entry points, not modules."
+									},
+									{
+										"group": ["@/client/screens/**"],
+										"message": "A feature never reaches up into a screen."
+									},
+									{
+										"group": ["@/client/features/**"],
 										"message": "A feature imports its own files relatively and never another feature: features are combined in the screen that needs them, so take a callback instead."
-									},
-									{
-										"group": ["@/backend/**", "!@/backend/middleware/**"],
-										"message": "A feature reaches the server only through a server function and its middleware."
 									}
 								]
 							}
@@ -187,7 +255,7 @@
 			}
 		},
 		{
-			"includes": ["src/screens/**"],
+			"includes": ["src/client/screens/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -196,11 +264,19 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/backend/**", "@/routes/**"],
-										"message": "A screen never imports a route or the backend."
+										"group": ["@/server/**"],
+										"message": "A screen never imports the server: it talks to it through a feature's server functions."
 									},
 									{
-										"group": ["@/screens/**"],
+										"group": ["**/*.server", "**/*.server.ts"],
+										"message": "A .server module never enters the client bundle: import the middleware that wraps it."
+									},
+									{
+										"group": ["@/routes/**"],
+										"message": "Nothing imports a route: routes are entry points, not modules."
+									},
+									{
+										"group": ["@/client/screens/**"],
 										"message": "A screen imports its own files relatively and never another screen: move the shared part into a feature or components."
 									}
 								]

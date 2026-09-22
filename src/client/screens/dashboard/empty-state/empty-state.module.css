@@ -1,0 +1,9 @@
+@layer screens {
+	.back {
+		transform: rotate(-6deg) translate(0.75rem, 0.5rem);
+	}
+
+	.front {
+		transform: rotate(4deg) translateX(-0.75rem);
+	}
+}

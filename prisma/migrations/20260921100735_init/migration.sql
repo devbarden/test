@@ -6,6 +6,7 @@ CREATE TABLE "applications" (
     "company" VARCHAR(100) NOT NULL,
     "skills" VARCHAR(300) NOT NULL,
     "details" VARCHAR(1200) NOT NULL,
+    "tone" VARCHAR(20) NOT NULL DEFAULT 'professional',
     "letter" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,
@@ -16,6 +17,3 @@ CREATE TABLE "applications" (
 
 -- CreateIndex
 CREATE INDEX "applications_user_id_deleted_at_id_idx" ON "applications"("user_id", "deleted_at", "id" DESC);
-
--- CreateIndex
-CREATE INDEX "applications_deleted_at_idx" ON "applications"("deleted_at");

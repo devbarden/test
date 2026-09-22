@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
+import { pageTitle } from '@/client/lib/document/brand'
+import { DashboardScreen } from '@/client/screens/dashboard/dashboard-screen'
 import { SEARCH_MAX_LENGTH } from '@/domain/applications/application-search'
-import { pageTitle } from '@/lib/document/brand'
-import { DashboardScreen } from '@/screens/dashboard/dashboard-screen'
 
 const dashboardSearchSchema = z.object({
 	q: z.string().max(SEARCH_MAX_LENGTH).optional().catch(undefined),

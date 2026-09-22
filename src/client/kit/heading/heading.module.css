@@ -1,0 +1,30 @@
+@layer kit {
+	.root {
+		min-inline-size: 0;
+		letter-spacing: var(--display-tracking);
+		hyphens: auto;
+		text-wrap: balance;
+		overflow-wrap: break-word;
+	}
+
+	.sm {
+		font: var(--type-display-sm);
+	}
+
+	.md {
+		font: var(--type-display-md);
+	}
+
+	.lg {
+		font: var(--type-display-lg);
+	}
+
+	.xl {
+		font: var(--type-display-xl);
+		letter-spacing: var(--display-tracking-tight);
+	}
+
+	.muted {
+		color: var(--color-text-tertiary);
+	}
+}

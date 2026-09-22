@@ -1,3 +1,5 @@
+import { WHITESPACE_RUN } from '@/lib/text/patterns'
+
 export const SEARCH_MAX_LENGTH = 100
 
 const MAX_SEARCH_TERMS = 6
@@ -8,7 +10,7 @@ type Searchable = {
 }
 
 export function searchTerms(search: string): string[] {
-	return search.toLowerCase().split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS)
+	return search.toLowerCase().split(WHITESPACE_RUN).filter(Boolean).slice(0, MAX_SEARCH_TERMS)
 }
 
 export function normalizeSearch(search: string): string {

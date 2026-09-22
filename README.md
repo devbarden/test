@@ -1,280 +1,54 @@
-# Alt+Shift — генератор сопроводительных писем
+# Alt+Shift
 
-Два экрана: дашборд с созданными письмами и форма генерации нового. Цель
-продукта — довести пользователя до пяти писем. Письма пишет модель через
-Generation API, текст появляется потоком, готовые письма хранятся в
-аккаунте, а их снимок в браузере восстанавливает список мгновенно после
-перезагрузки или закрытия вкладки.
+Live: **[test-production-0cb1.up.railway.app](https://test-production-0cb1.up.railway.app)**
 
-## Запуск
+A cover-letter generator. The brief asked for two screens: a dashboard of saved letters and an editor that streams a new letter from the Generation API. The product goal is to get a job seeker to five letters.
+
+I went well beyond the two screens. The app has real authentication and authorization, letters stored in Postgres per user, Redis for rate limits and locks, a Free and a Pro plan with checkout, a landing page, and a production deploy. The two screens from the brief are the core; everything else is what a product needs around them.
+
+TanStack Start (React 19, Nitro) + Clerk + Prisma/Postgres + Redis, deployed to Railway.
+
+## Documentation
+
+| Document | What it answers |
+| --- | --- |
+| [Architecture](docs/architecture.md) | how the client, server and shared code fit, the request path, DI, errors, budgets |
+| [Project structure](docs/project-structure.md) | what every folder in `src/` is for, how the tree works, where a new file goes |
+| [Stack](docs/stack.md) | every library and service, and why it was chosen |
+| [Generation API](docs/generation-api.md) | the streaming proxy: SSE to NDJSON, retries, timeouts, refunds, prompt safety |
+| [Billing](docs/billing.md) | plans, entitlements from Clerk, where limits are enforced, checkout |
+| [Storage](docs/storage.md) | the Postgres table, ownership, soft delete, the per-user browser snapshot |
+| [Design system](docs/design-system.md) | tokens, cascade layers, the kit, patterns from the mockups |
+| [Deployment](docs/deployment.md) | Railway, environment, migrations, graceful shutdown |
+| [Product decisions](docs/product-decisions.md) | choices beyond the mockups, edge cases, what the mockups got wrong |
+
+## Run it
 
 ```bash
-cp .env.example .env    # вписать ключи Clerk и токен Generation API
+cp .env.example .env    # add the Clerk keys and the Generation API token
 npm install
-npm run dev             # поднимет Postgres и Redis в Docker, применит миграции, http://localhost:3000
+npm run dev             # starts Postgres and Redis in Docker, applies migrations, http://localhost:3000
 ```
 
-| Команда | Что делает |
+Needs Node 24+ and Docker. The local database addresses are already in `.env.example`. The Generation API token is read only by the server and never reaches the client bundle.
+
+| Command | What it does |
 | --- | --- |
-| `npm run dev` | dev-сервер |
-| `npm run build && npm start` | продакшен-сборка и запуск (так же стартует Railway) |
-| `npm run db:down` | остановить локальные Postgres и Redis |
-| `npm run db:migrate` | создать и применить миграцию локально |
+| `npm run dev` | dev server |
+| `npm run build && npm start` | production build and start, the same as Railway |
+| `npm run lint` / `npm run lint:fix` | Biome: format, lint, import layering |
 | `npm run typecheck` | TypeScript |
-| `npm run lint` | линтер и форматирование (`lint:fix` — исправить) |
+| `npm run db:migrate` | create and apply a migration locally |
+| `npm run db:down` | stop the local databases |
 
-Нужны Node 24+ и Docker. Переменные окружения описаны в `.env.example`, адреса локальных баз там уже прописаны. Токен Generation API читает
-только сервер, в клиентский бандл он не попадает.
+## How I worked
 
-## Стек
+**Tools.** Claude Design for the UI pass from the mockups. Claude Code for the code, with my own skills, rules and MCP servers for the services the project uses, such as Railway and the documentation of the libraries in the stack.
 
-- **React 19.3 + TypeScript**, React Compiler, `<ViewTransition>`
-- **Vite 8** (Rolldown), React Compiler через `@rolldown/plugin-babel`
-- **Только английский интерфейс** — без i18n-слоя, тексты прямо в компонентах
-- **TanStack Start** (роутинг, серверные роуты, SSR на Nitro)
-- **TanStack Query** — серверное состояние в браузере, снимок в `localStorage`
-- **Clerk** — аутентификация и тарифы (Clerk Billing)
-- **Postgres + Prisma** — письма; **Redis** — лимиты и лок «одна генерация
-  на пользователя»
-- **CSS Modules + дизайн-токены** — без Tailwind и без UI-китов
-- **zod** — один контракт данных для формы, сервера и хранилища
-- **Biome**
-- **Railway** — деплой (`railway.json`)
+**Nothing of that workflow is in this repository.** Skills, rules and MCP configuration live in my global setup on my laptop, so they travel with me, not with the repo.
 
-## Архитектура
+**Where it helped.** The agent picked up the conventions from my neighbouring projects (TanStack Start, Clerk, Biome, the comment style) and carried them here. Before writing the client it probed the live Generation API with direct requests, which found every deviation from the spec listed in [generation-api.md](docs/generation-api.md#where-the-live-api-differs-from-its-spec).
 
-```
-src/
-  routes/            тонкие роуты: URL, guard, head() → экран
-                     /  лендинг · /sign-in · /app/applications[/create|/<id>]
-                     · /app/billing
-  screens/           страницы — собирают фичи и держат свой UI
-    landing/         лендинг: секции, scroll-reveal
-    auth/            общая страница входа/регистрации (Clerk withSignUp)
-    workspace/       оболочка приложения: Clerk, кэш пользователя, шапка
-    dashboard/       список писем: карточки, пустое состояние, фокус
-    application/     редактор: форма, панель письма, генерация
-    billing/         тариф и использование
-  features/          работа браузера с доменом: api / hooks / ui
-    applications/    API писем, кэш, удаление с Undo, цель
-    billing/         права, usage, меню аккаунта
-    generation/      клиент потока
-    marketing/       история продукта для лендинга и входа
-  domain/            общий чистый код сервера и браузера: схемы, типы, логика
-    applications/    схема письма, тоны, поиск
-    billing/         каталог тарифов, деньги, usage
-    generation/      протокол потока, конечный автомат
-  components/        дизайн-система (ui/), layout, brand
-  hooks/             общие хуки
-  lib/               инфраструктура по зонам: api/ document/ query/ text/
-  styles/            токены (палитра → семантические роли), шрифты, reset
-  backend/           только сервер
-    modules/         доменная логика: репозитории, сервисы, DI-модули
-                     (applications, billing, generation, account)
-                     остальное — инфраструктура: http, auth, БД, Redis, лимиты
-```
+**Where I disagreed.** Not much at the architecture level: the structure, the layering and the backend conventions were settled before this project, so there was little to argue about there. The disagreements were local and small. One about process is worth a line: a refactor commit came out unbuildable, with a file moved in one commit and its imports in the next. The history was rebuilt so that every commit passes typecheck.
 
-Зависимости идут в одну сторону: `routes → screens → features → domain ·
-components · hooks · lib`, а `backend → domain · lib`. Фичи не импортируют
-друг друга, их собирают экраны; это проверяет Biome (`noRestrictedImports`
-в `biome.json`).
-
-### Интеграция с Generation API
-
-```
-браузер ──POST JSON──▶ /api/generate ──POST SSE──▶ Generation API
-        ◀─ NDJSON ────               ◀─ SSE ───────
-```
-
-- **Прокси на сервере.** API отдаёт `Access-Control-Allow-Origin: *`,
-  то есть технически его можно звать прямо из браузера, но тогда токен
-  окажется в бандле. Сервер принимает только четыре поля формы и сам
-  собирает промпт, поэтому эндпоинт не превращается в открытый прокси к
-  платной модели.
-- **SSE → NDJSON с явным `done`.** Сервер разбирает SSE (`eventsource-parser`)
-  и отдаёт браузеру по одному
-  JSON-событию на строку. Главное здесь в явном терминальном событии:
-  письмо сохраняется **только** после `done`. Поток, который просто
-  оборвался, — это не короткое письмо, и засчитывать его в цель нельзя.
-- **Ошибки до первого байта** возвращаются обычным HTTP-статусом
-  (401/400/429 с `Retry-After`/502). **Ошибки после** — событием `error`
-  в потоке.
-- **Таймауты.** Тишина от провайдера дольше 30 с (до первого байта или
-  между чанками) обрывает поток как сбой с возвратом квоты; вся генерация
-  ограничена 90 с — это меньше TTL лока «одна генерация на пользователя»
-  (120 с). Браузер со своей стороны сдаётся после 60 с тишины: так «мёртвое»
-  соединение (телефон сменил сеть) не оставляет письмо в состоянии
-  «пишется» навсегда.
-- **Отмена.** Stop, уход со страницы или закрытие вкладки обрывают запрос
-  к нашему серверу, а он обрывает запрос к upstream. Письмо, которое
-  никто не ждёт, не тратит общий лимит.
-- **Rate limit на пользователя.** Лимит upstream — 6 запросов в минуту на
-  *токен*, то есть на всех пользователей деплоя сразу. Поэтому у каждого
-  пользователя своё окно в 4 запроса в минуту, и один человек, который
-  жмёт «Try Again», не блокирует остальных. Счётчики хранятся в Redis и
-  общие для всех реплик. Дневная квота возвращается, если письмо не
-  сохранилось не по вине пользователя (сбой провайдера, обрыв, ошибка
-  сохранения); Stop квоту не возвращает.
-- **Промпт-инъекции.** Ввод пользователя передаётся как данные внутри
-  тегов, и системный промпт прямо говорит, что это не инструкции. Угловые
-  скобки нейтрализуются, чтобы текст не мог закрыть свой тег.
-
-### Хранение писем
-
-Источник истины — Postgres: письмо привязано к пользователю Clerk, каждый
-запрос репозитория ограничен `userId`, удаление мягкое (Undo возвращает
-строку на место), а вебхук `user.deleted` стирает всё. Лимит сохранённых
-писем проверяется и записывается в одной транзакции под advisory-lock,
-поэтому две параллельные генерации не займут последний слот вдвоём.
-
-В браузере письма живут в TanStack Query, а снимок кэша — в
-`localStorage`, ключ отдельный для каждого пользователя:
-
-- сохраняются только список без фильтра и счётчики — поиск и открытые
-  письма не раздували бы снимок без предела;
-- снимок версионирован и читается через zod: старая сборка, обрезанная
-  запись или снимок старше месяца просто отбрасываются, и список
-  загружается с сервера;
-- восстановление синхронное, до первого рендера, затем каждая запись
-  помечается устаревшей и ревалидируется при первом использовании —
-  письма на экране сразу, а не после запроса;
-- неудачная ревалидация (офлайн, сервер недоступен) не затирает последний
-  хороший снимок;
-- при выходе из аккаунта снимок стирается, и делается это по состоянию
-  сессии, а не по событию: сессия, закончившаяся без открытой вкладки
-  `/app`, тоже не оставит письма в этом браузере;
-- если `localStorage` недоступен (приватный режим Safari с блокировкой
-  cookies, webview), приложение работает без снимка вместо падения.
-
-Экраны после логина рендерятся только на клиенте (`ssr: 'data-only'`):
-guard авторизации выполняется на сервере, а сами страницы строятся из
-кэша, который сервер не видит. Благодаря этому нет ни вспышки пустого
-дашборда, ни рассинхрона при гидрации.
-
-## Дизайн-система
-
-Токены в два слоя (`src/styles/tokens.css`): палитра и семантические
-роли. Компоненты ссылаются только на роли (`--color-text-secondary`,
-`--color-surface-muted`), поэтому смена темы — это перенастройка ролей в
-одном месте.
-
-CSS Modules разложены по каскадным слоям (`reset → tokens → base → ui →
-components → features → screens → utilities`), так что переопределение
-через `className` всегда выигрывает у собственных стилей компонента.
-
-Закономерности, найденные в макетах:
-
-- **Одна форма контейнера** — скруглённая панель без рамки, различается
-  только тоном: серый для контента (карточки, письмо), зелёный для
-  мотивации (баннер). Это компонент `Panel`.
-- **Три варианта кнопок** (primary / secondary / ghost) и два размера (40 и
-  56 px). `ButtonLink` — та же кнопка, но ссылка роутера (`createLink`).
-- **Прогресс двумя способами** — точки в хедере и полоски в баннере. Это
-  один компонент `StepProgress` с `variant`.
-- **Поля** — `Field` через контекст связывает label, описание и
-  `aria-invalid` с контролом, поэтому перепутать label и input невозможно.
-
-Мобильная версия: колонки редактора складываются одна под другую ниже
-960 px; при нажатии Generate панель письма прокручивается в видимую
-область, иначе на телефоне видна только крутилка на кнопке. Ниже 640 px в
-хедере остаются только точки прогресса (подпись «3/5 applications
-generated» уходит в скрытый текст для скринридеров), а счётчик дневных
-писем прячется целиком — на 320 px иначе не помещалось.
-
-## Продуктовые решения
-
-- **Как выглядит генерация.** Пока модель молчит (на живом API около 4
-  секунд до первого токена), показывается орб из прототипа. Потом текст
-  появляется абзацами с кареткой в месте, где появится следующее слово. Во
-  время стриминга «Copy» заменяется на «Stop»: копировать половину письма
-  никому не нужно, а остановить письмо, которое пошло не туда, полезно.
-- **Try Again перезаписывает то же письмо**, а не создаёт новое: иначе
-  кнопка накручивала бы счётчик цели. Если повтор упал или его остановили,
-  на экране остаётся предыдущее готовое письмо.
-- **После первой генерации URL меняется** с `/app/applications/create`
-  на `/app/applications/<id>` (через replace). Перезагрузка открывает письмо, а
-  не пустую форму, а «Назад» не возвращает в уже отправленную форму.
-- **Удаление — с подтверждением и с Undo.** Диалог отсекает случайный
-  клик, а Undo возвращает письмо на то же место, если ошибку заметили
-  уже после.
-- **Empty state без своей кнопки.** Под ним уже есть баннер с «Create
-  New», и в заголовке она тоже есть. Empty state показывает, *что* здесь
-  появится (карточки-призраки), и снижает порог входа.
-- **Уход во время генерации** спрашивает подтверждение: запрос в лимите
-  дорогой, а письмо без `done` не сохранится.
-- **Счётчик символов** показывает реальную длину. В макете он застыл на
-  «0/1200» при заполненном поле; при превышении поле и счётчик краснеют,
-  кнопка блокируется, а скринридер слышит только сам факт превышения, без
-  озвучки каждого символа.
-- **Clerk.** Генерация идёт через общий токен с общим лимитом, поэтому
-  эндпоинт закрыт от анонимного использования, а `userId` служит ключом и
-  для rate limit, и для писем в базе, и для снимка в браузере: два
-  аккаунта в одном браузере не видят писем друг друга.
-
-## Расхождения Generation API со спецификацией
-
-Проверено запросами к живому сервису (21.09.2026):
-
-1. **Поток начинается с комментария `: keepalive`**, в спецификации его
-   нет. Парсер пропускает комментарии по стандарту SSE.
-2. **Есть завершающее событие.** После последнего `delta` приходит
-   безымянное событие `data: [DONE]`, хотя спецификация говорит, что
-   отдельного события завершения нет. Поддержаны оба варианта: `[DONE]` и
-   чистое закрытие соединения.
-3. **`maxTokens` не валидируется.** `5000` и даже строка `"x"` принимаются
-   с `200 OK`, хотя в лимитах указано 1 500 токенов на ответ. Мы
-   отправляем 800: письму на 150–230 слов этого хватает с запасом.
-4. **Лимит длины проверяется по полю `prompt`**: ошибка — «Prompt is too
-   long (24000 characters max)», а в спецификации сказано «на запрос».
-5. **Сообщение об ошибке rate limit содержит секунды** («Try again in 14
-   seconds»), а `Retry-After` приходит, как и описано.
-
-## Крайние случаи
-
-- поток оборвался посередине → письмо не сохраняется, показывается
-  причина, частичный текст остаётся на экране;
-- 429 от upstream или от нашего лимита → сообщение со временем ожидания;
-- нет сети → отдельное сообщение;
-- письмо сгенерировано, но не сохранилось (сбой базы) → оно остаётся на
-  экране с просьбой скопировать, квота возвращается;
-- письмо удалено в другой вкладке → понятная страница «не найдено», а
-  удаление уже удалённого не считается ошибкой;
-- лимит сохранённых писем достигнут → диалог с объяснением до запроса, а
-  не ошибка после сгенерированного письма;
-- `localStorage` переполнен или содержит битый снимок → снимок
-  отбрасывается, список загружается с сервера;
-- сессия Clerk истекла во время работы → редирект на вход;
-- `prefers-reduced-motion` → анимации выключаются одним правилом.
-
-## Замеченное в макетах
-
-- На экране формы в хедере «4/5», а в баннере «3 out of 5».
-- В макете с 5/5 рядом с логотипом лишняя кнопка «домой» — посчитал
-  артефактом.
-- Счётчик «0/1200» при заполненном поле (см. выше).
-- В тексте баннера «couple more» оставлено как в макете, хотя
-  грамматически правильнее «a couple more».
-
-## Как я работал с AI
-
-> **TODO (автор):** этот раздел нужно написать от первого лица. Ниже
-> реальные эпизоды из работы с агентом (Claude Code) над этим проектом,
-> которые можно использовать как основу.
-
-- Агент нашёл в соседних проектах соглашения (TanStack Start, Clerk,
-  Biome, стиль комментариев) и перенёс их сюда.
-- Прежде чем писать клиент, агент проверил живой API curl-запросами. Так
-  нашлись все расхождения со спецификацией из раздела выше.
-- **Эпизоды, где результат агента пришлось исправлять:**
-  - SSE-парсер терял последнее событие, если поток заканчивался на `\r`.
-    Поймал тест на CRLF, разорванный между чанками.
-  - Агент сделал textarea, растущую по контенту, — это расходилось с
-    макетом (фиксированная высота со скроллом). Вернули как в макете.
-  - Первый вариант блокировки ухода со страницы сработал бы на собственном
-    редиректе после сохранения (`/create` → `/app/applications/<id>`). Решили
-    через `ignoreBlocker` на этом переходе.
-  - Тест обработчика падал из-за `beforeEach(() => mock.mockReset())`:
-    стрелка неявно возвращала мок, и Vitest вызывал его как cleanup-хук.
-  - Коммит с рефакторингом сначала получился несобираемым (файл
-    перенесён, а импорты уехали в соседний коммит). Историю пересобрали,
-    чтобы каждый коммит проходил typecheck.
+**What is most mine.** The shape of `src/` and everything under `src/server`: the client/server split, the layers and the Biome rules that enforce them, DI with request scopes, owner-scoped repositories, the error contract, the budgets. All of it was worked out and checked by hand before this project and brought here as a starting point.

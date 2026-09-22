@@ -1,8 +1,9 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { NotFound, RouteError } from '@/components/fallbacks'
-import { StandalonePage } from '@/components/layout/standalone-page'
-import { documentHead } from '@/lib/document/document-head'
+import { NotFound } from '@/client/components/not-found'
+import { RouteError } from '@/client/components/route-error'
+import { StandalonePage } from '@/client/kit/standalone-page'
+import { documentHead } from '@/client/lib/document/document-head'
 
 export const Route = createRootRoute({
 	component: Outlet,

@@ -1,0 +1,36 @@
+@layer screens {
+	.root {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-block-size: 24rem;
+		padding: var(--space-16) var(--space-6);
+		text-align: center;
+
+		@media (width < 40rem) {
+			min-block-size: 20rem;
+			padding-block: var(--space-12);
+		}
+	}
+
+	.illustration {
+		display: flex;
+		margin-block-end: var(--space-10);
+	}
+
+	.title {
+		margin-block-end: var(--space-2);
+	}
+
+	.description {
+		max-inline-size: 28rem;
+		font: var(--type-body-lg);
+		color: var(--color-text-secondary);
+		overflow-wrap: anywhere;
+	}
+
+	.action {
+		margin-block-start: var(--space-6);
+	}
+}

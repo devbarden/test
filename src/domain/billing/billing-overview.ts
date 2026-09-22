@@ -1,4 +1,5 @@
-import type { Entitlements, PlanId } from './billing.catalog'
+import type { Entitlements } from './billing-entitlements'
+import type { PlanId } from './billing-plans'
 
 export type BillingOverview = {
 	entitlements: Entitlements

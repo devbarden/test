@@ -1,7 +1,7 @@
 import { createFileRoute, useLocation } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { pageTitle } from '@/lib/document/brand'
-import { ApplicationScreen } from '@/screens/application/application-screen'
+import { pageTitle } from '@/client/lib/document/brand'
+import { ApplicationScreen } from '@/client/screens/application/application-screen'
 
 export const Route = createFileRoute('/app/applications/$applicationId')({
 	component: ApplicationRoute,

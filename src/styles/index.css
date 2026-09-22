@@ -1,9 +1,0 @@
-@layer reset, tokens, base, ui, components, features, screens, utilities;
-
-@import "./fonts.css";
-@import "./reset.css";
-@import "./tokens.css";
-@import "./base.css";
-@import "./view-transitions.css";
-@import "./utilities.css";
-@import "./clerk.css";

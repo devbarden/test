@@ -1,0 +1,17 @@
+@layer kit {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		align-items: center;
+		max-inline-size: 28rem;
+		padding-block: var(--space-14);
+		margin-inline: auto;
+		text-align: center;
+	}
+
+	.description {
+		font: var(--type-body-lg);
+		color: var(--color-text-secondary);
+	}
+}

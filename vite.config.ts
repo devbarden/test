@@ -19,10 +19,10 @@ export default defineConfig({
 		modules: { generateScopedName: '[name]__[local]__[hash:base64:5]' },
 	},
 	plugins: [
-		tanstackStart(),
+		tanstackStart({ server: { entry: 'server/entry.ts' } }),
 		nitro({
 			compressPublicAssets: { brotli: true, gzip: true },
-			plugins: ['./src/backend/lifecycle/server-lifecycle.nitro.ts'],
+			plugins: ['./src/server/lifecycle/server-lifecycle.nitro.ts'],
 			rolldownConfig: { checks: { moduleLevelDirective: false } },
 			routeRules: {
 				'/fonts/**': {

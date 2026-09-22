@@ -1,0 +1,6 @@
+@layer components {
+	.root {
+		display: flex;
+		border-radius: var(--radius-sm);
+	}
+}

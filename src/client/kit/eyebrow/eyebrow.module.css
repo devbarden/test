@@ -1,0 +1,9 @@
+@layer kit {
+	.root {
+		font: var(--type-body-xs);
+		font-weight: var(--weight-semibold);
+		color: var(--color-accent);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-eyebrow);
+	}
+}

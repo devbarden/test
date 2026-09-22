@@ -1,0 +1,17 @@
+@layer kit {
+	.root {
+		padding: 0 0.125em;
+		margin: 0 -0.125em;
+		color: var(--color-text-primary);
+		background: var(--color-highlight);
+		border-radius: var(--radius-sm);
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
+
+		@media (forced-colors: active) {
+			color: MarkText;
+			forced-color-adjust: none;
+			background: Mark;
+		}
+	}
+}

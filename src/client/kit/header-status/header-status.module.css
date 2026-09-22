@@ -1,0 +1,27 @@
+@layer kit {
+	.root {
+		display: flex;
+		gap: var(--space-4);
+		align-items: center;
+	}
+
+	.hideOnPhone {
+		@media (width < 40rem) {
+			display: none;
+		}
+	}
+
+	.label {
+		font: var(--type-body-lg);
+		color: var(--color-text-tertiary);
+		white-space: nowrap;
+
+		@media (width < 40rem) {
+			display: none;
+		}
+	}
+
+	.suffix {
+		margin-inline-start: 0.3em;
+	}
+}

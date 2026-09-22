@@ -1,0 +1,52 @@
+@layer screens {
+	.root {
+		display: flex;
+		gap: var(--space-4);
+		align-items: center;
+		justify-content: space-between;
+		min-block-size: 3rem;
+		margin-block: var(--space-8);
+
+		@media (width < 40rem) {
+			margin-block: var(--space-4) var(--space-6);
+		}
+
+		@media (width < 30rem) {
+			gap: var(--space-3);
+		}
+
+		:global(:root:active-view-transition-type(page)) & {
+			view-transition-name: app-header;
+		}
+	}
+
+	.actions {
+		display: flex;
+		gap: var(--space-6);
+		align-items: center;
+
+		@media (width < 40rem) {
+			gap: var(--space-3);
+		}
+
+		@media (width < 30rem) {
+			gap: var(--space-2);
+		}
+	}
+
+	.controls {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+	}
+
+	.account {
+		display: flex;
+		inline-size: var(--control-height-sm);
+		block-size: var(--control-height-sm);
+		background: var(--color-surface-page);
+		border: 1px solid var(--color-border-default);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-xs);
+	}
+}

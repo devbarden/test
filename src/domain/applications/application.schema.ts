@@ -1,14 +1,8 @@
 import { z } from 'zod'
 import { toPlainText } from '@/lib/text/plain-text'
+import { INPUT_LIMITS } from './application-input'
 import { SEARCH_MAX_LENGTH } from './application-search'
-import { DEFAULT_LETTER_TONE, LETTER_TONES } from './application-tone'
-
-export const INPUT_LIMITS = {
-	company: 100,
-	details: 1200,
-	jobTitle: 100,
-	skills: 300,
-} as const
+import { LETTER_TONES } from './application-tone'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   `max` runs before `trim` so the button agrees with the raw-length
@@ -25,14 +19,6 @@ export const applicationInputSchema = z.object({
 })
 
 export type ApplicationInput = z.infer<typeof applicationInputSchema>
-
-export const EMPTY_APPLICATION_INPUT: ApplicationInput = {
-	company: '',
-	details: '',
-	jobTitle: '',
-	skills: '',
-	tone: DEFAULT_LETTER_TONE,
-}
 
 export const applicationDtoSchema = z.object({
 	createdAt: z.iso.datetime(),
@@ -56,18 +42,3 @@ export const listApplicationsSchema = z.object({
 	cursor: z.uuid().optional(),
 	search: z.string().max(SEARCH_MAX_LENGTH).optional(),
 })
-
-export type ApplicationPage = {
-	items: ApplicationDto[]
-	nextCursor: string | null
-}
-
-export type ApplicationStats = {
-	goal: number
-	limit: number
-	total: number
-}
-
-export const APPLICATION_GOAL = 5
-
-export const APPLICATIONS_PAGE_SIZE = 10
