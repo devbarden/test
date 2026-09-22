@@ -10,9 +10,7 @@ import { useListFocus } from './use-list-focus'
 //   Asks first, then deletes; focus moves to the neighbouring card, and
 //   back to the letter if Undo restores it.
 // ═══════════════════════════════════════════════════════════════════════════
-export function useConfirmedDelete(
-	items: readonly ApplicationDto[] | undefined,
-) {
+export function useConfirmedDelete(items: readonly ApplicationDto[] | undefined) {
 	const queryClient = useQueryClient()
 	const focus = useListFocus(items)
 	const deleteApplication = useDeleteApplication({

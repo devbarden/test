@@ -1,11 +1,7 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 import { type ApiErrorCode, readApiError } from '../api/api-error'
 
-const RETRYABLE: ReadonlySet<ApiErrorCode> = new Set([
-	'network',
-	'unavailable',
-	'internal',
-])
+const RETRYABLE: ReadonlySet<ApiErrorCode> = new Set(['network', 'unavailable', 'internal'])
 
 const MAX_RETRIES = 2
 
@@ -20,8 +16,8 @@ function redirectIfUnauthorized(error: unknown): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   gcTime is Infinity: a 30-day value exceeds setTimeout's 2^31-1 ms, fires
-//   at once and collects every restored query.
+//   gcTime is Infinity: a persisted list collected while no screen shows it
+//   would drop out of the next snapshot.
 // ═══════════════════════════════════════════════════════════════════════════
 export function createQueryClient(): QueryClient {
 	return new QueryClient({
@@ -29,8 +25,7 @@ export function createQueryClient(): QueryClient {
 			mutations: { retry: false },
 			queries: {
 				gcTime: Number.POSITIVE_INFINITY,
-				retry: (failureCount, error) =>
-					failureCount < MAX_RETRIES && RETRYABLE.has(readApiError(error).code),
+				retry: (failureCount, error) => failureCount < MAX_RETRIES && RETRYABLE.has(readApiError(error).code),
 				staleTime: STALE_TIME_MS,
 			},
 		},

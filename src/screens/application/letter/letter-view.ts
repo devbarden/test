@@ -9,18 +9,13 @@ export type LetterContent =
 	| { kind: 'saving'; text: string }
 	| { kind: 'letter'; text: string }
 
-export type LetterNotice =
-	| { error: ApiError; kind: 'failed' }
-	| { kind: 'stopped'; savedLetterKept: boolean }
+export type LetterNotice = { error: ApiError; kind: 'failed' } | { kind: 'stopped'; savedLetterKept: boolean }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   A saved letter wins over a failed or stopped retry; partial text shows
 //   only when there is nothing better.
 // ═══════════════════════════════════════════════════════════════════════════
-export function letterContent(
-	state: GenerationState,
-	saved: ApplicationDto | undefined,
-): LetterContent {
+export function letterContent(state: GenerationState, saved: ApplicationDto | undefined): LetterContent {
 	switch (state.status) {
 		case 'waiting':
 			return { kind: 'waiting' }
@@ -28,6 +23,12 @@ export function letterContent(
 			return { kind: 'streaming', text: state.text }
 		case 'saving':
 			return { kind: 'saving', text: state.text }
+		// ═══════════════════════════════════════════════════════════════════
+		//   Kept until the saved letter's page takes over, so the new letter
+		//   never flashes back to the placeholder in between.
+		// ═══════════════════════════════════════════════════════════════════
+		case 'done':
+			return { kind: 'letter', text: saved?.letter ?? state.text }
 		case 'failed':
 			return state.error.code === 'save_failed'
 				? { kind: 'letter', text: state.text }
@@ -35,25 +36,15 @@ export function letterContent(
 		case 'stopped':
 			return savedOrPartial(saved, state.text)
 		case 'idle':
-			return saved
-				? { kind: 'letter', text: saved.letter }
-				: { kind: 'placeholder' }
+			return saved ? { kind: 'letter', text: saved.letter } : { kind: 'placeholder' }
 	}
 }
 
-const PLAN_LIMIT_CODES: readonly ApiErrorCode[] = [
-	'application_limit_reached',
-	'quota_exceeded',
-]
+const PLAN_LIMIT_CODES: readonly ApiErrorCode[] = ['application_limit_reached', 'quota_exceeded']
 
-export function letterNotice(
-	state: GenerationState,
-	saved: ApplicationDto | undefined,
-): LetterNotice | undefined {
+export function letterNotice(state: GenerationState, saved: ApplicationDto | undefined): LetterNotice | undefined {
 	if (state.status === 'failed') {
-		return PLAN_LIMIT_CODES.includes(state.error.code)
-			? undefined
-			: { error: state.error, kind: 'failed' }
+		return PLAN_LIMIT_CODES.includes(state.error.code) ? undefined : { error: state.error, kind: 'failed' }
 	}
 
 	if (state.status === 'stopped') {
@@ -63,13 +54,8 @@ export function letterNotice(
 	return undefined
 }
 
-function savedOrPartial(
-	saved: ApplicationDto | undefined,
-	partial: string,
-): LetterContent {
+function savedOrPartial(saved: ApplicationDto | undefined, partial: string): LetterContent {
 	if (saved) return { kind: 'letter', text: saved.letter }
 
-	return partial.trim()
-		? { kind: 'letter', text: partial }
-		: { kind: 'placeholder' }
+	return partial.trim() ? { kind: 'letter', text: partial } : { kind: 'placeholder' }
 }

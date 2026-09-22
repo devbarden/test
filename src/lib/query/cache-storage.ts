@@ -5,87 +5,66 @@ const KEY_PREFIX = 'alt-shift:cache:'
 
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
-function isDehydratedState(value: unknown): value is DehydratedState {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'queries' in value &&
-		Array.isArray(value.queries) &&
-		'mutations' in value &&
-		Array.isArray(value.mutations)
-	)
-}
-
 const storedCacheSchema = z.object({
 	savedAt: z.number(),
-	state: z.custom<DehydratedState>(isDehydratedState),
+	state: z.object({
+		mutations: z.array(z.any()),
+		queries: z.array(z.any()),
+	}),
 	version: z.string(),
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One user's query cache in localStorage. Storage may be blocked (access
-//   throws), full (a write throws) or hold anything — an older build, a
-//   half-written value — so every access tolerates all three, and a cache
-//   that does not parse, belongs to another version or is over a month old
+//   Storage may be blocked, full or hold anything (an older build, a half-
+//   written value): what does not parse, match the version or fit a month
 //   is dropped rather than hydrated.
 // ═══════════════════════════════════════════════════════════════════════════
-export function loadCache(
-	userId: string,
-	version: string,
-): DehydratedState | undefined {
+export function loadCache(userId: string, version: string): DehydratedState | undefined {
 	const key = cacheKey(userId)
-	const stored = parse(withStorage((storage) => storage.getItem(key), null))
+	const stored = attempt(() => {
+		const raw = localStorage.getItem(key)
 
-	if (
-		stored?.version === version &&
-		Date.now() - stored.savedAt <= MAX_AGE_MS
-	) {
+		return raw ? storedCacheSchema.parse(JSON.parse(raw)) : undefined
+	})
+
+	if (stored?.version === version && Date.now() - stored.savedAt <= MAX_AGE_MS) {
 		return stored.state
 	}
 
-	withStorage((storage) => storage.removeItem(key), undefined)
+	attempt(() => localStorage.removeItem(key))
 
 	return undefined
 }
 
-export function saveCache(
-	userId: string,
-	version: string,
-	state: DehydratedState,
-): void {
-	const value = JSON.stringify({ savedAt: Date.now(), state, version })
+export function saveCache(userId: string, version: string, state: DehydratedState): void {
+	const key = cacheKey(userId)
 
-	withStorage((storage) => storage.setItem(cacheKey(userId), value), undefined)
+	try {
+		localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), state, version }))
+	} catch {
+		// ═════════════════════════════════════════════════════════════════════
+		//   Storage full: no snapshot beats an old one shown as current.
+		// ═════════════════════════════════════════════════════════════════════
+		attempt(() => localStorage.removeItem(key))
+	}
 }
 
 export function clearCaches(): void {
-	withStorage((storage) => {
-		for (const key of Object.keys(storage)) {
-			if (key.startsWith(KEY_PREFIX)) storage.removeItem(key)
+	attempt(() => {
+		for (const key of Object.keys(localStorage)) {
+			if (key.startsWith(KEY_PREFIX)) localStorage.removeItem(key)
 		}
-	}, undefined)
+	})
 }
 
 function cacheKey(userId: string): string {
 	return `${KEY_PREFIX}${userId}`
 }
 
-function parse(raw: string | null) {
-	if (!raw) return undefined
-
+function attempt<T>(use: () => T): T | undefined {
 	try {
-		const parsed = storedCacheSchema.safeParse(JSON.parse(raw))
-
-		return parsed.success ? parsed.data : undefined
+		return use()
 	} catch {
 		return undefined
-	}
-}
-
-function withStorage<T>(use: (storage: Storage) => T, fallback: T): T {
-	try {
-		return use(window.localStorage)
-	} catch {
-		return fallback
 	}
 }

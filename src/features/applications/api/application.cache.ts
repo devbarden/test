@@ -1,41 +1,37 @@
-import type { InfiniteData, QueryClient } from '@tanstack/react-query'
-import type {
-	ApplicationDto,
-	ApplicationPage,
-	ApplicationStats,
-} from '@/domain/applications/application.schema'
+import type { InfiniteData, QueryClient, QueryKey } from '@tanstack/react-query'
+import type { ApplicationDto, ApplicationPage, ApplicationStats } from '@/domain/applications/application.schema'
 import { matchesSearch } from '@/domain/applications/application-search'
 import type { PersistedQueries } from '@/lib/query/user-query-client'
 import { applicationKeys } from './application.queries'
 
 type ApplicationList = InfiniteData<ApplicationPage, string | undefined>
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   Only what reopening the tab needs: the unfiltered list and the counts.
+//   Searches and opened letters would grow the snapshot without bound.
+// ═══════════════════════════════════════════════════════════════════════════
 export const PERSISTED_APPLICATIONS: PersistedQueries = {
-	roots: applicationKeys.all,
-	version: 'applications-v3',
+	keys: [applicationKeys.list(), applicationKeys.stats()],
+	version: 'applications-v4',
+}
+
+export function refreshApplications(queryClient: QueryClient): Promise<void> {
+	return queryClient.invalidateQueries({ queryKey: applicationKeys.all })
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Placed by id, not on top, so Undo restores it in place; an existing
 //   copy is dropped first so a racing refetch cannot show it twice.
 // ═══════════════════════════════════════════════════════════════════════════
-export function insertApplication(
-	queryClient: QueryClient,
-	application: ApplicationDto,
-): void {
+export function insertApplication(queryClient: QueryClient, application: ApplicationDto): void {
 	queryClient.setQueryData(applicationKeys.detail(application.id), application)
 	updateLists(queryClient, (pages, search) =>
-		matchesSearch(application.input, search)
-			? insertInOrder(pages, application)
-			: pages,
+		matchesSearch(application, search) ? insertInOrder(pages, application) : pages,
 	)
 	adjustTotal(queryClient, 1)
 }
 
-function insertInOrder(
-	pages: ApplicationPage[],
-	application: ApplicationDto,
-): ApplicationPage[] {
+function insertInOrder(pages: ApplicationPage[], application: ApplicationDto): ApplicationPage[] {
 	const next = pages.map((page) => ({
 		...page,
 		items: page.items.filter((item) => item.id !== application.id),
@@ -57,25 +53,20 @@ function insertInOrder(
 	return next
 }
 
-export function replaceApplication(
-	queryClient: QueryClient,
-	application: ApplicationDto,
-): void {
+export function replaceApplication(queryClient: QueryClient, application: ApplicationDto): void {
 	queryClient.setQueryData(applicationKeys.detail(application.id), application)
 	updateLists(queryClient, (pages, search) =>
 		mapItems(pages, (items) =>
 			items.flatMap((item) => {
 				if (item.id !== application.id) return [item]
-				return matchesSearch(application.input, search) ? [application] : []
+				return matchesSearch(application, search) ? [application] : []
 			}),
 		),
 	)
 }
 
 export function removeApplication(queryClient: QueryClient, id: string): void {
-	updateLists(queryClient, (pages) =>
-		mapItems(pages, (items) => items.filter((item) => item.id !== id)),
-	)
+	updateLists(queryClient, (pages) => mapItems(pages, (items) => items.filter((item) => item.id !== id)))
 	queryClient.removeQueries({ queryKey: applicationKeys.detail(id) })
 	adjustTotal(queryClient, -1)
 }
@@ -93,27 +84,26 @@ function updateLists(
 	for (const [queryKey, list] of cachedLists(queryClient)) {
 		if (!list) continue
 
-		const search = String(queryKey[2] ?? '')
-
 		queryClient.setQueryData<ApplicationList>(queryKey, {
 			...list,
-			pages: update(list.pages, search),
+			pages: update(list.pages, searchOf(queryKey)),
 		})
 	}
 }
 
-function mapItems(
-	pages: ApplicationPage[],
-	update: (items: ApplicationDto[]) => ApplicationDto[],
-): ApplicationPage[] {
+function searchOf(listKey: QueryKey): string {
+	const [, , search] = listKey
+
+	return typeof search === 'string' ? search : ''
+}
+
+function mapItems(pages: ApplicationPage[], update: (items: ApplicationDto[]) => ApplicationDto[]): ApplicationPage[] {
 	return pages.map((page) => ({ ...page, items: update(page.items) }))
 }
 
 function adjustTotal(queryClient: QueryClient, delta: number): void {
-	queryClient.setQueryData<ApplicationStats>(
-		applicationKeys.stats(),
-		(stats) =>
-			stats ? { ...stats, total: Math.max(0, stats.total + delta) } : stats,
+	queryClient.setQueryData<ApplicationStats>(applicationKeys.stats(), (stats) =>
+		stats ? { ...stats, total: Math.max(0, stats.total + delta) } : stats,
 	)
 }
 
@@ -126,9 +116,7 @@ export function applicationFromList(
 	id: string,
 ): { data: ApplicationDto; updatedAt: number | undefined } | undefined {
 	for (const [queryKey, list] of cachedLists(queryClient)) {
-		const data = list?.pages
-			.flatMap((page) => page.items)
-			.find((item) => item.id === id)
+		const data = list?.pages.flatMap((page) => page.items).find((item) => item.id === id)
 
 		if (data) {
 			return {

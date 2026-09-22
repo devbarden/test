@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { ApplicationDto } from '@/domain/applications/application.schema'
-import { cardLinkSelector } from './application-card'
+import { cardLinkSelector } from './application-card/application-card'
 
 type FocusRequest = {
 	id: string | undefined
@@ -17,9 +17,7 @@ export function useListFocus(items: readonly ApplicationDto[] | undefined) {
 
 		request.current = null
 
-		const card = pending.id
-			? document.querySelector<HTMLElement>(cardLinkSelector(pending.id))
-			: null
+		const card = pending.id ? document.querySelector<HTMLElement>(cardLinkSelector(pending.id)) : null
 		const target = card ?? document.querySelector<HTMLElement>('main')
 
 		target?.focus()

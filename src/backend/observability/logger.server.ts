@@ -9,14 +9,7 @@ export function createRootLogger(): Logger {
 		level: 'info',
 		redact: {
 			censor: '[redacted]',
-			paths: [
-				'*.authorization',
-				'*.Authorization',
-				'*.cookie',
-				'*.apiToken',
-				'*.token',
-				'*.secret',
-			],
+			paths: ['*.authorization', '*.Authorization', '*.cookie', '*.apiToken', '*.token', '*.secret'],
 		},
 		timestamp: pino.stdTimeFunctions.isoTime,
 	})

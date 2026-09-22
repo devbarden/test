@@ -79,12 +79,11 @@
 		--_padding: var(--space-8);
 
 		border-radius: var(--radius-full);
-		transition-property:
-			background-color, border-color, color, box-shadow, transform;
+		transition-property: background-color, border-color, color, box-shadow, transform;
 
 		@media (hover: hover) {
 			&:hover {
-				transform: translateY(-2px);
+				transform: translateY(var(--hover-lift-sm));
 			}
 		}
 

@@ -14,10 +14,7 @@ export function requestContextFrom(headers: Headers): RequestContext {
 	return { clientIp: clientIpFrom(headers), requestId: requestIdFrom(headers) }
 }
 
-export function runWithRequestContext<T>(
-	context: RequestContext,
-	callback: () => T,
-): T {
+export function runWithRequestContext<T>(context: RequestContext, callback: () => T): T {
 	return storage.run(context, callback)
 }
 

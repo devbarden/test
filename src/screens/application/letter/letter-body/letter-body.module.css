@@ -1,0 +1,7 @@
+@layer screens {
+	.placeholder {
+		flex: 1;
+		font: var(--type-body-lg);
+		color: var(--color-text-tertiary);
+	}
+}

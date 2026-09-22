@@ -1,7 +1,4 @@
-import {
-	usePlans,
-	useSubscription,
-} from '@clerk/tanstack-react-start/experimental'
+import { usePlans, useSubscription } from '@clerk/tanstack-react-start/experimental'
 import {
 	type Entitlements,
 	entitlementsFor,
@@ -40,9 +37,7 @@ export function usePlanOffers(): PlanOffers {
 	const currency = shopCurrency(plans.data)
 
 	const offers = PLAN_IDS.flatMap((id) => {
-		const plan = plans.data.find(
-			(candidate) => candidate.slug === PLAN_SLUGS[id],
-		)
+		const plan = plans.data.find((candidate) => candidate.slug === PLAN_SLUGS[id])
 
 		return plan ? [toOffer(id, plan, currency, isEligibleForTrial)] : []
 	})
@@ -51,27 +46,19 @@ export function usePlanOffers(): PlanOffers {
 		isError: plans.isError,
 		isLoading: plans.isLoading || subscription.isLoading,
 		offers,
-		retry: () => void plans.revalidate(),
+		retry: () => plans.revalidate(),
 	}
 }
 
-function toOffer(
-	id: PlanId,
-	plan: ClerkPlan,
-	currency: string,
-	isEligibleForTrial: boolean,
-): PlanOffer {
+function toOffer(id: PlanId, plan: ClerkPlan, currency: string, isEligibleForTrial: boolean): PlanOffer {
 	return {
 		annualFee: paid(plan.annualFee),
 		annualMonthlyFee: paid(plan.annualMonthlyFee),
 		clerkPlanId: plan.id,
-		entitlements: entitlementsFor(
-			plan.features.map((feature) => feature.slug).filter(isBillingFeature),
-		),
+		entitlements: entitlementsFor(plan.features.map((feature) => feature.slug).filter(isBillingFeature)),
 		fee: { amount: plan.fee?.amount ?? 0, currency },
 		id,
-		trialDays:
-			isEligibleForTrial && plan.freeTrialEnabled ? plan.freeTrialDays : null,
+		trialDays: isEligibleForTrial && plan.freeTrialEnabled ? plan.freeTrialDays : null,
 	}
 }
 
@@ -80,7 +67,5 @@ function shopCurrency(plans: readonly ClerkPlan[]): string {
 }
 
 function paid(fee: ClerkPlan['fee']): Money | null {
-	return fee && fee.amount > 0
-		? { amount: fee.amount, currency: fee.currency }
-		: null
+	return fee && fee.amount > 0 ? { amount: fee.amount, currency: fee.currency } : null
 }

@@ -8,11 +8,5 @@ type InputProps = ComponentProps<'input'>
 export function Input({ className, ...props }: InputProps) {
 	const controlProps = useFieldControlProps()
 
-	return (
-		<input
-			{...props}
-			{...controlProps}
-			className={clsx(styles.control, styles.input, className)}
-		/>
-	)
+	return <input {...props} {...controlProps} className={clsx(styles.control, styles.input, className)} />
 }

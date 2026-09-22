@@ -2,12 +2,10 @@
 //   No script-src: Clerk loads scripts from its own and Cloudflare's domains.
 // ═══════════════════════════════════════════════════════════════════════════
 const BASE_HEADERS: Record<string, string> = {
-	'Content-Security-Policy':
-		"frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'",
+	'Content-Security-Policy': "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'",
 	'Cross-Origin-Opener-Policy': 'same-origin',
 	'Cross-Origin-Resource-Policy': 'same-origin',
-	'Permissions-Policy':
-		'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+	'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
 	'Referrer-Policy': 'strict-origin-when-cross-origin',
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',

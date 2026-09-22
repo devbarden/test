@@ -14,33 +14,18 @@ export function GoalBanner() {
 	if (!isKnown || isReached) return null
 
 	return (
-		<Panel
-			aria-labelledby={titleId}
-			className={styles.root}
-			role="region"
-			tone="success"
-		>
+		<Panel aria-labelledby={titleId} className={styles.root} role="region" tone="success">
 			<Heading className={styles.title} id={titleId} size="md">
 				Hit your goal
 			</Heading>
 			<p className={styles.description}>
-				Generate and send out a couple more job applications today to get hired
-				faster
+				Generate and send out a couple more job applications today to get hired faster
 			</p>
-			<ButtonLink
-				iconStart={<PlusIcon />}
-				size="lg"
-				to="/app/applications/create"
-			>
+			<ButtonLink iconStart={<PlusIcon />} size="lg" to="/app/applications/create">
 				Create New
 			</ButtonLink>
 			<div className={styles.progress}>
-				<StepProgress
-					label={`${count} of ${goal} applications generated`}
-					max={goal}
-					value={count}
-					variant="bars"
-				/>
+				<StepProgress label={`${count} of ${goal} applications generated`} max={goal} value={count} variant="bars" />
 				<span aria-hidden="true" className={styles.count}>
 					{`${count} out of ${goal}`}
 				</span>

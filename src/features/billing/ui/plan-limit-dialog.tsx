@@ -1,6 +1,6 @@
 import { createCallable } from 'react-call'
 import { Button, ButtonLink } from '@/components/ui/button'
-import { Dialog } from '@/components/ui/dialog'
+import { DIALOG_EXIT_MS, Dialog } from '@/components/ui/dialog'
 
 export type PlanLimit = 'daily' | 'saved'
 
@@ -10,8 +10,6 @@ type PlanLimitDialogProps = {
 	reason: PlanLimit
 	upgradeLimit?: number
 }
-
-const EXIT_TRANSITION_MS = 200
 
 export const PlanLimitDialog = createCallable<PlanLimitDialogProps, void>(
 	({ call, hoursUntilReset, limit, reason, upgradeLimit }) => {
@@ -43,30 +41,23 @@ export const PlanLimitDialog = createCallable<PlanLimitDialogProps, void>(
 					upgradeLimit,
 				})}
 				onDismiss={close}
-				title={
-					reason === 'daily'
-						? 'Today’s letters are used up'
-						: 'No room for another application'
-				}
+				title={reason === 'daily' ? 'Your daily letters are used up' : 'No room for another application'}
 			/>
 		)
 	},
-	EXIT_TRANSITION_MS,
+	DIALOG_EXIT_MS,
 )
 
-function description({
-	hoursUntilReset,
-	limit,
-	reason,
-	upgradeLimit,
-}: PlanLimitDialogProps): string {
+function description({ hoursUntilReset, limit, reason, upgradeLimit }: PlanLimitDialogProps): string {
+	const plan = upgradeLimit === undefined ? 'Your plan' : 'The Free plan'
+
 	if (reason === 'daily') {
-		return upgradeLimit === undefined
-			? `Your plan includes ${limit} letters a day. New ones arrive in ${hoursUntilReset} h.`
-			: `The Free plan includes ${limit} letters a day. New ones arrive in ${hoursUntilReset} h — or move to Pro for ${upgradeLimit} a day.`
+		const upgrade = upgradeLimit === undefined ? '' : ` — or move to Pro for ${upgradeLimit} a day`
+
+		return `${plan} includes ${limit} letters a day. New ones arrive in ${hoursUntilReset} h${upgrade}.`
 	}
 
-	return upgradeLimit === undefined
-		? `Your plan keeps up to ${limit} applications. Delete one you no longer need to make room.`
-		: `The Free plan keeps up to ${limit} applications. Delete one you no longer need, or move to Pro to keep up to ${upgradeLimit}.`
+	const upgrade = upgradeLimit === undefined ? ' to make room' : `, or move to Pro to keep up to ${upgradeLimit}`
+
+	return `${plan} keeps up to ${limit} applications. Delete one you no longer need${upgrade}.`
 }

@@ -29,9 +29,7 @@ export function SegmentedControl<Value extends string>({
 
 	return (
 		<fieldset className={styles.root}>
-			<legend className={hideLabel ? 'visually-hidden' : styles.legend}>
-				{label}
-			</legend>
+			<legend className={hideLabel ? 'visually-hidden' : styles.legend}>{label}</legend>
 			<div className={styles.track}>
 				{options.map((option) => (
 					<label className={styles.option} key={option.value}>

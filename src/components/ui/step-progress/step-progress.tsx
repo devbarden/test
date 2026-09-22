@@ -16,13 +16,7 @@ const VARIANT_CLASS = {
 	dots: styles.dots,
 } satisfies Record<StepProgressVariant, string | undefined>
 
-export function StepProgress({
-	className,
-	label,
-	max,
-	value,
-	variant,
-}: StepProgressProps) {
+export function StepProgress({ className, label, max, value, variant }: StepProgressProps) {
 	const steps = Array.from({ length: max }, (_, index) => ({
 		isDone: index < value,
 		step: index + 1,

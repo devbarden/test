@@ -29,10 +29,7 @@ export default defineConfig({
 					headers: { 'cache-control': 'public, max-age=31536000, immutable' },
 				},
 				...Object.fromEntries(
-					BRAND_FILES.map((path) => [
-						path,
-						{ headers: { 'cache-control': 'public, max-age=86400' } },
-					]),
+					BRAND_FILES.map((path) => [path, { headers: { 'cache-control': 'public, max-age=86400' } }]),
 				),
 			},
 		}),

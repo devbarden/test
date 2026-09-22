@@ -19,10 +19,7 @@ export function Alert({ children, className, tone }: AlertProps) {
 	const Icon = tone === 'danger' ? CircleAlertIcon : InfoIcon
 
 	return (
-		<div
-			className={clsx(styles.root, TONE_CLASS[tone], className)}
-			role={tone === 'danger' ? 'alert' : 'status'}
-		>
+		<div className={clsx(styles.root, TONE_CLASS[tone], className)} role={tone === 'danger' ? 'alert' : 'status'}>
 			<Icon aria-hidden="true" />
 			<p>{children}</p>
 		</div>

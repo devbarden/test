@@ -26,9 +26,7 @@ export function Toast({ action, message, onDismiss, onExpire }: ToastProps) {
 		const isHeld = () => root.current?.matches(':hover, :focus-within') ?? false
 
 		const waitForRelease = () => {
-			timer = isHeld()
-				? setTimeout(waitForRelease, HELD_RECHECK_MS)
-				: setTimeout(timeUp, TOAST_DURATION_MS)
+			timer = isHeld() ? setTimeout(waitForRelease, HELD_RECHECK_MS) : setTimeout(timeUp, TOAST_DURATION_MS)
 		}
 
 		const timeUp = () => {
@@ -54,12 +52,7 @@ export function Toast({ action, message, onDismiss, onExpire }: ToastProps) {
 					{action.label}
 				</button>
 			)}
-			<button
-				aria-label="Dismiss"
-				className={styles.dismiss}
-				onClick={onDismiss}
-				type="button"
-			>
+			<button aria-label="Dismiss" className={styles.dismiss} onClick={onDismiss} type="button">
 				<XIcon />
 			</button>
 		</div>

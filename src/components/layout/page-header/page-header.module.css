@@ -21,5 +21,10 @@
 		align-items: center;
 		justify-content: flex-end;
 		min-inline-size: 0;
+
+		@media (width < 30rem) {
+			flex-basis: 100%;
+			flex-wrap: wrap;
+		}
 	}
 }

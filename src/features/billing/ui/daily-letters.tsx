@@ -9,20 +9,15 @@ export function DailyLetters() {
 	if (!data) return <HeaderStatus hideOnPhone />
 
 	const limit = data.entitlements.dailyGenerations
-	const used = Math.min(data.usage.generationsToday, limit)
+	const used = Math.min(data.usage.generationsInWindow, limit)
 
 	return (
 		<HeaderStatus
 			hideOnPhone
 			indicator={
-				<ProgressRing
-					label="Letters today"
-					max={limit}
-					value={used}
-					valueText={`${used} of ${limit}`}
-				/>
+				<ProgressRing label="Letters in the last 24 hours" max={limit} value={used} valueText={`${used} of ${limit}`} />
 			}
-			suffix="letters today"
+			suffix="letters in 24 h"
 			value={`${used}/${limit}`}
 		/>
 	)

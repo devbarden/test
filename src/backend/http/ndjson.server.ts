@@ -1,10 +1,8 @@
 const encoder = new TextEncoder()
 
 // ═══════════════════════════════════════════════════════════════════════════
-//   One JSON value per line, pulled from the iterator only as fast as the
-//   client reads. Cancelling the response — the client went away — returns
-//   the iterator, so the generator's own cleanup (aborting the upstream
-//   request) runs.
+//   Pulled only as fast as the client reads; a client that leaves cancels
+//   the stream, which returns the iterator and runs its cleanup.
 // ═══════════════════════════════════════════════════════════════════════════
 export function ndjsonResponse<T>(events: AsyncIterable<T>): Response {
 	const iterator = events[Symbol.asyncIterator]()

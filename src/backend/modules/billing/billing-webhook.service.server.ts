@@ -4,10 +4,7 @@ import type { Logger } from '@/backend/observability/logger.server'
 type BillingEvent = Extract<
 	WebhookEvent,
 	{
-		type:
-			| `subscription.${string}`
-			| `subscriptionItem.${string}`
-			| `paymentAttempt.${string}`
+		type: `subscription.${string}` | `subscriptionItem.${string}` | `paymentAttempt.${string}`
 	}
 >
 
@@ -26,8 +23,7 @@ export function createBillingWebhookService({ logger }: { logger: Logger }) {
 		record(event: BillingEvent): void {
 			const details = {
 				billingEvent: event.type,
-				payerUserId:
-					'payer' in event.data ? event.data.payer?.user_id : undefined,
+				payerUserId: 'payer' in event.data ? event.data.payer?.user_id : undefined,
 				status: 'status' in event.data ? event.data.status : undefined,
 			}
 
@@ -40,6 +36,4 @@ export function createBillingWebhookService({ logger }: { logger: Logger }) {
 	}
 }
 
-export type BillingWebhookService = ReturnType<
-	typeof createBillingWebhookService
->
+export type BillingWebhookService = ReturnType<typeof createBillingWebhookService>

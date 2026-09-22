@@ -1,7 +1,4 @@
-import {
-	verifyWebhook,
-	type WebhookEvent,
-} from '@clerk/tanstack-react-start/webhooks'
+import { verifyWebhook, type WebhookEvent } from '@clerk/tanstack-react-start/webhooks'
 import type { AppConfig } from '../config.server'
 import { ForbiddenError, NotConfiguredError } from '../errors/app-error.server'
 
@@ -19,9 +16,7 @@ export function createClerkWebhookVerifier({ config }: { config: AppConfig }) {
 			try {
 				return await verifyWebhook(request, { signingSecret })
 			} catch (cause) {
-				throw new ForbiddenError(
-					`Rejected a Clerk webhook with an invalid signature: ${String(cause)}`,
-				)
+				throw new ForbiddenError(`Rejected a Clerk webhook with an invalid signature: ${String(cause)}`)
 			}
 		},
 	}

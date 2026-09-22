@@ -13,15 +13,13 @@ export function createBillingService({
 	rateLimiter: RateLimiter
 	userActor: UserActor
 }) {
-	const { entitlements, plan, userId } = userActor
+	const { entitlements, plan } = userActor
 
 	return {
 		async overview(): Promise<BillingOverview> {
 			const [applications, generations] = await Promise.all([
 				applicationService.count(),
-				rateLimiter.peek(
-					budgets.dailyGenerations(userId, entitlements.dailyGenerations),
-				),
+				rateLimiter.peek(budgets.dailyGenerations(userActor)),
 			])
 
 			return {
@@ -29,8 +27,8 @@ export function createBillingService({
 				plan,
 				usage: {
 					applications,
+					generationsInWindow: generations.consumed,
 					generationsResetInSeconds: generations.resetInSeconds,
-					generationsToday: generations.consumed,
 				},
 			}
 		},

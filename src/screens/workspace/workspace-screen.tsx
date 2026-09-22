@@ -1,5 +1,5 @@
 import { ClerkBoundary } from '@/components/clerk-boundary'
-import { WorkspaceGate } from './workspace-gate'
+import { WorkspaceGate } from './workspace-gate/workspace-gate'
 
 export function WorkspaceScreen() {
 	return (

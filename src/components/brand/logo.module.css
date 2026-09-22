@@ -17,10 +17,25 @@
 			inline-size: calc(2.5rem * 179 / 48);
 			block-size: 2.5rem;
 		}
+
+		@media (width < 30rem) {
+			inline-size: calc(2rem * 179 / 48);
+			block-size: 2rem;
+		}
 	}
 
 	.mark {
 		fill: var(--color-brand);
+	}
+
+	.markAnimated {
+		animation: pulse 1.2s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		50% {
+			opacity: 0.35;
+		}
 	}
 
 	.wordmark {

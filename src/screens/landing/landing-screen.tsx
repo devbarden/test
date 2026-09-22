@@ -1,10 +1,10 @@
-import { LandingFooter } from './landing-footer'
-import { LandingNav } from './landing-nav'
+import { LandingFooter } from './landing-footer/landing-footer'
+import { LandingNav } from './landing-nav/landing-nav'
 import styles from './landing-screen.module.css'
-import { Faq } from './sections/faq'
-import { Features } from './sections/features'
-import { Hero } from './sections/hero'
-import { HowItWorks } from './sections/how-it-works'
+import { Faq } from './sections/faq/faq'
+import { Features } from './sections/features/features'
+import { Hero } from './sections/hero/hero'
+import { HowItWorks } from './sections/how-it-works/how-it-works'
 
 export function LandingScreen() {
 	return (

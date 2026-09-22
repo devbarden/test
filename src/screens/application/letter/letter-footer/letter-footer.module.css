@@ -1,0 +1,17 @@
+@layer screens {
+	.root {
+		display: flex;
+		gap: var(--space-4);
+		align-items: center;
+		justify-content: flex-end;
+		margin-block-start: auto;
+	}
+
+	.progress {
+		display: inline-flex;
+		gap: var(--space-2);
+		align-items: center;
+		margin-inline-end: auto;
+		color: var(--color-text-tertiary);
+	}
+}

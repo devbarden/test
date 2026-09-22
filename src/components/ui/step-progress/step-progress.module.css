@@ -26,5 +26,16 @@
 		&.done {
 			background: var(--color-progress-done);
 		}
+
+		@media (forced-colors: active) {
+			outline: 1px solid CanvasText;
+			outline-offset: -1px;
+			forced-color-adjust: none;
+			background: Canvas;
+
+			&.done {
+				background: CanvasText;
+			}
+		}
 	}
 }

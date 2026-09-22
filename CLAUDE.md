@@ -61,8 +61,9 @@ does.
 
 ### Formatting and naming
 
-- Biome: tabs, single quotes, no semicolons, sorted object keys, JSX
-  attributes and CSS properties. `npm run lint:fix` fixes it.
+- Biome: tabs, 120 columns, single quotes, no semicolons, sorted object
+  keys, JSX attributes and CSS properties. `npm run lint:fix` fixes it.
+- No `void` operator (`noVoid`): a fire-and-forget promise is just called.
 - `*.server.ts` is server-only and must never be imported, directly, by a
   file that reaches the client bundle. Server functions (`*.api.ts`) and
   middleware files drop the suffix because the client imports them; they
@@ -78,7 +79,8 @@ does.
   the rest — it once put the whole landing into every page's entry chunk.
   Each component folder in `components/` has a one-line `index.ts`
   (`export * from './button'`) and nothing else does.
-- Files and folders are kebab-case; components are one per file.
+- Files and folders are kebab-case (Biome `useFilenamingConvention`, routes
+  aside); components are one per file.
 - A component's props are a named type declared above it —
   `type ButtonProps = { … }`, or `type InputProps = ComponentProps<'input'>`
   — never an inline `({ children }: { children: ReactNode })`.
@@ -133,8 +135,11 @@ src/lib/            infrastructure safe on both sides, one folder per
 Where a file goes: runs only on the server → `backend/`; pure and needed
 by both sides → `domain/`; React or browser data access → `features/`.
 
-Imports flow one way, and Biome's `noRestrictedImports` (per-folder
-`overrides` in `biome.json`) fails any import against it:
+Imports flow one way, and Biome's `noRestrictedImports` (one `overrides`
+entry per layer in `biome.json`) fails any import against it. Inside
+`features/` and `screens/` every `@/features/…` or `@/screens/…` import is
+refused: a module's own files are imported relatively, so an absolute one
+can only reach another feature or screen.
 
 ```
 routes → screens → features → domain · components · hooks · lib
@@ -215,6 +220,12 @@ repository (Prisma, every query scoped by owner) → Postgres.
 - A route file holds only its URL concerns — params, search, guards,
   `head()`, `ssr` — and renders a screen from `src/screens`.
 - Screens are named `<name>-screen.tsx` and export `<Name>Screen`.
+- Inside a screen every component has its own folder: the component, its
+  CSS module and the hooks or helpers only it uses
+  (`plan-card/plan-card.tsx` + `plan-card.module.css`). The screen file and
+  what several components share stay at the screen's root; a skeleton
+  lives with the component it mirrors. A component never styles through
+  another one's module: it takes a prop (`SectionHeading onInk`).
 - `components/ui` is the design system. A new variant goes into the
   component, not into a one-off override at the call site.
 - Dialogs are react-call callables, as in our other projects: define one

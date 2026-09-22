@@ -6,6 +6,6 @@ export type BillingOverview = {
 	usage: {
 		applications: number
 		generationsResetInSeconds: number
-		generationsToday: number
+		generationsInWindow: number
 	}
 }

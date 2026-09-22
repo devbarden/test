@@ -11,9 +11,7 @@ export function GoalIndicator() {
 
 	return (
 		<HeaderStatus
-			indicator={
-				<StepProgress label={label} max={goal} value={count} variant="dots" />
-			}
+			indicator={<StepProgress label={label} max={goal} value={count} variant="dots" />}
 			suffix="applications generated"
 			value={`${count}/${goal}`}
 		/>

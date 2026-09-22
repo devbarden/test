@@ -1,5 +1,5 @@
 import { createMiddleware } from '@tanstack/react-start'
-import { toClientError } from '../errors/error-response.server'
+import { toServerFnError } from '../errors/error-response.server'
 import { guardUser } from './guard.server'
 
 export const userScopeMiddleware = createMiddleware({
@@ -8,7 +8,7 @@ export const userScopeMiddleware = createMiddleware({
 	guardUser(
 		(scope) => next({ context: { scope } }),
 		(error) => {
-			throw toClientError(error)
+			throw toServerFnError(error)
 		},
 	),
 )

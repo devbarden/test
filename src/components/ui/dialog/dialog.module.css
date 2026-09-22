@@ -10,12 +10,17 @@
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow-floating);
 		opacity: 1;
+
 		transform: none;
 		transition:
 			opacity var(--duration-base) var(--ease-out),
 			transform var(--duration-base) var(--ease-out),
 			overlay var(--duration-base) allow-discrete,
 			display var(--duration-base) allow-discrete;
+
+		@media (forced-colors: active) {
+			outline: 1px solid CanvasText;
+		}
 
 		@starting-style {
 			opacity: 0;

@@ -1,8 +1,5 @@
 import { z } from 'zod'
-import {
-	applicationDtoSchema,
-	applicationInputSchema,
-} from '@/domain/applications/application.schema'
+import { applicationDtoSchema, applicationInputSchema } from '@/domain/applications/application.schema'
 import { apiErrorSchema } from '@/lib/api/api-error'
 
 export const GENERATION_ENDPOINT = '/api/generate'

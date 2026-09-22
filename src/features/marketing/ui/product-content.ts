@@ -1,3 +1,5 @@
+import { BRAND_NAME } from '@/lib/document/brand'
+
 type Entry<Id extends string> = { body: string; id: Id; title: string }
 
 type Question = { answer: string; id: string; question: string }
@@ -47,7 +49,7 @@ export const PRODUCT_FAQ: readonly Question[] = [
 		answer:
 			'Yes. The Free plan lets you write letters every day at no cost. Pro raises the daily limit and the number of saved applications when you need more.',
 		id: 'free',
-		question: 'Is Alt+Shift free?',
+		question: `Is ${BRAND_NAME} free?`,
 	},
 	{
 		answer:
@@ -62,8 +64,7 @@ export const PRODUCT_FAQ: readonly Question[] = [
 		question: 'Which languages can it write in?',
 	},
 	{
-		answer:
-			'Only you. Letters are tied to your account, and deleting the account erases them.',
+		answer: 'Only you. Letters are tied to your account, and deleting the account erases them.',
 		id: 'privacy',
 		question: 'Who can see my letters?',
 	},

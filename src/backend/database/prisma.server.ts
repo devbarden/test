@@ -11,22 +11,22 @@ declare global {
 	var __altShiftPrisma: PrismaClient | undefined
 }
 
-export function createPrismaClient({
-	config,
-	rootLogger,
-}: {
-	config: AppConfig
-	rootLogger: Logger
-}): PrismaClient {
-	if (globalThis.__altShiftPrisma) return globalThis.__altShiftPrisma
+export function createPrismaClient({ config, rootLogger }: { config: AppConfig; rootLogger: Logger }): PrismaClient {
+	globalThis.__altShiftPrisma ??= connect(config.database, rootLogger)
 
-	const { poolMax, statementTimeoutMs, url } = config.database
+	return globalThis.__altShiftPrisma
+}
+
+function connect(
+	{ connectTimeoutMs, idleConnectionTimeoutMs, poolMax, statementTimeoutMs, url }: AppConfig['database'],
+	logger: Logger,
+): PrismaClient {
 	const client = new PrismaClient({
 		adapter: new PrismaPg({
 			connectionString: url,
-			connectionTimeoutMillis: 5_000,
+			connectionTimeoutMillis: connectTimeoutMs,
 			idle_in_transaction_session_timeout: statementTimeoutMs,
-			idleTimeoutMillis: 30_000,
+			idleTimeoutMillis: idleConnectionTimeoutMs,
 			max: poolMax,
 			statement_timeout: statementTimeoutMs,
 		}),
@@ -36,10 +36,8 @@ export function createPrismaClient({
 		],
 	})
 
-	client.$on('warn', (event) => rootLogger.warn({ prisma: event }, 'Prisma'))
-	client.$on('error', (event) => rootLogger.error({ prisma: event }, 'Prisma'))
-
-	if (!config.isProduction) globalThis.__altShiftPrisma = client
+	client.$on('warn', (event) => logger.warn({ prisma: event }, 'Prisma'))
+	client.$on('error', (event) => logger.error({ prisma: event }, 'Prisma'))
 
 	return client
 }

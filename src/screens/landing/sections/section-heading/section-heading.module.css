@@ -1,0 +1,30 @@
+@layer screens {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		max-inline-size: 42rem;
+		margin-inline: auto;
+		text-align: center;
+	}
+
+	.kicker {
+		.onInk & {
+			color: var(--color-text-on-ink-secondary);
+		}
+	}
+
+	.lead {
+		font: var(--type-prose-md);
+		color: var(--color-text-secondary);
+		text-wrap: pretty;
+
+		@media (width >= 48rem) {
+			font: var(--type-prose-lg);
+		}
+
+		.onInk & {
+			color: var(--color-text-on-ink-secondary);
+		}
+	}
+}

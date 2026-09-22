@@ -9,16 +9,10 @@ type HeaderStatusProps = {
 	value?: string
 }
 
-export function HeaderStatus({
-	hideOnPhone = false,
-	indicator,
-	suffix,
-	value,
-}: HeaderStatusProps) {
+export function HeaderStatus({ hideOnPhone = false, indicator, suffix, value }: HeaderStatusProps) {
 	const className = clsx(styles.root, hideOnPhone && styles.hideOnPhone)
 
-	if (value === undefined)
-		return <div aria-hidden="true" className={className} />
+	if (value === undefined) return <div aria-hidden="true" className={className} />
 
 	return (
 		<div className={className}>

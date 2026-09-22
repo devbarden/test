@@ -14,10 +14,5 @@ const SHAPE_CLASS = {
 } satisfies Record<SkeletonShape, string | undefined>
 
 export function Skeleton({ className, shape = 'line' }: SkeletonProps) {
-	return (
-		<span
-			aria-hidden="true"
-			className={clsx(styles.root, SHAPE_CLASS[shape], className)}
-		/>
-	)
+	return <span aria-hidden="true" className={clsx(styles.root, SHAPE_CLASS[shape], className)} />
 }

@@ -4,11 +4,7 @@ type LocationChange = {
 	toLocation: { pathname: string }
 }
 
-export function pageTransitionTypes({
-	fromLocation,
-	pathChanged,
-	toLocation,
-}: LocationChange): string[] | false {
+export function pageTransitionTypes({ fromLocation, pathChanged, toLocation }: LocationChange): string[] | false {
 	if (!fromLocation || !pathChanged) return false
 
 	const from = depth(fromLocation.pathname)

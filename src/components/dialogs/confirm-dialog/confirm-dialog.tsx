@@ -1,6 +1,6 @@
 import { createCallable } from 'react-call'
 import { Button } from '@/components/ui/button'
-import { Dialog } from '@/components/ui/dialog'
+import { DIALOG_EXIT_MS, Dialog } from '@/components/ui/dialog'
 
 type ConfirmDialogProps = {
 	cancelLabel?: string
@@ -9,8 +9,6 @@ type ConfirmDialogProps = {
 	title: string
 	tone?: 'default' | 'danger'
 }
-
-const EXIT_TRANSITION_MS = 200
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Cancel comes first and takes focus, so Enter never confirms a
@@ -21,19 +19,10 @@ export const ConfirmDialog = createCallable<ConfirmDialogProps, boolean>(
 		<Dialog
 			actions={
 				<>
-					<Button
-						autoFocus
-						onClick={() => call.end(false)}
-						size="md"
-						variant="secondary"
-					>
+					<Button autoFocus onClick={() => call.end(false)} size="md" variant="secondary">
 						{cancelLabel ?? 'Cancel'}
 					</Button>
-					<Button
-						onClick={() => call.end(true)}
-						size="md"
-						variant={tone === 'danger' ? 'danger' : 'primary'}
-					>
+					<Button onClick={() => call.end(true)} size="md" variant={tone === 'danger' ? 'danger' : 'primary'}>
 						{confirmLabel}
 					</Button>
 				</>
@@ -44,5 +33,5 @@ export const ConfirmDialog = createCallable<ConfirmDialogProps, boolean>(
 			title={title}
 		/>
 	),
-	EXIT_TRANSITION_MS,
+	DIALOG_EXIT_MS,
 )

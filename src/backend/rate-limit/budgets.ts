@@ -1,4 +1,4 @@
-import type { SystemActor } from '../auth/actor'
+import type { SystemActor, UserActor } from '../auth/actor'
 
 export type Budget = {
 	durationSeconds: number
@@ -28,12 +28,12 @@ function perMinute(name: string, points: number, key: string): Budget {
 export const budgets = {
 	clientIp: (clientIp: string) => perMinute('ip', 600, clientIp),
 
-	dailyGenerations: (userId: string, limit: number): Budget => ({
+	dailyGenerations: ({ entitlements, userId }: UserActor): Budget => ({
 		durationSeconds: DAY,
 		exceededCode: 'quota_exceeded',
 		key: userId,
 		name: 'generationDay',
-		points: limit,
+		points: entitlements.dailyGenerations,
 	}),
 
 	// ═════════════════════════════════════════════════════════════════════════
@@ -42,11 +42,9 @@ export const budgets = {
 	// ═════════════════════════════════════════════════════════════════════════
 	generationApi: () => perMinute('upstream', 6, 'generation-api'),
 
-	generationsPerMinute: (userId: string) =>
-		perMinute('generationMinute', 4, userId),
+	generationsPerMinute: (userId: string) => perMinute('generationMinute', 4, userId),
 
-	system: (source: SystemActor['source'], clientIp: string) =>
-		perMinute('system', 300, `${source}:${clientIp}`),
+	system: (source: SystemActor['source'], clientIp: string) => perMinute('system', 300, `${source}:${clientIp}`),
 
 	user: (userId: string) => perMinute('user', 300, userId),
 }

@@ -10,13 +10,8 @@ export const Route = createFileRoute('/api/generate')({
 	server: {
 		handlers: {
 			POST: async ({ context, request }) => {
-				const command = generateCommandSchema.parse(
-					await readJsonBody(request, MAX_BODY_BYTES),
-				)
-				const events = await context.scope.cradle.generationService.start(
-					command,
-					request.signal,
-				)
+				const command = generateCommandSchema.parse(await readJsonBody(request, MAX_BODY_BYTES))
+				const events = await context.scope.cradle.generationService.start(command, request.signal)
 
 				return ndjsonResponse(events)
 			},

@@ -15,16 +15,18 @@ const LOAD_AHEAD_MARGIN = '0px 0px 480px 0px'
 // ═══════════════════════════════════════════════════════════════════════════
 export function useApplicationList(search: string) {
 	const query = useInfiniteQuery(applicationQueries.list(search))
-	const items = useDeferredValue(
-		query.data?.pages.flatMap((page) => page.items),
-	)
+	const items = useDeferredValue(query.data?.pages.flatMap((page) => page.items))
 	const isLoadingMore = useDeferredValue(query.isFetchingNextPage)
-	const canLoadMore =
-		query.hasNextPage &&
-		!query.isFetchingNextPage &&
-		!query.isFetchNextPageError
+	const canLoadMore = query.hasNextPage && !query.isFetchingNextPage && !query.isFetchNextPageError
+	// ═════════════════════════════════════════════════════════════════════════
+	//   Re-checked at the moment the sentinel is seen: the observer can fire
+	//   again before React has unmounted it, and a second fetchNextPage
+	//   would cancel the first and request the same page twice.
+	// ═════════════════════════════════════════════════════════════════════════
 	const observeSentinel = useOnVisible(() => {
-		void query.fetchNextPage()
+		if (query.hasNextPage && !query.isFetchingNextPage) {
+			query.fetchNextPage()
+		}
 	}, LOAD_AHEAD_MARGIN)
 
 	return {
@@ -32,8 +34,8 @@ export function useApplicationList(search: string) {
 		error: query.error,
 		failedToLoad: query.isError && !query.data,
 		failedToLoadMore: query.isFetchNextPageError,
-		isEmpty:
-			items?.length === 0 && !query.hasNextPage && !query.isPlaceholderData,
+		hasLoadedEverything: !query.hasNextPage && (query.data?.pages.length ?? 0) > 1,
+		isEmpty: items?.length === 0 && !query.hasNextPage && !query.isPlaceholderData,
 		isLoadingMore,
 		isStale: query.isPlaceholderData,
 		items,

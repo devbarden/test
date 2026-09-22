@@ -1,9 +1,5 @@
 import { useAuth } from '@clerk/tanstack-react-start'
-import {
-	FREE_ENTITLEMENTS,
-	type Subscription,
-	subscriptionFrom,
-} from '@/domain/billing/billing.catalog'
+import { FREE_ENTITLEMENTS, type Subscription, subscriptionFrom } from '@/domain/billing/billing.catalog'
 
 type ClientEntitlements = Subscription & { isLoaded: boolean }
 

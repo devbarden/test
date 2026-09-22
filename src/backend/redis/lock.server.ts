@@ -16,13 +16,7 @@ return 0`
 
 const NO_LOCK: Lock = { release: async () => {} }
 
-export function createLockService({
-	redis,
-	rootLogger,
-}: {
-	redis: Redis
-	rootLogger: Logger
-}) {
+export function createLockService({ redis, rootLogger }: { redis: Redis; rootLogger: Logger }) {
 	async function acquire(key: string, ttlMs: number): Promise<Lock | null> {
 		const token = randomUUID()
 

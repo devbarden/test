@@ -77,11 +77,7 @@
 		--color-accent-on-inverse: var(--palette-green-200);
 		--color-control-hover-on-inverse: rgb(255 255 255 / 0.08);
 
-		--gradient-ink: linear-gradient(
-			150deg,
-			var(--palette-green-700),
-			var(--palette-green-900)
-		);
+		--gradient-ink: linear-gradient(150deg, var(--palette-green-700), var(--palette-green-900));
 		--color-surface-ink-deep: var(--palette-green-950);
 		--color-mesh-1: var(--palette-green-600);
 		--color-mesh-2: var(--palette-green-400);
@@ -110,21 +106,15 @@
 		--ring-danger: 0 0 0 4px var(--palette-red-100);
 
 		--shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
-		--shadow-card:
-			0 1px 2px rgb(16 24 40 / 0.04), 0 16px 40px -24px rgb(16 24 40 / 0.24);
-		--shadow-card-hover:
-			0 1px 2px rgb(16 24 40 / 0.04), 0 24px 48px -24px rgb(16 24 40 / 0.32);
-		--shadow-raised:
-			0 2px 6px rgb(16 24 40 / 0.08), 0 32px 64px -32px rgb(16 24 40 / 0.45);
+		--shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 16px 40px -24px rgb(16 24 40 / 0.24);
+		--shadow-card-hover: 0 1px 2px rgb(16 24 40 / 0.04), 0 24px 48px -24px rgb(16 24 40 / 0.32);
+		--shadow-raised: 0 2px 6px rgb(16 24 40 / 0.08), 0 32px 64px -32px rgb(16 24 40 / 0.45);
 		--shadow-floating:
-			0 0 0 1px rgb(16 24 40 / 0.06), 0 10px 24px -14px rgb(16 24 40 / 0.28),
-			0 28px 56px -28px rgb(16 24 40 / 0.28);
+			0 0 0 1px rgb(16 24 40 / 0.06), 0 10px 24px -14px rgb(16 24 40 / 0.28), 0 28px 56px -28px rgb(16 24 40 / 0.28);
 		--shadow-toast: 0 12px 24px -4px rgb(16 24 40 / 0.18);
 		--shadow-orb: inset 0 -2px 32px rgb(16 24 40 / 0.08);
 
-		--font-text:
-			"Fixel Text", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-			sans-serif;
+		--font-text: "Fixel Text", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 		--font-display: "Fixel Display", var(--font-text);
 
 		--text-2xs: 0.6875rem;
@@ -155,39 +145,17 @@
 		--weight-medium: 500;
 		--weight-semibold: 600;
 
-		--type-body-xs:
-			var(--weight-regular) var(--text-xs) / var(--text-xs-leading)
-			var(--font-text);
-		--type-body-sm:
-			var(--weight-regular) var(--text-sm) / var(--text-sm-leading)
-			var(--font-text);
-		--type-body-md:
-			var(--weight-regular) var(--text-md) / var(--text-md-leading)
-			var(--font-text);
-		--type-body-lg:
-			var(--weight-regular) var(--text-lg) / var(--text-lg-leading)
-			var(--font-text);
-		--type-prose-sm:
-			var(--weight-regular) var(--text-sm) / var(--leading-relaxed)
-			var(--font-text);
-		--type-prose-md:
-			var(--weight-regular) var(--text-md) / var(--leading-relaxed)
-			var(--font-text);
-		--type-prose-lg:
-			var(--weight-regular) var(--text-lg) / var(--leading-relaxed)
-			var(--font-text);
-		--type-display-sm:
-			var(--weight-semibold) var(--display-sm) / var(--display-leading)
-			var(--font-display);
-		--type-display-md:
-			var(--weight-semibold) var(--display-md) / var(--display-md-leading)
-			var(--font-display);
-		--type-display-lg:
-			var(--weight-semibold) var(--display-lg) / var(--display-lg-leading)
-			var(--font-display);
-		--type-display-xl:
-			var(--weight-semibold) var(--display-xl) / var(--display-leading-tight)
-			var(--font-display);
+		--type-body-xs: var(--weight-regular) var(--text-xs) / var(--text-xs-leading) var(--font-text);
+		--type-body-sm: var(--weight-regular) var(--text-sm) / var(--text-sm-leading) var(--font-text);
+		--type-body-md: var(--weight-regular) var(--text-md) / var(--text-md-leading) var(--font-text);
+		--type-body-lg: var(--weight-regular) var(--text-lg) / var(--text-lg-leading) var(--font-text);
+		--type-prose-sm: var(--weight-regular) var(--text-sm) / var(--leading-relaxed) var(--font-text);
+		--type-prose-md: var(--weight-regular) var(--text-md) / var(--leading-relaxed) var(--font-text);
+		--type-prose-lg: var(--weight-regular) var(--text-lg) / var(--leading-relaxed) var(--font-text);
+		--type-display-sm: var(--weight-semibold) var(--display-sm) / var(--display-leading) var(--font-display);
+		--type-display-md: var(--weight-semibold) var(--display-md) / var(--display-md-leading) var(--font-display);
+		--type-display-lg: var(--weight-semibold) var(--display-lg) / var(--display-lg-leading) var(--font-display);
+		--type-display-xl: var(--weight-semibold) var(--display-xl) / var(--display-leading-tight) var(--font-display);
 
 		--space-1: 0.25rem;
 		--space-1-5: 0.375rem;
@@ -233,6 +201,8 @@
 		--duration-emphasized: 300ms;
 		--ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 		--ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+		--hover-lift-sm: -2px;
+		--hover-lift-md: -4px;
 
 		--z-behind: -1;
 		--z-raised: 1;

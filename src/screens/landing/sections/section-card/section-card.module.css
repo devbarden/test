@@ -1,0 +1,42 @@
+@layer screens {
+	.root {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+		padding: var(--space-6);
+		color: var(--color-text-primary);
+	}
+
+	.spacious {
+		padding-block: var(--space-8);
+	}
+
+	.head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-block-end: var(--space-3);
+	}
+
+	.iconChip {
+		--icon-size: var(--icon-lg);
+
+		display: grid;
+		place-items: center;
+		inline-size: 2.75rem;
+		block-size: 2.75rem;
+		color: var(--color-text-on-ink);
+		background: var(--gradient-ink);
+		border-radius: var(--radius-xl);
+	}
+
+	.title {
+		font: var(--type-body-lg);
+		font-weight: var(--weight-semibold);
+	}
+
+	.body {
+		font: var(--type-prose-sm);
+		color: var(--color-text-secondary);
+	}
+}

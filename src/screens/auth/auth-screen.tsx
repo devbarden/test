@@ -1,9 +1,9 @@
-import { SignIn } from '@clerk/tanstack-react-start'
 import { HomeLink } from '@/components/brand'
 import { ClerkBoundary } from '@/components/clerk-boundary'
-import { AuthPanel } from './auth-panel'
+import { AuthPanel } from './auth-panel/auth-panel'
 import styles from './auth-screen.module.css'
-import { MeshBackground } from './mesh-background'
+import { MeshBackground } from './mesh-background/mesh-background'
+import { SignInForm } from './sign-in-form/sign-in-form'
 
 export function AuthScreen() {
 	return (
@@ -15,13 +15,7 @@ export function AuthScreen() {
 						<HomeLink className={styles.mobileBrand} tone="inverse" />
 					</div>
 					<div className={styles.form}>
-						<SignIn
-							fallbackRedirectUrl="/app/applications"
-							path="/sign-in"
-							routing="path"
-							signUpFallbackRedirectUrl="/app/applications"
-							withSignUp
-						/>
+						<SignInForm />
 					</div>
 				</main>
 				<AuthPanel />

@@ -59,13 +59,8 @@ export function createApplicationService({
 		})
 	}
 
-	async function createLetter(
-		input: ApplicationInput,
-		letter: string,
-	): Promise<ApplicationDto> {
-		const created = await withRoom((tx) =>
-			applicationRepository.create(userId, { input, letter }, tx),
-		)
+	async function createLetter(input: ApplicationInput, letter: string): Promise<ApplicationDto> {
+		const created = await withRoom((tx) => applicationRepository.create(userId, { input, letter }, tx))
 
 		logger.info({ applicationId: created.id }, 'Application created')
 
@@ -77,11 +72,7 @@ export function createApplicationService({
 		input: ApplicationInput,
 		letter: string,
 	): Promise<ApplicationDto> {
-		const updated = await applicationRepository.updateLetter(
-			userId,
-			applicationId,
-			{ input, letter },
-		)
+		const updated = await applicationRepository.updateLetter(userId, applicationId, { input, letter })
 
 		if (!updated) throw notFound(applicationId)
 
@@ -108,13 +99,7 @@ export function createApplicationService({
 			return toApplicationDto(await findOwned(id))
 		},
 
-		async list({
-			cursor,
-			search = '',
-		}: {
-			cursor?: string
-			search?: string
-		}): Promise<ApplicationPage> {
+		async list({ cursor, search = '' }: { cursor?: string; search?: string }): Promise<ApplicationPage> {
 			const rows = await applicationRepository.listActive(userId, {
 				cursor,
 				take: APPLICATIONS_PAGE_SIZE + 1,
@@ -138,9 +123,7 @@ export function createApplicationService({
 		},
 
 		async restore(id: string): Promise<ApplicationDto> {
-			const restored = await withRoom((tx) =>
-				applicationRepository.restore(userId, id, tx),
-			)
+			const restored = await withRoom((tx) => applicationRepository.restore(userId, id, tx))
 
 			if (!restored) {
 				throw new NotFoundError(`Deleted application ${id} not found`)
@@ -151,14 +134,8 @@ export function createApplicationService({
 			return toApplicationDto(restored)
 		},
 
-		saveLetter({
-			applicationId,
-			input,
-			letter,
-		}: SaveLetterCommand): Promise<ApplicationDto> {
-			return applicationId
-				? replaceLetter(applicationId, input, letter)
-				: createLetter(input, letter)
+		saveLetter({ applicationId, input, letter }: SaveLetterCommand): Promise<ApplicationDto> {
+			return applicationId ? replaceLetter(applicationId, input, letter) : createLetter(input, letter)
 		},
 
 		async stats(): Promise<ApplicationStats> {

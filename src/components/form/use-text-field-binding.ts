@@ -13,8 +13,7 @@ export function useTextFieldBinding() {
 		control: {
 			name: field.name,
 			onBlur: field.handleBlur,
-			onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-				field.handleChange(event.target.value),
+			onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => field.handleChange(event.target.value),
 			value: field.state.value,
 		},
 		invalid: isTouched && errors.length > 0,

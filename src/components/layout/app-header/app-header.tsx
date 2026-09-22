@@ -16,11 +16,7 @@ export function AppHeader({ account, status }: AppHeaderProps) {
 			<div className={styles.actions}>
 				{status}
 				<div className={styles.controls}>
-					<IconButtonLink
-						icon={<HouseIcon />}
-						label="All applications"
-						to="/app/applications"
-					/>
+					<IconButtonLink icon={<HouseIcon />} label="All applications" to="/app/applications" />
 					{account && <div className={styles.account}>{account}</div>}
 				</div>
 			</div>

@@ -20,10 +20,7 @@ export function useCopyToClipboard() {
 			setStatus('failed')
 		}
 
-		resetTimer.current = setTimeout(
-			() => setStatus('idle'),
-			FEEDBACK_DURATION_MS,
-		)
+		resetTimer.current = setTimeout(() => setStatus('idle'), FEEDBACK_DURATION_MS)
 	}
 
 	return { copy, status }

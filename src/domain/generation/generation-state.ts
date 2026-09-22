@@ -5,6 +5,7 @@ export type GenerationState =
 	| { status: 'waiting' }
 	| { status: 'streaming'; text: string }
 	| { status: 'saving'; text: string }
+	| { status: 'done'; text: string }
 	| { error: ApiError; status: 'failed'; text: string }
 	| { status: 'stopped'; text: string }
 
@@ -18,17 +19,12 @@ export type GenerationAction =
 
 export const IDLE_GENERATION: GenerationState = { status: 'idle' }
 
-export function generationReducer(
-	state: GenerationState,
-	action: GenerationAction,
-): GenerationState {
+export function generationReducer(state: GenerationState, action: GenerationAction): GenerationState {
 	switch (action.type) {
 		case 'start':
 			return { status: 'waiting' }
 		case 'stop':
-			return isStoppable(state)
-				? { status: 'stopped', text: textOf(state) }
-				: state
+			return isStoppable(state) ? { status: 'stopped', text: textOf(state) } : state
 	}
 
 	// ═══════════════════════════════════════════════════════════════════════
@@ -47,18 +43,14 @@ export function generationReducer(
 		case 'saving':
 			return { status: 'saving', text: textOf(state) }
 		case 'complete':
-			return IDLE_GENERATION
+			return { status: 'done', text: textOf(state) }
 		case 'fail':
 			return { error: action.error, status: 'failed', text: textOf(state) }
 	}
 }
 
 export function isGenerating(state: GenerationState): boolean {
-	return (
-		state.status === 'waiting' ||
-		state.status === 'streaming' ||
-		state.status === 'saving'
-	)
+	return state.status === 'waiting' || state.status === 'streaming' || state.status === 'saving'
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

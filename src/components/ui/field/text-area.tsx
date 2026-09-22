@@ -8,11 +8,5 @@ type TextAreaProps = ComponentProps<'textarea'>
 export function TextArea({ className, ...props }: TextAreaProps) {
 	const controlProps = useFieldControlProps()
 
-	return (
-		<textarea
-			{...props}
-			{...controlProps}
-			className={clsx(styles.control, styles.textArea, className)}
-		/>
-	)
+	return <textarea {...props} {...controlProps} className={clsx(styles.control, styles.textArea, className)} />
 }

@@ -1,7 +1,4 @@
-import {
-	PayloadTooLargeError,
-	ValidationError,
-} from '../errors/app-error.server'
+import { PayloadTooLargeError, ValidationError } from '../errors/app-error.server'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   `duplex` is required to send a streamed body and is in the Fetch
@@ -13,10 +10,7 @@ declare global {
 	}
 }
 
-export async function readJsonBody(
-	request: Request,
-	maxBytes: number,
-): Promise<unknown> {
+export async function readJsonBody(request: Request, maxBytes: number): Promise<unknown> {
 	if (!request.headers.get('content-type')?.includes('application/json')) {
 		throw new ValidationError('Expected an application/json body')
 	}
@@ -41,7 +35,7 @@ export function withBodyLimit(request: Request, maxBytes: number): Request {
 	//   Not `new Request(request, …)`: the server's Request cannot be copied.
 	// ═════════════════════════════════════════════════════════════════════════
 	return new Request(request.url, {
-		body: request.body.pipeThrough(byteLimit(maxBytes)),
+		body: limitedBody(request.body, maxBytes),
 		duplex: 'half',
 		headers: request.headers,
 		method: request.method,
@@ -49,16 +43,29 @@ export function withBodyLimit(request: Request, maxBytes: number): Request {
 	})
 }
 
-function byteLimit(maxBytes: number) {
+// ═══════════════════════════════════════════════════════════════════════════
+//   Never cancels the source: cancelling Node's request stream while the
+//   client is still sending crashes the process (ERR_INVALID_STATE).
+// ═══════════════════════════════════════════════════════════════════════════
+function limitedBody(body: ReadableStream<Uint8Array>, maxBytes: number): ReadableStream<Uint8Array> {
+	const reader = body.getReader()
 	let received = 0
 
-	return new TransformStream<Uint8Array, Uint8Array>({
-		transform(chunk, controller) {
-			received += chunk.byteLength
+	return new ReadableStream<Uint8Array>({
+		cancel: () => reader.releaseLock(),
+		async pull(controller) {
+			const { done, value } = await reader.read()
 
-			if (received > maxBytes) throw new PayloadTooLargeError()
+			if (done) return controller.close()
 
-			controller.enqueue(chunk)
+			received += value.byteLength
+
+			if (received > maxBytes) {
+				reader.releaseLock()
+				return controller.error(new PayloadTooLargeError())
+			}
+
+			controller.enqueue(value)
 		},
 	})
 }

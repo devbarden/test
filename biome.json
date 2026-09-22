@@ -27,6 +27,9 @@
 			"!src/generated"
 		]
 	},
+	"formatter": {
+		"lineWidth": 120
+	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "single",
@@ -36,6 +39,9 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"complexity": {
+				"noVoid": "error"
+			},
 			"recommended": true,
 			"suspicious": {
 				"noConsole": {
@@ -59,6 +65,33 @@
 			}
 		},
 		{
+			"includes": ["src/**/*.ts", "src/**/*.tsx", "!src/routes/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useFilenamingConvention": {
+							"level": "error",
+							"options": {
+								"filenameCases": ["kebab-case"],
+								"requireAscii": true
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/domain/**", "src/features/**", "src/screens/**"],
+			"linter": {
+				"rules": {
+					"performance": {
+						"noBarrelFile": "error",
+						"noReExportAll": "error"
+					}
+				}
+			}
+		},
+		{
 			"includes": ["src/components/**", "src/hooks/**", "src/lib/**"],
 			"linter": {
 				"rules": {
@@ -68,14 +101,8 @@
 							"options": {
 								"patterns": [
 									{
-										"group": [
-											"@/features/**",
-											"@/screens/**",
-											"@/routes/**",
-											"@/domain/**",
-											"@/backend/**"
-										],
-										"message": "Shared code knows no domain, feature, screen or backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
+										"group": ["@/backend/**", "@/domain/**", "@/features/**", "@/routes/**", "@/screens/**"],
+										"message": "Shared code knows no domain, feature, screen or backend (see Architecture in CLAUDE.md)."
 									}
 								]
 							}
@@ -96,13 +123,13 @@
 									{
 										"group": [
 											"@/backend/**",
-											"@/features/**",
-											"@/screens/**",
-											"@/routes/**",
 											"@/components/**",
-											"@/hooks/**"
+											"@/features/**",
+											"@/hooks/**",
+											"@/routes/**",
+											"@/screens/**"
 										],
-										"message": "Domain code is pure: no React, no server, no UI. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
+										"message": "Domain code is pure and imports nothing but lib/ (see Architecture in CLAUDE.md)."
 									}
 								]
 							}
@@ -121,14 +148,8 @@
 							"options": {
 								"patterns": [
 									{
-										"group": [
-											"@/features/**",
-											"@/screens/**",
-											"@/routes/**",
-											"@/components/**",
-											"@/hooks/**"
-										],
-										"message": "The backend knows no UI. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
+										"group": ["@/components/**", "@/features/**", "@/hooks/**", "@/routes/**", "@/screens/**"],
+										"message": "The backend knows no UI: it imports only domain/ and lib/ (see Architecture in CLAUDE.md)."
 									}
 								]
 							}
@@ -138,7 +159,7 @@
 			}
 		},
 		{
-			"includes": ["src/features/applications/**"],
+			"includes": ["src/features/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -147,16 +168,12 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/screens/**", "@/routes/**"],
-										"message": "A feature never reaches up into a screen or a route. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
+										"group": ["@/routes/**", "@/screens/**"],
+										"message": "A feature never reaches up into a screen or a route."
 									},
 									{
-										"group": [
-											"@/features/billing/**",
-											"@/features/generation/**",
-											"@/features/marketing/**"
-										],
-										"message": "Features are combined in the screen that needs them, not inside each other: take a callback instead."
+										"group": ["@/features/**"],
+										"message": "A feature imports its own files relatively and never another feature: features are combined in the screen that needs them, so take a callback instead."
 									},
 									{
 										"group": ["@/backend/**", "!@/backend/middleware/**"],
@@ -170,7 +187,7 @@
 			}
 		},
 		{
-			"includes": ["src/features/billing/**"],
+			"includes": ["src/screens/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -179,264 +196,12 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["@/screens/**", "@/routes/**"],
-										"message": "A feature never reaches up into a screen or a route. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
+										"group": ["@/backend/**", "@/routes/**"],
+										"message": "A screen never imports a route or the backend."
 									},
 									{
-										"group": [
-											"@/features/applications/**",
-											"@/features/generation/**",
-											"@/features/marketing/**"
-										],
-										"message": "Features are combined in the screen that needs them, not inside each other: take a callback instead."
-									},
-									{
-										"group": ["@/backend/**", "!@/backend/middleware/**"],
-										"message": "A feature reaches the server only through a server function and its middleware."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/features/generation/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/screens/**", "@/routes/**"],
-										"message": "A feature never reaches up into a screen or a route. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/features/applications/**",
-											"@/features/billing/**",
-											"@/features/marketing/**"
-										],
-										"message": "Features are combined in the screen that needs them, not inside each other: take a callback instead."
-									},
-									{
-										"group": ["@/backend/**", "!@/backend/middleware/**"],
-										"message": "A feature reaches the server only through a server function and its middleware."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/features/marketing/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/screens/**", "@/routes/**"],
-										"message": "A feature never reaches up into a screen or a route. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/features/applications/**",
-											"@/features/billing/**",
-											"@/features/generation/**"
-										],
-										"message": "Features are combined in the screen that needs them, not inside each other: take a callback instead."
-									},
-									{
-										"group": ["@/backend/**", "!@/backend/middleware/**"],
-										"message": "A feature reaches the server only through a server function and its middleware."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/application/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/auth/**",
-											"@/screens/billing/**",
-											"@/screens/dashboard/**",
-											"@/screens/landing/**",
-											"@/screens/workspace/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/auth/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/application/**",
-											"@/screens/billing/**",
-											"@/screens/dashboard/**",
-											"@/screens/landing/**",
-											"@/screens/workspace/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/billing/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/application/**",
-											"@/screens/auth/**",
-											"@/screens/dashboard/**",
-											"@/screens/landing/**",
-											"@/screens/workspace/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/dashboard/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/application/**",
-											"@/screens/auth/**",
-											"@/screens/billing/**",
-											"@/screens/landing/**",
-											"@/screens/workspace/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/landing/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/application/**",
-											"@/screens/auth/**",
-											"@/screens/billing/**",
-											"@/screens/dashboard/**",
-											"@/screens/workspace/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/screens/workspace/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"patterns": [
-									{
-										"group": ["@/routes/**", "@/backend/**"],
-										"message": "A screen never imports a route or the backend. Layers: routes → screens → features → domain · components · hooks · lib; backend → domain · lib (see CLAUDE.md)."
-									},
-									{
-										"group": [
-											"@/screens/application/**",
-											"@/screens/auth/**",
-											"@/screens/billing/**",
-											"@/screens/dashboard/**",
-											"@/screens/landing/**"
-										],
-										"message": "A screen never imports another screen: move the shared part into a feature or components."
+										"group": ["@/screens/**"],
+										"message": "A screen imports its own files relatively and never another screen: move the shared part into a feature or components."
 									}
 								]
 							}

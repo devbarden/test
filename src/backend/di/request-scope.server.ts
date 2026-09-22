@@ -9,9 +9,7 @@ function createRequestScope(actor: Actor): AppContainer {
 	const scope = container.createScope()
 	const requestId = getRequestContext()?.requestId ?? randomUUID()
 	const logger = container.cradle.rootLogger.child(
-		actor.type === 'user'
-			? { requestId, userId: actor.userId }
-			: { requestId, source: actor.source },
+		actor.type === 'user' ? { requestId, userId: actor.userId } : { requestId, source: actor.source },
 	)
 
 	scope.register({

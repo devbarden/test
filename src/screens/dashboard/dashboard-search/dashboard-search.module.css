@@ -1,0 +1,11 @@
+@layer screens {
+	.root {
+		display: block;
+		flex: 0 1 20rem;
+		min-inline-size: 10rem;
+
+		@media (width < 30rem) {
+			flex-basis: 100%;
+		}
+	}
+}

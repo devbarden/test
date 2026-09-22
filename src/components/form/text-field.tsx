@@ -2,10 +2,7 @@ import type { ComponentProps } from 'react'
 import { Field, Input } from '@/components/ui/field'
 import { useTextFieldBinding } from './use-text-field-binding'
 
-type TextFieldProps = Omit<
-	ComponentProps<'input'>,
-	'name' | 'onBlur' | 'onChange' | 'value'
-> & {
+type TextFieldProps = Omit<ComponentProps<'input'>, 'name' | 'onBlur' | 'onChange' | 'value'> & {
 	label: string
 }
 

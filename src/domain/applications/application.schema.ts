@@ -14,8 +14,7 @@ export const INPUT_LIMITS = {
 //   `max` runs before `trim` so the button agrees with the raw-length
 //   counter under the textarea.
 // ═══════════════════════════════════════════════════════════════════════════
-const text = (maxLength: number) =>
-	z.string().max(maxLength).overwrite(toPlainText).trim()
+const text = (maxLength: number) => z.string().max(maxLength).overwrite(toPlainText).trim()
 
 export const applicationInputSchema = z.object({
 	company: text(INPUT_LIMITS.company).min(1),

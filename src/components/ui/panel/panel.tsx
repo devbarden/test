@@ -17,20 +17,9 @@ const TONE_CLASS = {
 	success: styles.success,
 } satisfies Record<PanelTone, string | undefined>
 
-export function Panel({
-	as: Element = 'div',
-	className,
-	interactive = false,
-	tone = 'muted',
-	...props
-}: PanelProps) {
+export function Panel({ as: Element = 'div', className, interactive = false, tone = 'muted', ...props }: PanelProps) {
 	return createElement(Element, {
 		...props,
-		className: clsx(
-			styles.root,
-			TONE_CLASS[tone],
-			interactive && styles.interactive,
-			className,
-		),
+		className: clsx(styles.root, TONE_CLASS[tone], interactive && styles.interactive, className),
 	})
 }

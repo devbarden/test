@@ -1,0 +1,22 @@
+@layer screens {
+	.root {
+		padding-block: var(--space-10);
+		scroll-margin-block-start: var(--space-24);
+
+		@media (width >= 48rem) {
+			padding-block: var(--space-14);
+		}
+	}
+
+	.ink {
+		padding: var(--space-14) var(--space-6);
+		color: var(--color-text-on-ink);
+		background: var(--gradient-ink);
+		border-radius: var(--radius-3xl);
+		box-shadow: var(--shadow-raised);
+
+		@media (width >= 48rem) {
+			padding: var(--space-20) var(--space-12);
+		}
+	}
+}

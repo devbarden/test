@@ -1,9 +1,4 @@
-import {
-	createRootRoute,
-	HeadContent,
-	Outlet,
-	Scripts,
-} from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { NotFound, RouteError } from '@/components/fallbacks'
 import { StandalonePage } from '@/components/layout/standalone-page'

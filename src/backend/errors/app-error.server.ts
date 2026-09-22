@@ -22,9 +22,7 @@ export class AppError extends Error {
 	}
 
 	toPayload(): ApiError {
-		return this.retryAfterSeconds
-			? { code: this.code, retryAfterSeconds: this.retryAfterSeconds }
-			: { code: this.code }
+		return this.retryAfterSeconds ? { code: this.code, retryAfterSeconds: this.retryAfterSeconds } : { code: this.code }
 	}
 }
 
@@ -71,21 +69,13 @@ export class PayloadTooLargeError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-	constructor(
-		code: 'rate_limited' | 'quota_exceeded',
-		retryAfterSeconds: number,
-		message: string = code,
-	) {
+	constructor(code: 'rate_limited' | 'quota_exceeded', retryAfterSeconds: number, message: string = code) {
 		super(code, 429, message, { retryAfterSeconds })
 	}
 }
 
 export class UpstreamError extends AppError {
-	constructor(
-		code: 'unavailable' | 'interrupted' | 'rate_limited',
-		message: string,
-		options?: AppErrorOptions,
-	) {
+	constructor(code: 'unavailable' | 'interrupted' | 'rate_limited', message: string, options?: AppErrorOptions) {
 		super(code, code === 'rate_limited' ? 429 : 502, message, options)
 	}
 }

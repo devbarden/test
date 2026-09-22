@@ -12,16 +12,11 @@ export function createApplicationMaintenanceService({
 		async eraseUser(userId: string): Promise<number> {
 			const count = await applicationRepository.deleteAllForUser(userId)
 
-			logger.info(
-				{ count, userId },
-				'Erased all applications of a deleted user',
-			)
+			logger.info({ count, userId }, 'Erased all applications of a deleted user')
 
 			return count
 		},
 	}
 }
 
-export type ApplicationMaintenanceService = ReturnType<
-	typeof createApplicationMaintenanceService
->
+export type ApplicationMaintenanceService = ReturnType<typeof createApplicationMaintenanceService>

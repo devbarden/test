@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import styles from './meter.module.css'
+import { MeterValue, meterRatio } from './meter-value'
 
 type MeterProps = {
 	label: string
@@ -9,7 +10,7 @@ type MeterProps = {
 
 export function Meter({ label, max, value }: MeterProps) {
 	const valueText = `${value} of ${max}`
-	const ratio = max > 0 ? Math.min(value / max, 1) : 0
+	const ratio = meterRatio(value, max)
 
 	return (
 		<div className={styles.root}>
@@ -17,19 +18,9 @@ export function Meter({ label, max, value }: MeterProps) {
 				<span className={styles.label}>{label}</span>
 				<span className={styles.value}>{valueText}</span>
 			</div>
-			<meter
-				aria-label={label}
-				aria-valuetext={valueText}
-				className="visually-hidden"
-				max={max}
-				min={0}
-				value={Math.min(value, max)}
-			/>
+			<MeterValue label={label} max={max} value={value} valueText={valueText} />
 			<div aria-hidden="true" className={styles.track}>
-				<span
-					className={clsx(styles.fill, ratio >= 1 && styles.full)}
-					style={{ inlineSize: `${ratio * 100}%` }}
-				/>
+				<span className={clsx(styles.fill, ratio >= 1 && styles.full)} style={{ inlineSize: `${ratio * 100}%` }} />
 			</div>
 		</div>
 	)

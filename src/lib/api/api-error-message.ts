@@ -7,13 +7,13 @@ export function apiErrorMessage(error: ApiError): string {
 				? `Too many letters at once. Try again in ${error.retryAfterSeconds} seconds.`
 				: 'Too many letters at once. Try again in a minute.'
 		case 'quota_exceeded':
-			return 'You have used today’s letters on your plan. Come back tomorrow or upgrade to Pro for more.'
+			return 'You have used your daily letters. New ones arrive within 24 hours, or upgrade to Pro for more.'
 		case 'generation_in_progress':
-			return 'A letter is already being written in another tab. Wait for it to finish.'
+			return 'Another letter is still being written. Wait for it to finish, then try again.'
 		case 'application_limit_reached':
 			return 'You have reached the number of saved applications on your plan. Delete a few or upgrade to Pro.'
 		case 'interrupted':
-			return 'The connection dropped before the letter was finished. Nothing was saved — please try again.'
+			return 'The letter could not be finished. Nothing was saved — please try again.'
 		case 'unavailable':
 			return 'The writing service is unavailable right now. Please try again in a moment.'
 		case 'save_failed':

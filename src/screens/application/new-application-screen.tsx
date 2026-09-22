@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { ApplicationEditor } from './editor/application-editor'
+import { ApplicationEditor } from './editor/application-editor/application-editor'
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Replaces /new in history and keeps scroll, skipping the transition and

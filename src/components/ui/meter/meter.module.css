@@ -21,6 +21,7 @@
 		font: var(--type-body-md);
 		font-weight: var(--weight-medium);
 		color: var(--color-text-primary);
+		white-space: nowrap;
 	}
 
 	.track {
@@ -28,6 +29,11 @@
 		overflow: hidden;
 		background: var(--color-progress-todo);
 		border-radius: var(--radius-full);
+
+		@media (forced-colors: active) {
+			outline: 1px solid CanvasText;
+			outline-offset: -1px;
+		}
 	}
 
 	.fill {
@@ -39,6 +45,11 @@
 
 		&.full {
 			background: var(--color-meter-spent);
+		}
+
+		@media (forced-colors: active) {
+			forced-color-adjust: none;
+			background: CanvasText;
 		}
 	}
 }

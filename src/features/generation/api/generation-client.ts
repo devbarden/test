@@ -61,11 +61,7 @@ export async function* requestLetter(
 	throw new LetterGenerationFailure({ code: 'interrupted' })
 }
 
-async function postCommand(
-	command: GenerateCommand,
-	connection: AbortSignal,
-	stop: AbortSignal,
-): Promise<Response> {
+async function postCommand(command: GenerateCommand, connection: AbortSignal, stop: AbortSignal): Promise<Response> {
 	try {
 		return await fetch(GENERATION_ENDPOINT, {
 			body: JSON.stringify(command),
@@ -93,10 +89,7 @@ function createIdleAbort(parent: AbortSignal, timeoutMs: number) {
 	const reset = () => {
 		clearTimeout(timer)
 		timer = setTimeout(
-			() =>
-				controller.abort(
-					new DOMException(`No data for ${timeoutMs} ms`, 'TimeoutError'),
-				),
+			() => controller.abort(new DOMException(`No data for ${timeoutMs} ms`, 'TimeoutError')),
 			timeoutMs,
 		)
 	}
@@ -116,12 +109,8 @@ function createIdleAbort(parent: AbortSignal, timeoutMs: number) {
 	}
 }
 
-async function failureFromResponse(
-	response: Response,
-): Promise<LetterGenerationFailure> {
-	const body = apiErrorBodySchema.safeParse(
-		await response.json().catch(() => null),
-	)
+async function failureFromResponse(response: Response): Promise<LetterGenerationFailure> {
+	const body = apiErrorBodySchema.safeParse(await response.json().catch(() => null))
 
 	if (body.success) return new LetterGenerationFailure(body.data.error)
 
@@ -133,9 +122,7 @@ async function failureFromResponse(
 // ═══════════════════════════════════════════════════════════════════════════
 //   A reader loop: Safari got async iteration of streams late.
 // ═══════════════════════════════════════════════════════════════════════════
-async function* readLines(
-	body: NonNullable<Response['body']>,
-): AsyncGenerator<string> {
+async function* readLines(body: NonNullable<Response['body']>): AsyncGenerator<string> {
 	const reader = body.pipeThrough(new TextDecoderStream()).getReader()
 	let buffer = ''
 

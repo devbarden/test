@@ -2,9 +2,7 @@ import type { ComponentProps, MouseEvent } from 'react'
 import { ButtonContent, type ButtonContentProps } from './button-content'
 import { type ButtonStyleProps, buttonClassName } from './button-styles'
 
-type ButtonProps = ButtonStyleProps &
-	ButtonContentProps &
-	Omit<ComponentProps<'button'>, keyof ButtonContentProps>
+type ButtonProps = ButtonStyleProps & ButtonContentProps & Omit<ComponentProps<'button'>, keyof ButtonContentProps>
 
 // ═══════════════════════════════════════════════════════════════════════════
 //   Loading is not disabled: a disabled button leaves the tab order and
@@ -38,10 +36,7 @@ export function Button({
 			{...props}
 			aria-busy={loading || undefined}
 			aria-disabled={loading || undefined}
-			className={buttonClassName(
-				{ fullWidth, shape, size, variant },
-				className,
-			)}
+			className={buttonClassName({ fullWidth, shape, size, variant }, className)}
 			onClick={handleClick}
 			type={type}
 		>

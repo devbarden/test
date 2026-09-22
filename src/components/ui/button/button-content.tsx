@@ -10,12 +10,7 @@ export type ButtonContentProps = {
 	loading?: boolean
 }
 
-export function ButtonContent({
-	children,
-	iconEnd,
-	iconStart,
-	loading = false,
-}: ButtonContentProps) {
+export function ButtonContent({ children, iconEnd, iconStart, loading = false }: ButtonContentProps) {
 	return (
 		<span className={styles.content}>
 			<span className={clsx(styles.row, loading && styles.concealed)}>

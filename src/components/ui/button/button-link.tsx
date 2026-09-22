@@ -19,13 +19,7 @@ function ButtonAnchor({
 	...props
 }: ButtonAnchorProps) {
 	return (
-		<a
-			{...props}
-			className={buttonClassName(
-				{ fullWidth, shape, size, variant },
-				className,
-			)}
-		>
+		<a {...props} className={buttonClassName({ fullWidth, shape, size, variant }, className)}>
 			<ButtonContent iconEnd={iconEnd} iconStart={iconStart}>
 				{children}
 			</ButtonContent>

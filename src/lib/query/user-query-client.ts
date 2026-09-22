@@ -1,11 +1,11 @@
-import { dehydrate, hydrate, type QueryClient } from '@tanstack/react-query'
+import { dehydrate, hashKey, hydrate, type InfiniteData, type QueryClient, type QueryKey } from '@tanstack/react-query'
 import { clearCaches, loadCache, saveCache } from './cache-storage'
 import { createQueryClient } from './query-client'
 
 const SAVE_DELAY_MS = 500
 
 export type PersistedQueries = {
-	roots: readonly string[]
+	keys: readonly QueryKey[]
 	version: string
 }
 
@@ -22,24 +22,13 @@ let session: Session | undefined
 //   session, and a remount must find the same cache. A different user gets
 //   a fresh client; the previous user's saved cache stays theirs.
 // ═══════════════════════════════════════════════════════════════════════════
-export function getUserQueryClient(
-	userId: string,
-	persisted: PersistedQueries,
-): QueryClient {
-	if (session?.userId === userId) return session.queryClient
-
-	endSession()
-
-	const queryClient = createQueryClient()
-
-	restore(queryClient, userId, persisted)
-	session = {
-		queryClient,
-		stopSaving: saveOnChange(queryClient, userId, persisted),
-		userId,
+export function getUserQueryClient(userId: string, persisted: PersistedQueries): QueryClient {
+	if (session?.userId !== userId) {
+		endSession()
+		session = startSession(userId, persisted)
 	}
 
-	return queryClient
+	return session.queryClient
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -51,56 +40,97 @@ export function disposeUserQueryClient(): void {
 	clearCaches()
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   Restored synchronously, before the first render, so the letters are on
+//   screen at once; then marked stale, so each revalidates on first use.
+// ═══════════════════════════════════════════════════════════════════════════
+function startSession(userId: string, persisted: PersistedQueries): Session {
+	const queryClient = createQueryClient()
+	const saved = loadCache(userId, persisted.version)
+
+	if (saved) {
+		hydrate(queryClient, saved)
+		queryClient.invalidateQueries({ refetchType: 'none' })
+	}
+
+	return {
+		queryClient,
+		stopSaving: saveOnChange(queryClient, userId, persisted),
+		userId,
+	}
+}
+
 function endSession(): void {
 	session?.stopSaving()
 	session?.queryClient.clear()
 	session = undefined
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//   Synchronous, before the first render, so the letters are on screen at
-//   once instead of after a fetch; then marked stale, so each restored query
-//   revalidates the first time it is used.
-// ═══════════════════════════════════════════════════════════════════════════
-function restore(
-	queryClient: QueryClient,
-	userId: string,
-	{ version }: PersistedQueries,
-): void {
-	const state = loadCache(userId, version)
-
-	if (!state) return
-
-	hydrate(queryClient, state)
-	void queryClient.invalidateQueries({ refetchType: 'none' })
-}
-
-function saveOnChange(
-	queryClient: QueryClient,
-	userId: string,
-	{ roots, version }: PersistedQueries,
-): () => void {
+function saveOnChange(queryClient: QueryClient, userId: string, { keys, version }: PersistedQueries): () => void {
+	const queryCache = queryClient.getQueryCache()
+	const hashes = new Set(keys.map(hashKey))
 	let timer: ReturnType<typeof setTimeout> | undefined
 
 	const save = () => {
+		clearTimeout(timer)
 		timer = undefined
+
+		const queries = queryCache.getAll().filter((query) => hashes.has(query.queryHash))
+
+		// ═════════════════════════════════════════════════════════════════════
+		//   A failed revalidation (offline, server down) keeps the last good
+		//   snapshot: saving now would drop the list from it.
+		// ═════════════════════════════════════════════════════════════════════
+		if (queries.some((query) => query.state.status === 'error')) return
+
 		saveCache(
 			userId,
 			version,
 			dehydrate(queryClient, {
-				shouldDehydrateQuery: (query) =>
-					query.state.status === 'success' &&
-					roots.includes(String(query.queryKey[0])),
+				serializeData: firstPageOnly,
+				shouldDehydrateQuery: (query) => queries.includes(query) && query.state.status === 'success',
 			}),
 		)
 	}
+	const flush = () => {
+		if (timer) save()
+	}
 
-	const unsubscribe = queryClient.getQueryCache().subscribe(() => {
-		timer ??= setTimeout(save, SAVE_DELAY_MS)
+	const unsubscribe = queryCache.subscribe(({ query }) => {
+		if (hashes.has(query.queryHash)) timer ??= setTimeout(save, SAVE_DELAY_MS)
 	})
+
+	window.addEventListener('pagehide', flush)
 
 	return () => {
 		clearTimeout(timer)
 		unsubscribe()
+		window.removeEventListener('pagehide', flush)
 	}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   An infinite query is saved at its first page: a tab reopens at the top
+//   and scrolls the rest in, while every page scrolled through would grow
+//   the snapshot towards the storage quota and lengthen the refetch that
+//   revalidates it.
+// ═══════════════════════════════════════════════════════════════════════════
+function firstPageOnly(data: unknown): unknown {
+	if (!isInfiniteData(data)) return data
+
+	return {
+		pageParams: data.pageParams.slice(0, 1),
+		pages: data.pages.slice(0, 1),
+	}
+}
+
+function isInfiniteData(data: unknown): data is InfiniteData<unknown> {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		'pages' in data &&
+		Array.isArray(data.pages) &&
+		'pageParams' in data &&
+		Array.isArray(data.pageParams)
+	)
 }

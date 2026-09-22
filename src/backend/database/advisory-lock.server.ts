@@ -4,10 +4,7 @@ import type { PrismaClient } from './prisma.server'
 // ═══════════════════════════════════════════════════════════════════════════
 //   Released by COMMIT or ROLLBACK, so a crash cannot leave it held.
 // ═══════════════════════════════════════════════════════════════════════════
-async function lockUntilCommit(
-	tx: Prisma.TransactionClient,
-	key: string,
-): Promise<void> {
+async function lockUntilCommit(tx: Prisma.TransactionClient, key: string): Promise<void> {
 	await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`
 }
 

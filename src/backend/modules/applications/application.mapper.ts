@@ -1,9 +1,5 @@
 import type { ApplicationDto } from '@/domain/applications/application.schema'
-import {
-	DEFAULT_LETTER_TONE,
-	isLetterTone,
-	type LetterTone,
-} from '@/domain/applications/application-tone'
+import { DEFAULT_LETTER_TONE, isLetterTone, type LetterTone } from '@/domain/applications/application-tone'
 import type { Application } from '@/generated/prisma/client'
 
 export function toApplicationDto(row: Application): ApplicationDto {

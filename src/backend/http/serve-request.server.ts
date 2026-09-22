@@ -5,10 +5,7 @@ import type { Logger } from '../observability/logger.server'
 import { budgets } from '../rate-limit/budgets'
 import type { RateLimiter } from '../rate-limit/rate-limiter.server'
 import { withBodyLimit } from './request-body.server'
-import {
-	requestContextFrom,
-	runWithRequestContext,
-} from './request-context.server'
+import { requestContextFrom, runWithRequestContext } from './request-context.server'
 import { withSecurityHeaders } from './security-headers.server'
 
 type Deps = {
@@ -17,11 +14,7 @@ type Deps = {
 	rootLogger: Logger
 }
 
-async function admit(
-	incoming: Request,
-	clientIp: string,
-	{ config, rateLimiter }: Deps,
-): Promise<Request> {
+async function admit(incoming: Request, clientIp: string, { config, rateLimiter }: Deps): Promise<Request> {
 	const request = withBodyLimit(incoming, config.http.maxRequestBodyBytes)
 
 	// ═════════════════════════════════════════════════════════════════════════
@@ -46,9 +39,7 @@ export function serveRequest(
 	return runWithRequestContext(context, async () => {
 		const response = await admit(request, clientIp, deps)
 			.then(handle)
-			.catch((error: unknown) =>
-				errorResponse(logAndNormalizeError(error, logger)),
-			)
+			.catch((error: unknown) => errorResponse(logAndNormalizeError(error, logger)))
 
 		return withSecurityHeaders(response, {
 			isProduction: deps.config.isProduction,

@@ -9,18 +9,13 @@ import {
 } from '@/domain/generation/generation-state'
 import type { GenerateCommand } from '@/domain/generation/protocol'
 import type { ApiError } from '@/lib/api/api-error'
-import {
-	LetterGenerationFailure,
-	requestLetter,
-} from '../api/generation-client'
+import { LetterGenerationFailure, requestLetter } from '../api/generation-client'
 
 type GenerateOptions = {
 	onComplete: (application: ApplicationDto) => void
 }
 
-export type GenerationResult =
-	| { outcome: 'aborted' | 'completed' }
-	| { error: ApiError; outcome: 'failed' }
+export type GenerationResult = { outcome: 'aborted' | 'completed' } | { error: ApiError; outcome: 'failed' }
 
 export function useLetterGeneration() {
 	const [state, dispatch] = useReducer(generationReducer, IDLE_GENERATION)
@@ -28,21 +23,13 @@ export function useLetterGeneration() {
 
 	useEffect(() => () => controllerRef.current?.abort(), [])
 
-	const generate = async (
-		command: GenerateCommand,
-		options: GenerateOptions,
-	): Promise<GenerationResult> => {
+	const generate = async (command: GenerateCommand, options: GenerateOptions): Promise<GenerationResult> => {
 		controllerRef.current?.abort()
 
 		const controller = new AbortController()
 		controllerRef.current = controller
 
-		const outcome = await streamLetter(
-			command,
-			controller.signal,
-			dispatch,
-			options,
-		)
+		const outcome = await streamLetter(command, controller.signal, dispatch, options)
 
 		if (controllerRef.current === controller) controllerRef.current = null
 
@@ -92,10 +79,7 @@ async function streamLetter(
 	} catch (cause) {
 		if (signal.aborted) return { outcome: 'aborted' }
 
-		const error =
-			cause instanceof LetterGenerationFailure
-				? cause.error
-				: { code: 'interrupted' as const }
+		const error = cause instanceof LetterGenerationFailure ? cause.error : { code: 'interrupted' as const }
 
 		dispatch({ error, type: 'fail' })
 		return { error, outcome: 'failed' }

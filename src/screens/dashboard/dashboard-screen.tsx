@@ -4,18 +4,15 @@ import { PageHeader } from '@/components/layout/page-header'
 import { Alert } from '@/components/ui/alert'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { LoadError } from '@/components/ui/load-error'
-import {
-	normalizeSearch,
-	searchTerms,
-} from '@/domain/applications/application-search'
+import { normalizeSearch, searchTerms } from '@/domain/applications/application-search'
 import { applicationQueries } from '@/features/applications/api/application.queries'
 import { GoalBanner } from '@/features/applications/ui/goal-banner'
 import { errorMessage } from '@/lib/api/api-error-message'
-import { ApplicationGrid } from './application-grid'
+import { ApplicationGrid } from './application-grid/application-grid'
 import styles from './dashboard-screen.module.css'
-import { DashboardSearch } from './dashboard-search'
-import { EmptyState } from './empty-state'
-import { NoMatches } from './no-matches'
+import { DashboardSearch } from './dashboard-search/dashboard-search'
+import { EmptyState } from './empty-state/empty-state'
+import { NoMatches } from './no-matches/no-matches'
 import { useApplicationList } from './use-application-list'
 import { useConfirmedDelete } from './use-confirmed-delete'
 
@@ -24,10 +21,7 @@ type DashboardScreenProps = {
 	search: string
 }
 
-export function DashboardScreen({
-	onSearchChange,
-	search,
-}: DashboardScreenProps) {
+export function DashboardScreen({ onSearchChange, search }: DashboardScreenProps) {
 	const query = normalizeSearch(search)
 	const list = useApplicationList(query)
 	const stats = useQuery(applicationQueries.stats())
@@ -39,17 +33,8 @@ export function DashboardScreen({
 			<PageHeader
 				actions={
 					<>
-						{canSearch && (
-							<DashboardSearch
-								onSearchChange={onSearchChange}
-								search={search}
-							/>
-						)}
-						<ButtonLink
-							iconStart={<PlusIcon />}
-							size="md"
-							to="/app/applications/create"
-						>
+						{canSearch && <DashboardSearch onSearchChange={onSearchChange} search={search} />}
+						<ButtonLink iconStart={<PlusIcon />} size="md" to="/app/applications/create">
 							Create New
 						</ButtonLink>
 					</>
@@ -67,19 +52,11 @@ export function DashboardScreen({
 					onDelete={handleDelete}
 				/>
 			)}
-			{list.isEmpty &&
-				(query ? (
-					<NoMatches onClear={() => onSearchChange('')} search={search} />
-				) : (
-					<EmptyState />
-				))}
-			{list.canLoadMore && (
-				<div
-					aria-hidden="true"
-					className={styles.sentinel}
-					ref={list.observeSentinel}
-				/>
-			)}
+			{list.isEmpty && (query ? <NoMatches onClear={() => onSearchChange('')} search={search} /> : <EmptyState />)}
+			{list.canLoadMore && <div aria-hidden="true" className={styles.sentinel} ref={list.observeSentinel} />}
+			<p className="visually-hidden" role="status">
+				{loadingStatus(list)}
+			</p>
 			{list.failedToLoadMore && (
 				<div className={styles.more}>
 					<Alert tone="danger">{errorMessage(list.error)}</Alert>
@@ -91,4 +68,15 @@ export function DashboardScreen({
 			<GoalBanner />
 		</div>
 	)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//   Pages arrive below the fold without a click: a screen reader hears
+//   that more is coming and when the list is complete.
+// ═══════════════════════════════════════════════════════════════════════════
+function loadingStatus({ hasLoadedEverything, isLoadingMore }: ReturnType<typeof useApplicationList>): string {
+	if (isLoadingMore) return 'Loading more applications…'
+	if (hasLoadedEverything) return 'All applications are shown'
+
+	return ''
 }

@@ -1,8 +1,4 @@
-import {
-	RateLimiterMemory,
-	RateLimiterRedis,
-	RateLimiterRes,
-} from 'rate-limiter-flexible'
+import { RateLimiterMemory, RateLimiterRedis, RateLimiterRes } from 'rate-limiter-flexible'
 import { RateLimitError } from '../errors/app-error.server'
 import type { Logger } from '../observability/logger.server'
 import type { Redis } from '../redis/redis.server'
@@ -14,13 +10,7 @@ type RateLimitUsage = {
 	resetInSeconds: number
 }
 
-export function createRateLimiter({
-	redis,
-	rootLogger,
-}: {
-	redis: Redis
-	rootLogger: Logger
-}) {
+export function createRateLimiter({ redis, rootLogger }: { redis: Redis; rootLogger: Logger }) {
 	const limiters = new Map<string, RateLimiterRedis>()
 
 	// ═════════════════════════════════════════════════════════════════════════
@@ -76,8 +66,18 @@ export function createRateLimiter({
 	}
 
 	async function refund(budget: Budget): Promise<void> {
+		const limiter = limiterFor(budget)
+
 		try {
-			await limiterFor(budget).reward(budget.key, 1)
+			// ═════════════════════════════════════════════════════════════════
+			//   After the window reset there is nothing to give back: a reward
+			//   then would start the new window below zero.
+			// ═════════════════════════════════════════════════════════════════
+			const state = await limiter.get(budget.key)
+
+			if (state && state.consumedPoints > 0) {
+				await limiter.reward(budget.key, 1)
+			}
 		} catch (err) {
 			rootLogger.warn({ err }, 'Rate limit refund failed')
 		}

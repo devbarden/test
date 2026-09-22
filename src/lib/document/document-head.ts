@@ -1,4 +1,5 @@
 import stylesheet from '@/styles/index.css?url'
+import { BRAND_NAME } from './brand'
 
 const FONTS_TO_PRELOAD = [
 	'/fonts/FixelText-Regular.woff2',
@@ -26,7 +27,7 @@ export function documentHead() {
 		meta: [
 			{ charSet: 'utf-8' },
 			{ content: 'width=device-width, initial-scale=1', name: 'viewport' },
-			{ title: 'Alt+Shift — cover letters' },
+			{ title: `${BRAND_NAME} — cover letters` },
 			{ content: '#ffffff', name: 'theme-color' },
 		],
 	}

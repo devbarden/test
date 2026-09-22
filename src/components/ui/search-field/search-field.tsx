@@ -3,24 +3,14 @@ import { SearchIcon, XIcon } from 'lucide-react'
 import { type ComponentProps, useRef } from 'react'
 import styles from './search-field.module.css'
 
-type SearchFieldProps = Omit<
-	ComponentProps<'input'>,
-	'aria-label' | 'onChange' | 'type' | 'value'
-> & {
+type SearchFieldProps = Omit<ComponentProps<'input'>, 'aria-label' | 'onChange' | 'type' | 'value'> & {
 	clearLabel: string
 	label: string
 	onValueChange: (value: string) => void
 	value: string
 }
 
-export function SearchField({
-	className,
-	clearLabel,
-	label,
-	onValueChange,
-	value,
-	...props
-}: SearchFieldProps) {
+export function SearchField({ className, clearLabel, label, onValueChange, value, ...props }: SearchFieldProps) {
 	const input = useRef<HTMLInputElement>(null)
 
 	const clear = () => {
@@ -47,13 +37,7 @@ export function SearchField({
 				value={value}
 			/>
 			{value && (
-				<button
-					aria-label={clearLabel}
-					className={styles.clear}
-					onClick={clear}
-					title={clearLabel}
-					type="button"
-				>
+				<button aria-label={clearLabel} className={styles.clear} onClick={clear} title={clearLabel} type="button">
 					<XIcon />
 				</button>
 			)}

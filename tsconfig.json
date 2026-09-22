@@ -4,7 +4,7 @@
 		"allowJs": true,
 		"checkJs": false,
 		"jsx": "react-jsx",
-		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"lib": ["ES2023", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"noEmit": true,

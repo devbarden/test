@@ -1,20 +1,10 @@
-import clsx from 'clsx'
 import styles from './spinner.module.css'
 
 const SPOKES = Array.from({ length: 8 }, (_, index) => index)
 
-type SpinnerProps = {
-	className?: string
-}
-
-export function Spinner({ className }: SpinnerProps) {
+export function Spinner() {
 	return (
-		<svg
-			aria-hidden="true"
-			className={clsx(styles.root, className)}
-			fill="none"
-			viewBox="0 0 24 24"
-		>
+		<svg aria-hidden="true" className={styles.root} fill="none" viewBox="0 0 24 24">
 			{SPOKES.map((spoke) => (
 				<line
 					key={spoke}

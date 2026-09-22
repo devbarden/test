@@ -2,6 +2,12 @@ import { type ReactNode, useEffect, useId, useRef } from 'react'
 import { Heading } from '../heading'
 import styles from './dialog.module.css'
 
+// ═══════════════════════════════════════════════════════════════════════════
+//   How long a callable keeps the closing dialog mounted: the exit
+//   transition in dialog.module.css (--duration-base).
+// ═══════════════════════════════════════════════════════════════════════════
+export const DIALOG_EXIT_MS = 200
+
 type DialogProps = {
 	actions: ReactNode
 	closing?: boolean
@@ -14,13 +20,7 @@ type DialogProps = {
 //   Esc and a backdrop click end in the native `close` event, reported as
 //   a dismissal unless an action is already closing the dialog.
 // ═══════════════════════════════════════════════════════════════════════════
-export function Dialog({
-	actions,
-	closing = false,
-	description,
-	onDismiss,
-	title,
-}: DialogProps) {
+export function Dialog({ actions, closing = false, description, onDismiss, title }: DialogProps) {
 	const ref = useRef<HTMLDialogElement>(null)
 	const titleId = useId()
 	const descriptionId = useId()

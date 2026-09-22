@@ -13,38 +13,34 @@ const LIMITED_ENTITLEMENT = {
 } as const satisfies Record<PlanLimit, string>
 
 export function usePlanLimits() {
-	const { data } = useQuery(billingQueries.overview())
+	const { data, dataUpdatedAt } = useQuery(billingQueries.overview())
 	const { entitlements, plan } = useEntitlements()
 	const isFree = plan === 'free'
 
-	const reached = ({
-		creates,
-	}: {
-		creates: boolean
-	}): PlanLimit | undefined => {
+	// ═════════════════════════════════════════════════════════════════════════
+	//   The usage may be hours old on a tab left open: count down from when
+	//   it was fetched, so a window that has reset no longer blocks.
+	// ═════════════════════════════════════════════════════════════════════════
+	const resetSecondsLeft = () => data && data.usage.generationsResetInSeconds - (Date.now() - dataUpdatedAt) / 1000
+
+	const reached = ({ creates }: { creates: boolean }): PlanLimit | undefined => {
 		if (!data) return undefined
-		if (data.usage.generationsToday >= data.entitlements.dailyGenerations) {
-			return 'daily'
-		}
-		if (
-			creates &&
-			data.usage.applications >= data.entitlements.maxApplications
-		) {
-			return 'saved'
-		}
+
+		const { entitlements: limits, usage } = data
+		const isDailyUsedUp = usage.generationsInWindow >= limits.dailyGenerations && (resetSecondsLeft() ?? 0) > 0
+
+		if (isDailyUsedUp) return 'daily'
+		if (creates && usage.applications >= limits.maxApplications) return 'saved'
+
 		return undefined
 	}
 
 	const explain = (reason: PlanLimit, retryAfterSeconds?: number) => {
-		const resetSeconds =
-			retryAfterSeconds ?? data?.usage.generationsResetInSeconds
+		const resetSeconds = retryAfterSeconds ?? resetSecondsLeft()
 		const entitlement = LIMITED_ENTITLEMENT[reason]
 
-		void PlanLimitDialog.call({
-			hoursUntilReset:
-				resetSeconds === undefined
-					? DAY_IN_HOURS
-					: hoursUntilReset(resetSeconds),
+		PlanLimitDialog.call({
+			hoursUntilReset: resetSeconds === undefined ? DAY_IN_HOURS : hoursUntilReset(resetSeconds),
 			limit: entitlements[entitlement],
 			reason,
 			upgradeLimit: isFree ? FULL_ENTITLEMENTS[entitlement] : undefined,

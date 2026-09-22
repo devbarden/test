@@ -5,12 +5,9 @@ export const Route = createFileRoute('/api/webhooks/clerk')({
 	server: {
 		handlers: {
 			POST: async ({ context, request }) => {
-				const { accountEventsService, clerkWebhookVerifier } =
-					context.scope.cradle
+				const { accountEventsService, clerkWebhookVerifier } = context.scope.cradle
 
-				await accountEventsService.handle(
-					await clerkWebhookVerifier.verify(request),
-				)
+				await accountEventsService.handle(await clerkWebhookVerifier.verify(request))
 
 				return new Response(null, { status: 204 })
 			},

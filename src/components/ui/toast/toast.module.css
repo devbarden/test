@@ -16,6 +16,10 @@
 		box-shadow: var(--shadow-toast);
 		transform: translateX(-50%);
 		animation: enter var(--duration-base) var(--ease-out);
+
+		@media (forced-colors: active) {
+			outline: 1px solid CanvasText;
+		}
 	}
 
 	.message {

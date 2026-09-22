@@ -11,12 +11,7 @@ type ClerkBoundaryProps = {
 // ═══════════════════════════════════════════════════════════════════════════
 export function ClerkBoundary({ children }: ClerkBoundaryProps) {
 	return (
-		<ClerkProvider
-			afterSignOutUrl="/sign-in"
-			appearance={clerkAppearance}
-			signInUrl="/sign-in"
-			signUpUrl="/sign-in"
-		>
+		<ClerkProvider afterSignOutUrl="/sign-in" appearance={clerkAppearance} signInUrl="/sign-in" signUpUrl="/sign-in">
 			{children}
 		</ClerkProvider>
 	)

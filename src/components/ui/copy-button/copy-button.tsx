@@ -30,12 +30,7 @@ export function CopyButton({ subject, text }: CopyButtonProps) {
 
 	return (
 		<>
-			<Button
-				disabled={!text}
-				iconEnd={ICONS[status]}
-				onClick={() => text && copy(text)}
-				variant="ghost"
-			>
+			<Button disabled={!text} iconEnd={ICONS[status]} onClick={() => text && copy(text)} variant="ghost">
 				{LABELS[status]}
 				{subject && <span className="visually-hidden">{`: ${subject}`}</span>}
 			</Button>

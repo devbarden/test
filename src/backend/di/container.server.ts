@@ -1,9 +1,4 @@
-import {
-	type AwilixContainer,
-	createContainer,
-	InjectionMode,
-	type Resolver,
-} from 'awilix'
+import { type AwilixContainer, createContainer, InjectionMode, type Resolver } from 'awilix'
 import { accountModule } from '@/backend/modules/account/account.module.server'
 import { applicationsModule } from '@/backend/modules/applications/applications.module.server'
 import { billingModule } from '@/backend/modules/billing/billing.module.server'
@@ -21,9 +16,7 @@ const modules = {
 }
 
 type CradleOf<Module extends Record<string, Resolver<unknown>>> = {
-	[Name in keyof Module]: Module[Name] extends Resolver<infer Value>
-		? Value
-		: never
+	[Name in keyof Module]: Module[Name] extends Resolver<infer Value> ? Value : never
 }
 
 type RequestCradle = {
